@@ -30,13 +30,30 @@ function optPerLine(q, W) {
 function optLayout(q) { const L = q.o.map(o => M().width(o)); return q.o.length && Math.max(...L) <= 3.5 && L.reduce((x, y) => x + y, 0) <= 11 ? 'row' : 'col'; }
 /* a figure in a box of at most mw x mh inches (keeps its shape, centred across the box width) */
 function figFit(f, x, y, mw, mh) { let w = mw, h = w * f.h / f.w; if (h > mh) { h = mh; w = h * f.w / f.h; } return { x: x + (mw - w) / 2, y, w, h }; }
+/* {{tbl:…}} lines (rows split by \x1e, cells by \x1f): the text without them + the tables */
+function takeTables(text) { const TB = []; const t = String(text).split('\n').filter(l => { const m = /^\{\{tbl:([\s\S]*)\}\}$/.exec(l.trim()); if (m) { TB.push(m[1].split('\x1e').map(r => r.split('\x1f'))); return false; } return true; }).join('\n'); return { text: t, TB }; }
+/* tables on a slide from y down, shrunk so they end above ymax; o = { face, color, line, fill, center } */
+function addTables(s, TB, x, y, w, ymax, o) {
+  TB.forEach((rows, ti) => {
+    const nc = Math.max(1, ...rows.map(r => r.length)), room = Math.max(0.3, ymax - y) / (TB.length - ti); let fsT = nc > 2 ? 11 : 14, rh = nc > 2 ? 0.5 : 0.4;
+    if (rows.length * rh > room) { const k = room / (rows.length * rh); rh *= k; fsT = Math.max(7, Math.floor(fsT * Math.max(k, 0.5))); }
+    const bd = { type: 'solid', pt: 1, color: o.line };
+    s.addTable(rows.map((r, ri) => Array.from({ length: nc }, (_, j) => ({ text: M().plainText(r[j] || ''), options: { fontFace: o.face, fontSize: fsT, color: o.color, bold: ri === 0, align: o.center ? 'center' : 'left', valign: 'middle', border: [bd, bd, bd, bd], margin: [0.03, 0.06, 0.03, 0.06], fill: ri === 0 ? { color: o.fill } : undefined } }))),
+      { x, y, w, colW: Array(nc).fill(w / nc), rowH: Array(rows.length).fill(rh) });
+    y += rows.length * rh + 0.25;
+  });
+  return y;
+}
+/* a safety net for every part written: characters XML 1.0 does not allow (C0 controls but tab / newline / CR, U+FFFE / U+FFFF) are dropped */
+const BADXML = /[\x00-\x08\x0B\x0C\x0E-\x1F\uFFFE\uFFFF]/g;
+async function cleanZip(zip, re) { for (const name of Object.keys(zip.files)) { if (!re.test(name)) continue; const x = await zip.file(name).async('string'); BADXML.lastIndex = 0; if (BADXML.test(x)) zip.file(name, x.replace(BADXML, '')); } }
 function chapterName(H, q) { const c = H.CHMAP.get(q.cc); return c ? c.n : ''; }
 
 /* answer-key text: pages of the same sheet become one continuous line; a label only when there are several sheets */
 function keyBlocks(keys) {
   const groups = [];
   keys.forEach(p => { const lab = String(p.badge || p.title).replace(/\s*·\s*Page \d+ of \d+$/, ''), g = groups[groups.length - 1], items = p.qs.map((q, i) => (i + 1 + (p.start || 0)) + '-' + M().plainText(q.a || '—')); if (g && g.lab === lab) g.items.push(...items); else groups.push({ lab, items }); });
-  return groups.map(g => ({ lab: groups.length > 1 ? g.lab : '', line: g.items.join('    ') }));
+  return groups.map(g => ({ lab: groups.length > 1 ? g.lab : '', line: g.items.join('    '), items: g.items }));
 }
 
 /* ---------- Word ---------- */
@@ -238,9 +255,10 @@ async function buildDocx(D, JSZip, pages, H) {
   const raw = D.Packer.toBlob ? await (await D.Packer.toBlob(doc)).arrayBuffer() : await D.Packer.toBuffer(doc);
   const zip = await JSZip.loadAsync(raw), f = zip.file('word/document.xml');
   let xml = await f.async('string');
-  xml = xml.replace(/<w:r>(?:(?!<\/w:r>)[\s\S])*?<w:t[^>]*>⟦E(\d+)⟧<\/w:t><\/w:r>/g, (all, id) => { const e = eqs[+id]; return M().omml(e.tex, e.display, 'docx'); });
+  xml = xml.replace(/<w:r>(?:(?!<\/w:r>)[\s\S])*?<w:t[^>]*>⟦E(\d+)⟧<\/w:t><\/w:r>/g, (all, id) => { const e = eqs[+id], sz = (/<w:sz w:val="(\d+)"/.exec(all) || [])[1]; return M().omml(e.tex, e.display, 'docx' + (sz ? '@' + sz : '')); });   /* equations at the size of the text around them */
   let nid = 0; xml = xml.replace(/(<(?:wp:docPr|pic:cNvPr)\b[^>]*?\bid=")\d+"/g, (m, a) => a + (++nid) + '"');   /* docx gives every picture id 1 / 0: make them unique */
   zip.file('word/document.xml', xml);
+  await cleanZip(zip, /^(word\/[^/]+|docProps\/[^/]+)\.xml$/);
   return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 }
 
@@ -302,10 +320,16 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
     if (hasFig) { const f = H.figs[q.i]; s.addImage(Object.assign({ data: f.dataUrl }, figFit(f, 8.5, 1.4, 4.4, 5.8))); }
   }
   const keys = pages.filter(p => p.key);
-  if (keys.length) {
-    const sk = pptx.addSlide(); sk.background = { color: 'FDFAF1' };
-    sk.addText('Answer key', { x: 0.7, y: 0.4, w: 12, h: 0.8, fontFace: 'Cambria', bold: true, fontSize: 32, color: NAVY });
-    sk.addText(keyBlocks(keys).flatMap(g => (g.lab ? [{ text: g.lab + '\n', options: { bold: true, fontSize: 14, color: NAVY } }] : []).concat([{ text: g.line + '\n', options: { fontSize: 14, color: '141413' } }])), { x: 0.7, y: 1.3, w: 12, h: 5.8, fontFace: 'Calibri', valign: 'top' });
+  if (keys.length) {   /* the key wrapped into lines here (14 pt, about 0.5 em a character) and run on to more slides as needed */
+    const KL = Math.floor(12 * 72 / 14 / 0.5 * 0.93), LPS = 21, lines = [];
+    keyBlocks(keys).forEach(g => { if (g.lab) lines.push({ lab: g.lab, n: 1 }); let cur = ''; g.items.forEach(it => { const nx = cur ? cur + '    ' + it : it; if (cur && nx.length > KL) { lines.push({ t: cur, n: Math.ceil(cur.length / KL) }); cur = it; } else cur = nx; }); if (cur) lines.push({ t: cur, n: Math.ceil(cur.length / KL) }); });
+    const kp = [[]]; let used = 0;
+    lines.forEach(l => { if (kp[kp.length - 1].length && used + l.n + (l.lab ? 1 : 0) > LPS) { kp.push([]); used = 0; } kp[kp.length - 1].push(l); used += l.n; });
+    kp.forEach((pl, k) => {
+      const sk = pptx.addSlide(); sk.background = { color: 'FDFAF1' };
+      sk.addText('Answer key' + (k ? ' (contd.)' : ''), { x: 0.7, y: 0.4, w: 12, h: 0.8, fontFace: 'Cambria', bold: true, fontSize: 32, color: NAVY });
+      sk.addText(pl.map((l, j) => ({ text: l.lab || l.t, options: Object.assign(l.lab ? { bold: true, fontSize: 14, color: NAVY } : { fontSize: 14, color: '141413' }, j < pl.length - 1 ? { breakLine: true } : {}) })), { x: 0.7, y: 1.3, w: 12, h: 5.8, fontFace: 'Calibri', valign: 'top' });
+    });
   }
   if (H.expl && H.expl.length) {
     const sh = pptx.addSlide(); sh.background = { color: 'FDFAF1' };
@@ -313,13 +337,15 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
     for (const e of H.expl) {
       const s = pptx.addSlide(); s.background = { color: 'FFFFFF' };
       s.addText('Q' + e.n + ' \u00b7 Explanation', { x: 0.5, y: 0.3, w: 8, h: 0.6, fontFace: 'Calibri', bold: true, fontSize: 24, color: NAVY });
-      const txt = String(e.text).replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, ''), L = M().plainText(txt).length, fs = L > 1100 ? 12 : L > 800 ? 14 : L > 500 ? 16 : 18;
-      s.addText(runs(txt, { fontFace: 'Calibri', fontSize: fs, color: '141413' }), { x: 0.6, y: 1.1, w: e.fig ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
-      if (e.fig) s.addImage(Object.assign({ data: e.fig.dataUrl }, figFit(e.fig, 8.5, 1.4, 4.4, 5.8)));
+      const et = takeTables(e.text), side = e.fig || et.TB.length;   /* tables in an explanation are drawn as tables, on the right like a figure */
+      const txt = et.text.replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, ''), L = M().plainText(txt).length, fs = L > 1100 ? 12 : L > 800 ? 14 : L > 500 ? 16 : 18;
+      s.addText(runs(txt, { fontFace: 'Calibri', fontSize: fs, color: '141413' }), { x: 0.6, y: 1.1, w: side ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
+      const fb = e.fig ? figFit(e.fig, 8.5, 1.4, 4.4, et.TB.length ? 2.8 : 5.8) : null;
+      if (fb) s.addImage(Object.assign({ data: e.fig.dataUrl }, fb));
+      if (et.TB.length) addTables(s, et.TB, 8.5, 1.4 + (fb ? fb.h + 0.3 : 0), 4.4, 7.2, { face: 'Calibri', color: '141413', line: '9AB8B7', fill: 'EEF8F8' });
     }
   }
   const buf = await pptx.write({ outputType: 'arraybuffer' });
-  if (!eqs.length) return new Blob([buf]);
   const zip = await JSZip.loadAsync(buf);
   const NS_MC = 'http://schemas.openxmlformats.org/markup-compatibility/2006', NS_A14 = 'http://schemas.microsoft.com/office/drawing/2010/main', NS_M = 'http://schemas.openxmlformats.org/officeDocument/2006/math';
   const re = /<a:r>((?:(?!<\/a:r>)[\s\S])*?)<a:t>⟦M(\d+)⟧<\/a:t><\/a:r>/g;
@@ -334,6 +360,7 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
     });
     zip.file(name, xml);
   }
+  await cleanZip(zip, /^(ppt\/slides\/slide\d+|docProps\/[^/]+)\.xml$/);
   return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
 }
 
@@ -377,8 +404,10 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     case 'frac': v = 0.75 * (hEm(n.n) + hEm(n.d)) + 0.15; break;
     case 'rad': v = hEm(n.e) + 0.15; break;
     case 'nary': v = Math.max(1.7, hEm(n.e)); break;
-    case 'grp': case 'delim': case 'acc': case 'bar': v = hEm(n.e); break;
-    case 'script': v = hEm(n.e) + (n.sup ? 0.45 : 0) + (n.sub ? 0.25 : 0); break;
+    case 'grp': case 'delim': case 'acc': case 'bar': case 'gchr': v = hEm(n.e); break;
+    case 'box': v = hEm(n.e) + 0.2; break;
+    case 'over': case 'under': v = hEm(n.e) + 0.6 * hEm(n.lim); break;
+    case 'script': case 'pre': v = hEm(n.e) + (n.sup ? 0.45 : 0) + (n.sub ? 0.25 : 0); break;
     case 'mat': v = n.rows.length * 1.15; break; }
     h = Math.max(h, v); }); return h; };
   /* simulate PowerPoint's wrapping: words and equations fill lines up to the box width, a line is as tall as its tallest equation (at least 1.2 line heights). Calibrated on real PowerPoint screenshots (20pt: plain line 0.31in, stacked-fraction line 0.6in). Returns inches. */
@@ -468,81 +497,101 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
   const ansText = q => /^[A-D](,\s*[A-D])*$/.test(q.a || '') ? q.a.split(/,\s*/).map(l => '(' + l + ')').join(', ') : (q.a || '—');
   const exam0 = d.bucket === 'Main' ? ['JEE MAINS', GREEN] : d.bucket === 'KCET' ? ['KCET', 'F472B6'] : d.bucket === 'IAT' ? ['IAT', '2F7D6D'] : d.bucket === 'NDA' ? ['NDA', 'F59E0B'] : ['JEE ADVANCED', RED];
   const examOf = q => d.perQ ? (q.s === 'P' ? (q.e === 'Main' ? ['JEE MAINS', GREEN] : q.e === 'KCET' ? ['KCET', 'F472B6'] : q.e === 'IAT' ? ['IAT', '2F7D6D'] : q.e === 'NDA' ? ['NDA', 'F59E0B'] : ['JEE ADVANCED', RED]) : ['PRACTICE · ' + String(q.pb || 'AVANTI').toUpperCase(), TEAL]) : exam0;
+  /* a question that does not fit: type shrinks step by step to 12 pt; still too long, it runs on to "(contd.)" slides (never below the Ans line) */
+  const QFSS = [24, 22, 20, 18, 16, 15, 14, 13, 12], QLIM = 5.44, GAPQ = 0.083;
+  const qPieces = t => { const out = []; M().split(t).forEach(p => { if (p.t === 'text') out.push(...(p.s.match(/\s*\S+\s*|\s+/g) || [])); else out.push(p.display ? '\\[' + p.s + '\\]' : '\\(' + p.s + '\\)'); }); return out; };
+  /* blocks: {t, stem|k|pre} paragraphs (split at words and equations), {row} table rows (split between rows, header repeated). Returns the slides' blocks, each with its height */
+  function qPaginate(blocks, hOf, wOf) {
+    const pages = [[]], queue = blocks.slice(); let room = QLIM + GAPQ;
+    const next = () => { pages.push([]); room = QLIM + GAPQ; };
+    while (queue.length) {
+      const b = queue.shift(), pg = pages[pages.length - 1], w = wOf(pages.length - 1);
+      if (b.row) { const need = b.h + b.after + (pg.some(x => x.row) ? 0 : b.hh); if (need <= room || !pg.length) { pg.push(Object.assign({}, b, { hgt: need })); room -= need; } else { next(); queue.unshift(b); } continue; }
+      const h = hOf(b, w); if (h <= room) { pg.push(Object.assign({}, b, { hgt: h })); room -= h; continue; }
+      const pcs = qPieces(b.t), part = n => Object.assign({}, b, { t: pcs.slice(0, n).join('').replace(/\s+$/, ''), last: n >= pcs.length && b.last !== false });
+      let lo = 0, hi = pcs.length - 1;
+      while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (hOf(part(mid), w) <= room) lo = mid; else hi = mid - 1; }
+      if (!lo && pg.length) { next(); queue.unshift(b); continue; }
+      const n = Math.max(1, lo), pb = part(n); pg.push(Object.assign(pb, { hgt: hOf(pb, w) }));
+      if (n < pcs.length) queue.unshift(Object.assign({}, b, { t: pcs.slice(n).join('').replace(/^\s+/, ''), first: false }));
+      next();
+    }
+    return pages.filter(p => p.length);
+  }
   d.qs.forEach((q0, i) => {
-    const TB = [], q = Object.assign({}, q0, { q: String(q0.q).split('\n').filter(l => { const m = /^\{\{tbl:([\s\S]*)\}\}$/.exec(l.trim()); if (m) { TB.push(m[1].split('\x1e').map(r => r.split('\x1f'))); return false; } return true; }).join('\n') });
+    const tq = takeTables(q0.q), TB = tq.TB, q = Object.assign({}, q0, { q: tq.text });
     const exam = examOf(q), practice = d.perQ && q.s !== 'P';
-    const s = pptx.addSlide(); s.background = { color: BLACK }; const pm = d.meta[q.i] || {}, pStr = String(pm.paper || q.p || '');
+    const pm = d.meta[q.i] || {}, pStr = String(pm.paper || q.p || '');
     const dm = /\d{1,2} [A-Za-z]{3} \d{4}/.exec(pStr), sd = /^(\d{4})-(\d{2})-(\d{2})/.exec(pm.sort_date || '');
     const date = dm ? dm[0] : sd && sd[2] !== '00' ? new Date(+sd[1], +sd[2] - 1, +sd[3]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
     const shift = pStr.replace(/\d{1,2} [A-Za-z]{3} \d{4}/, '').replace(/IIT-JEE|JEE (Main|Advanced)|AIEEE|KCET|IAT/g, '').replace(/\b(19|20)\d{2}\b/g, '').replace(/\s+/g, ' ').trim();
     const when = [date || (q.y ? String(q.y) : 'Year not printed'), shift].filter(Boolean).join(' · ');
-    const pillText = practice ? exam[0] : q._lab ? q._lab : exam[0] + ' · ' + when, pillW = Math.min(8.2, 0.5 + pillText.length * 0.135);
-    s.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 0.3, w: 1.05, h: 0.42, fill: { type: 'none' }, line: { color: CORAL, width: 2 }, rectRadius: 0.1 });
-    s.addText('Ques', { x: 0.5, y: 0.3, w: 1.05, h: 0.42, fontFace: FH, bold: true, fontSize: 20, color: WHITE, align: 'center', valign: 'middle', margin: 0 });
-    s.addShape(pptx.ShapeType.roundRect, { x: 1.7, y: 0.3, w: pillW, h: 0.42, fill: { type: 'none' }, line: { color: exam[1], width: 1.25 }, rectRadius: 0.21 });
-    s.addText(pillText, { x: 1.7, y: 0.3, w: pillW, h: 0.42, fontFace: FB, bold: true, fontSize: 16, margin: 0, color: exam[1], align: 'center', valign: 'middle' });
-    /* level pill (L1 / L2 / L3), outline only, Arial bold 16pt, right after the exam pill */
-    const lvl = /^L[123]$/.test(q.d || '') ? q.d : '', lvX = 1.7 + pillW + 0.15, lvW = 0.8;
-    if (lvl) {
-      s.addShape(pptx.ShapeType.roundRect, { x: lvX, y: 0.3, w: lvW, h: 0.42, fill: { type: 'none' }, line: { color: LVC[lvl], width: 1.25 }, rectRadius: 0.21 });
-      s.addText(lvl, { x: lvX, y: 0.3, w: lvW, h: 0.42, fontFace: FB, bold: true, fontSize: 16, color: LVC[lvl], align: 'center', valign: 'middle', margin: 0 });
-    }
-    const tpX = Math.max(8.0, (lvl ? lvX + lvW : 1.7 + pillW) + 0.2);
-    if (!d.noTopic && tpX < 12.6) s.addText(q._t || '', { x: tpX, y: 0.3, w: 12.83 - tpX, h: 0.5, fontFace: FB, bold: true, fontSize: 14, color: YEL, align: 'right', valign: 'middle', fit: 'shrink' });
-    const hasFig = q.f && H.figs && H.figs[q.i], blockX = 61 / 72, blockW = (hasFig || TB.length ? 8.4 : 924 / 72) - blockX, TOP = 68 / 72;
+    const head = contd => {
+      const s = pptx.addSlide(); s.background = { color: BLACK };
+      const pillText = (practice ? exam[0] : q._lab ? q._lab : exam[0] + ' · ' + when) + (contd ? ' · contd.' : ''), pillW = Math.min(8.2, 0.5 + pillText.length * 0.135);
+      s.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 0.3, w: 1.05, h: 0.42, fill: { type: 'none' }, line: { color: CORAL, width: 2 }, rectRadius: 0.1 });
+      s.addText('Ques', { x: 0.5, y: 0.3, w: 1.05, h: 0.42, fontFace: FH, bold: true, fontSize: 20, color: WHITE, align: 'center', valign: 'middle', margin: 0 });
+      s.addShape(pptx.ShapeType.roundRect, { x: 1.7, y: 0.3, w: pillW, h: 0.42, fill: { type: 'none' }, line: { color: exam[1], width: 1.25 }, rectRadius: 0.21 });
+      s.addText(pillText, { x: 1.7, y: 0.3, w: pillW, h: 0.42, fontFace: FB, bold: true, fontSize: 16, margin: 0, color: exam[1], align: 'center', valign: 'middle' });
+      /* level pill (L1 / L2 / L3), outline only, Arial bold 16pt, right after the exam pill */
+      const lvl = /^L[123]$/.test(q.d || '') ? q.d : '', lvX = 1.7 + pillW + 0.15, lvW = 0.8;
+      if (lvl) {
+        s.addShape(pptx.ShapeType.roundRect, { x: lvX, y: 0.3, w: lvW, h: 0.42, fill: { type: 'none' }, line: { color: LVC[lvl], width: 1.25 }, rectRadius: 0.21 });
+        s.addText(lvl, { x: lvX, y: 0.3, w: lvW, h: 0.42, fontFace: FB, bold: true, fontSize: 16, color: LVC[lvl], align: 'center', valign: 'middle', margin: 0 });
+      }
+      const tpX = Math.max(8.0, (lvl ? lvX + lvW : 1.7 + pillW) + 0.2);
+      if (!d.noTopic && tpX < 12.6) s.addText(q._t || '', { x: tpX, y: 0.3, w: 12.83 - tpX, h: 0.5, fontFace: FB, bold: true, fontSize: 14, color: YEL, align: 'right', valign: 'middle', fit: 'shrink' });
+      return s;
+    };
+    const hasFig = q.f && H.figs && H.figs[q.i], blockX = 61 / 72, fullW = 924 / 72 - blockX, blockW = (hasFig || TB.length ? 8.4 : 924 / 72) - blockX, TOP = 68 / 72;
     /* list labels in the stem ((I), (II), (1), (2) ...) start their own line, like a list; maths is left alone */
     const QT = q.q.split(/(\\\([\s\S]*?\\\))/).map((seg, i) => i % 2 ? seg : seg.replace(/\s*(\((?:I{1,3}|IV|V|VI)\)|\([1-9]\))(?=\s)/g, (m, lab, off) => (off === 0 && i === 0) ? m : '\n' + lab)).join('').replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, '');
-    const mtc = MP(q.q);
-    if (mtc) {
-      const bdc = { type: 'solid', pt: 1, color: '9CAFAE' }, colW = (blockW - 0.0) / 2, nT = Math.max(mtc.left.length, mtc.right.length);
-      const mk = (fs) => {
-        const fsT = Math.max(14, fs - 2), rowH = [], rowsT = [];
-        const hH = textH(mtc.head[0] + ' ' + mtc.head[1], fsT, colW - 0.25) + 0.16; let th = hH;
-        for (let r = 0; r < nT; r++) { const hh = Math.max(textH(mtc.left[r] || ' ', fsT, colW - 0.25), textH(mtc.right[r] || ' ', fsT, colW - 0.25)) + 0.16; rowH.push(hh); th += hh; }
-        const preT = mtc.pre ? textH(mtc.pre, fs, blockW) + 0.15 : 0, opH = (q.o || []).reduce((a, o, k) => a + textH('(' + LET[k] + ') ' + o, fs, blockW) + 0.083, 0);
-        return { fsT, rowH, hH, th, preT, opH, tot: preT + th + 0.15 + opH };
-      };
-      let fs2 = Math.min(QFS, 22), G = mk(fs2);
-      while (G.tot > 5.44 && fs2 > 14) { fs2 -= 2; G = mk(fs2); }
-      const baseT = { fontFace: FQ, fontSize: G.fsT, color: WHITE }, cellO = (hd) => ({ fontFace: FQ, fontSize: G.fsT, color: WHITE, bold: !!hd, border: [bdc, bdc, bdc, bdc], valign: 'middle', margin: [0.04, 0.08, 0.04, 0.08], fill: hd ? { color: '262626' } : undefined });
-      const cellT = (t, hd) => ({ text: runs(t || ' ', Object.assign({}, baseT, { bold: !!hd }), WHITE), options: cellO(hd) });
-      const rowsT = [[cellT(mtc.head[0], true), cellT(mtc.head[1], true)]]; for (let r = 0; r < nT; r++) rowsT.push([cellT(mtc.left[r]), cellT(mtc.right[r])]);
-      const baseQ = { fontFace: FQ, fontSize: fs2, color: WHITE }; let yy = TOP;
-      s.addShape(pptx.ShapeType.rect, { x: 0.5, y: TOP, w: 6 / 72, h: G.tot, fill: { color: CORAL }, line: { type: 'none' } });
-      if (mtc.pre) { s.addText(qRuns(mtc.pre, baseQ), { x: blockX, y: yy, w: blockW, h: G.preT, valign: 'top', margin: 0 }); yy += G.preT; }
-      s.addTable(rowsT, { x: blockX, y: yy, w: colW * 2, colW: [colW, colW], rowH: [G.hH].concat(G.rowH) }); yy += G.th + 0.15;
-      if (q.o && q.o.length) { const of = []; q.o.forEach((o, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, baseQ, { bold: true, color: '3BFFEC' }) }].concat(runs(o, baseQ, WHITE)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; ro.paraSpaceAfter = 6; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: blockX, y: yy, w: blockW, h: G.opH + 0.1, valign: 'top', margin: 0 }); }
-      if (hasFig) s.addImage(Object.assign({ data: H.figs[q.i].dataUrl }, figFit(H.figs[q.i], 9.1, TOP, 3.7, 7.1 - TOP)));
-      s.addText([{ text: 'Ans: ', options: { bold: true, fontFace: FB, fontSize: 16, color: GRAYC } }].concat(runs(ansText(q), { fontFace: FB, fontSize: 16, color: GRAYC }, GRAYC)), { x: 0.5, y: 6.6, w: 6, h: 0.5, valign: 'middle', margin: 0 });
-      blank(); return;
-    }
-    const build = fs => {
-      const base = { fontFace: FQ, fontSize: fs, color: WHITE }, paras = [qRuns(QT, base)];
-      if (q.t === 'MSQ') paras[0] = paras[0].concat([{ text: '   (one or more options correct)', options: Object.assign({}, base, { italic: true, color: GRAYC, fontSize: Math.max(12, fs - 4) }) }]);
-      const rows = (q.o || []).map((o, k) => [k]);
-      rows.forEach(ix => { const pr = [{ text: '(' + LET[ix[0]] + ') ', options: Object.assign({}, base, { bold: true, color: '3BFFEC' }) }]; pr.push(...runs(q.o[ix[0]], base, WHITE)); paras.push(pr); });
-      const hs = [textH(QT + (q.t === 'MSQ' ? '   (one or more options correct)' : ''), fs, blockW)].concat(rows.map(ix => textH('(' + LET[ix[0]] + ') ' + q.o[ix[0]], fs, blockW)));
-      return { paras, h: hs.reduce((a, b) => a + b, 0) + (paras.length - 1) * 0.083 };
+    const mtc = MP(q.q), HINT = '   (one or more options correct)';
+    const bdc = { type: 'solid', pt: 1, color: '9CAFAE' };
+    const lab = b => b.k !== undefined && b.first !== false ? '(' + LET[b.k] + ') ' : '';
+    /* the blocks of the question at font size fs: words of the stem, the match table's rows, the options */
+    const mkBlocks = fs => {
+      const out = [], fsT = Math.max(Math.min(14, fs), fs - 2), colW = blockW / 2;
+      if (mtc) {
+        if (mtc.pre) out.push({ t: mtc.pre, pre: true, gap: 0.15 });
+        const hH = textH(mtc.head[0] + ' ' + mtc.head[1], fsT, colW - 0.25) + 0.16, nT = Math.max(mtc.left.length, mtc.right.length);
+        for (let r = 0; r < nT; r++) out.push({ row: [mtc.left[r], mtc.right[r]], h: Math.max(textH(mtc.left[r] || ' ', fsT, colW - 0.25), textH(mtc.right[r] || ' ', fsT, colW - 0.25)) + 0.16, after: r === nT - 1 ? 0.15 : 0, hh: hH, fsT });
+      } else out.push({ t: QT, stem: true, gap: GAPQ });
+      (q.o || []).forEach((o, k) => out.push({ t: o, k, gap: GAPQ }));
+      return out;
     };
-    let fs = QFS, L = build(fs);
-    while (L.h > 5.44 && fs > 20) { fs -= 2; L = build(fs); }
-    const flat = [];
-    L.paras.forEach((pr, k) => pr.forEach((r, j) => { const o = Object.assign({}, r.options); if (j === pr.length - 1 && k < L.paras.length - 1) o.breakLine = true; o.paraSpaceAfter = 6; flat.push({ text: r.text, options: o }); }));
-    s.addShape(pptx.ShapeType.rect, { x: 0.5, y: TOP, w: 6 / 72, h: L.h, fill: { color: CORAL }, line: { type: 'none' } });
-    s.addText(flat, { x: blockX, y: TOP, w: blockW, h: L.h + 0.1, valign: 'top', margin: 0 });
-    const fb = hasFig ? figFit(H.figs[q.i], 9.1, TOP, 3.7, TB.length ? 3.6 : 7.1 - TOP) : null;   /* capped so it stays on the slide (and leaves room for a table under it) */
-    if (fb) s.addImage(Object.assign({ data: H.figs[q.i].dataUrl }, fb));
-    if (TB.length) {
-      let ty = TOP + (fb ? fb.h + 0.3 : 0);
-      const tbd = { type: 'solid', pt: 1, color: '9CAFAE' };
-      TB.forEach(rows => {
-        const nc = Math.max(...rows.map(r => r.length)), fsT = nc > 2 ? 11 : 14;
-        s.addTable(rows.map((r, ri) => Array.from({ length: nc }, (_, j) => ({ text: M().plainText(r[j] || ''), options: { fontFace: FQ, fontSize: fsT, color: WHITE, bold: ri === 0, align: 'center', valign: 'middle', border: [tbd, tbd, tbd, tbd], margin: [0.04, 0.06, 0.04, 0.06], fill: ri === 0 ? { color: '262626' } : undefined } }))),
-          { x: 8.9, y: ty, w: 4.0, colW: Array(nc).fill(4.0 / nc) });
-        ty += rows.length * (nc > 2 ? 0.5 : 0.4) + 0.25;
-      });
-    }
-    s.addText([{ text: 'Ans: ', options: { bold: true, fontFace: FB, fontSize: 16, color: GRAYC } }].concat(runs(ansText(q), { fontFace: FB, fontSize: 16, color: GRAYC }, GRAYC)), { x: 0.5, y: 6.6, w: 6, h: 0.5, valign: 'middle', margin: 0 });
+    const hOf = fs => (b, w) => textH(lab(b) + b.t + (b.stem && b.last !== false && q.t === 'MSQ' ? HINT : ''), fs, w) + b.gap;
+    let fs = QFSS.find(f => f <= (mtc ? 22 : QFS)), P;
+    for (const f of QFSS) { if (f > (mtc ? 22 : QFS)) continue; fs = f; P = qPaginate(mkBlocks(fs), hOf(fs), k => (mtc || !k ? blockW : fullW)); if (P.length === 1) break; }
+    const base = { fontFace: FQ, fontSize: fs, color: WHITE };
+    P.forEach((pg, pi) => {
+      const s = head(pi > 0), w = mtc || !pi ? blockW : fullW; let y = TOP;
+      const lb = pg[pg.length - 1], tot = pg.reduce((a, b) => a + b.hgt, 0) - (lb.row ? lb.after : lb.gap);
+      s.addShape(pptx.ShapeType.rect, { x: 0.5, y: TOP, w: 6 / 72, h: tot, fill: { color: CORAL }, line: { type: 'none' } });
+      for (let j = 0; j < pg.length;) {
+        if (pg[j].row) {   /* consecutive rows: one table with the header row on top */
+          const rs = []; while (j < pg.length && pg[j].row) rs.push(pg[j++]);
+          const fsT = rs[0].fsT, colW = blockW / 2, cellT = (t, hd) => ({ text: runs(t || ' ', { fontFace: FQ, fontSize: fsT, color: WHITE, bold: !!hd }, WHITE), options: { fontFace: FQ, fontSize: fsT, color: WHITE, bold: !!hd, border: [bdc, bdc, bdc, bdc], valign: 'middle', margin: [0.04, 0.08, 0.04, 0.08], fill: hd ? { color: '262626' } : undefined } });
+          s.addTable([[cellT(mtc.head[0], true), cellT(mtc.head[1], true)]].concat(rs.map(r => [cellT(r.row[0]), cellT(r.row[1])])), { x: blockX, y, w: colW * 2, colW: [colW, colW], rowH: [rs[0].hh].concat(rs.map(r => r.h)) });
+          y += rs.reduce((a, r) => a + r.hgt, 0); continue;
+        }
+        const ps = []; while (j < pg.length && !pg[j].row) ps.push(pg[j++]);
+        const flat = [];
+        ps.forEach((b, k) => {
+          const pr = b.k !== undefined ? (b.first !== false ? [{ text: '(' + LET[b.k] + ') ', options: Object.assign({}, base, { bold: true, color: '3BFFEC' }) }] : []).concat(runs(b.t, base, WHITE)) : qRuns(b.t, base);
+          if (b.stem && b.last !== false && q.t === 'MSQ') pr.push({ text: HINT, options: Object.assign({}, base, { italic: true, color: GRAYC, fontSize: Math.max(12, fs - 4) }) });
+          pr.forEach((r, jj) => { const o = Object.assign({}, r.options); if (jj === pr.length - 1 && k < ps.length - 1) o.breakLine = true; o.paraSpaceAfter = 6; flat.push({ text: r.text, options: o }); });
+        });
+        const hh = ps.reduce((a, b) => a + b.hgt, 0);
+        s.addText(flat, { x: blockX, y, w, h: hh - ps[ps.length - 1].gap + 0.1, valign: 'top', margin: 0 }); y += hh;
+      }
+      if (!pi) {
+        const fb = hasFig ? figFit(H.figs[q.i], 9.1, TOP, 3.7, TB.length ? 3.6 : 7.1 - TOP) : null;   /* capped so it stays on the slide (and leaves room for a table under it) */
+        if (fb) s.addImage(Object.assign({ data: H.figs[q.i].dataUrl }, fb));
+        if (TB.length) addTables(s, TB, 8.9, TOP + (fb ? fb.h + 0.3 : 0), 4.0, 7.1, { face: FQ, color: WHITE, line: '9CAFAE', fill: '262626', center: true });
+      }
+      if (pi === P.length - 1) s.addText([{ text: 'Ans: ', options: { bold: true, fontFace: FB, fontSize: 16, color: GRAYC } }].concat(runs(ansText(q), { fontFace: FB, fontSize: 16, color: GRAYC }, GRAYC)), { x: 0.5, y: 6.6, w: 6, h: 0.5, valign: 'middle', margin: 0 });
+    });
     blank();
   });
   /* answer key (d.key): question number + answer, numbered 1, 2, 3 ... as the slides run, a heading for each topic when there are several; before the explanations */
@@ -572,9 +621,12 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     for (const e of d.expl) {
       const s = pptx.addSlide(); s.background = { color: BLACK };
       s.addText('Q' + e.n + '  \u00b7  Explanation', { x: 0.5, y: 0.3, w: 9, h: 0.6, fontFace: FB, bold: true, fontSize: 20, color: CORAL });
-      const txt = String(e.text).replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, ''), L = M().plainText(txt).length, fs = L > 1100 ? 12 : L > 800 ? 14 : L > 500 ? 16 : 18;
-      s.addText(runs(txt, { fontFace: FQ, fontSize: fs, color: WHITE }, LIME), { x: 0.6, y: 1.1, w: e.fig ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
-      if (e.fig) s.addImage(Object.assign({ data: e.fig.dataUrl }, figFit(e.fig, 8.5, 1.4, 4.4, 5.8)));
+      const et = takeTables(e.text), side = e.fig || et.TB.length;   /* tables drawn as tables, on the right like a figure */
+      const txt = et.text.replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, ''), L = M().plainText(txt).length, fs = L > 1100 ? 12 : L > 800 ? 14 : L > 500 ? 16 : 18;
+      s.addText(runs(txt, { fontFace: FQ, fontSize: fs, color: WHITE }, LIME), { x: 0.6, y: 1.1, w: side ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
+      const fb = e.fig ? figFit(e.fig, 8.5, 1.4, 4.4, et.TB.length ? 2.8 : 5.8) : null;
+      if (fb) s.addImage(Object.assign({ data: e.fig.dataUrl }, fb));
+      if (et.TB.length) addTables(s, et.TB, 8.5, 1.4 + (fb ? fb.h + 0.3 : 0), 4.4, 7.2, { face: FQ, color: WHITE, line: '9CAFAE', fill: '262626', center: true });
     }
   }
   /* last: closing slide */
@@ -587,7 +639,6 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     s.addText(kindLabel + ' · ' + d.count + ' questions', { x: 0.5, y: 5.1, w: 12.33, h: 0.5, fontFace: FB, fontSize: 16, color: GRAYC, align: 'center' });
     s.addText('- PhyNik', { x: 0.5, y: 6.7, w: 12.33, h: 0.4, fontFace: FB, fontSize: 12, color: GRAYC, align: 'center', charSpacing: 2 }); }
   const buf = await pptx.write({ outputType: 'arraybuffer' });
-  if (!eqs.length) return new Blob([buf]);
   const zip = await JSZip.loadAsync(buf);
   const NS_MC = 'http://schemas.openxmlformats.org/markup-compatibility/2006', NS_A14 = 'http://schemas.microsoft.com/office/drawing/2010/main', NS_M = 'http://schemas.openxmlformats.org/officeDocument/2006/math';
   const re = /<a:r>((?:(?!<\/a:r>)[\s\S])*?)<a:t>⟦M(\d+)⟧<\/a:t><\/a:r>/g;
@@ -604,6 +655,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     });
     zip.file(name, xml);
   }
+  await cleanZip(zip, /^(ppt\/slides\/slide\d+|docProps\/[^/]+)\.xml$/);
   return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
 }
 
