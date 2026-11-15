@@ -9,3 +9,14 @@
 .pt-dtx{display:flex;flex-direction:column;gap:1px;min-width:0}.pt-dtx b{font-size:14px;font-weight:600}.pt-dtx small{font-size:12px;color:var(--color-fg-muted,#5d6a85)}
 .pt-dsep{height:1px;background:var(--color-border-line,rgba(128,128,128,.3));margin:4px 6px}
 #selection .qb-exp{display:none!important}
+
+/* PYQ kind switch: Question Paper / Chapterwise */
+.pyqkind{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--field,#eef1f8);border:1px solid var(--rule,rgba(128,128,128,.3));border-radius:12px;padding:4px;margin:2px 0 14px}
+.pyqk{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:9px 12px;border:0;border-radius:9px;background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .15s,color .15s,box-shadow .15s}
+.pyqk strong{font-size:14px;font-weight:700;line-height:1.2}
+.pyqk span{font-size:11.5px;line-height:1.25;opacity:.72}
+.pyqk:hover{background:color-mix(in srgb,#1f3f95 10%,transparent)}
+.pyqk:focus-visible{outline:2px solid #1f3f95;outline-offset:1px}
+.pyqk[aria-pressed=true]{background:var(--navy,#0c1a3d);color:#fff;box-shadow:0 3px 10px rgba(12,26,61,.22)}
+.pyqk[aria-pressed=true] span{opacity:.85}
+@media (max-width:420px){.pyqkind{grid-template-columns:1fr}}
