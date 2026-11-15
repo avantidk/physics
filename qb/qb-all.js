@@ -485,7 +485,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   function logoXml() {
     if (!window.QB_LOGO_B64) return '';
     var cy = LOGO_H, cx = Math.round(cy * (window.QB_LOGO_W || 480) / (window.QB_LOGO_H || 165));
-    return '<p:pic><p:nvPicPr><p:cNvPr id="6" name="Unkganit logo"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="' + (EMU_W - 300000 - cx) + '" y="' + LOGO_TOP + '"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>';
+    return '<p:pic><p:nvPicPr><p:cNvPr id="6" name="PhyNik logo"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="' + (EMU_W - 300000 - cx) + '" y="' + LOGO_TOP + '"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>';
   }
   function logoWidth() { return window.QB_LOGO_B64 ? Math.round(LOGO_H * (window.QB_LOGO_W || 480) / (window.QB_LOGO_H || 165)) + 400000 : 0; }
   function slideXml(inner) { return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sld xmlns:a="' + NS_A + '" xmlns:r="' + NS_R + '" xmlns:p="' + NS_P + '">' + SP_HEAD + inner + logoXml() + SP_TAIL + '</p:sld>'; }
@@ -1398,10 +1398,9 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var parts = [];
     if (chs.length === 1) { var c = CHMAP[chs[0]]; parts.push(chs[0] + ' ' + (c ? c.chapter : qs[0].chapter)); }
     else parts.push('Physics');
-    if (years.length === 1) parts.push(years[0]); else if (years.length > 1) parts.push(years[0] + '-' + years[years.length - 1]);
-    if (exams.length === 1) parts.push(exams[0]);
-    var srcs = uniq(qs.map(function (q) { return q.source; }));
-    parts.push(srcs.length === 1 ? (srcs[0] === 'PYQ' ? 'PYQs' : 'Practice Qs') : 'PYQs + Practice Qs');
+    var papers = uniq(qs.map(function (q) { return q.paper; }).filter(Boolean));
+    if (papers.length === 1) parts.push(papers[0]); else if (years.length === 1) parts.push(years[0]); else if (years.length > 1) parts.push(years[0] + '-' + years[years.length - 1]);
+    parts.push('Questions');
     if (chs.length > 1) parts.push('(' + chs.length + ' chapters)');
     return parts.join(' ').replace(/[\\/:*?"<>|]+/g, '-');
   }

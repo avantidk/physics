@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '20';   /* website version: matches the published version number */
+const SITE_VERSION = '21';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -221,7 +221,7 @@ function skeleton(p, keyMode) {
   /* header: logo left, exam name (18 bold) with date below (14), Physics top right; footer: Exam - Date left, page number right */
   const examName = p.pyq ? String(p.sub || '').replace(/\s*\u00b7\s*all topics$/, '') : p.title, dateLine = p.pyq ? p.title : sub;
   const headTitle = p.pyq ? examName : p.title, headSub = p.pyq ? (keyMode ? dateLine + ' \u00b7 ' + (keyMode === 'exp' ? 'Explanations' : 'Answer key') : dateLine) : sub;
-  const logo = h('img', { class: 'sh-logo', src: LOGO_DATA || 'img/ankit-logo-dark.png', alt: 'Unkganit', style: 'height:40px;width:auto;display:block' });
+  const logo = h('img', { class: 'sh-logo', src: LOGO_DATA || 'img/ankit-logo-dark.png', alt: 'PhyNik', style: 'height:40px;width:auto;display:block' });
   return h('div', { class: 'sheet' },
     h('div', { class: 'sh-head' },
       h('div', { class: 'sh-brand' }, logo),
@@ -1007,7 +1007,7 @@ window.__qbCwPptx = async function (ids, explain) {
   const figs = {}; for (const q of flat) if (q.f && !figs[q.i]) { try { figs[q.i] = await figPng(q.f); } catch (e) { /* skip the picture */ } }
   let logo = null; try { const rs = await fetch('img/ankit-logo.png'); if (rs.ok) { const bl = await rs.blob(), bm = await createImageBitmap(bl), dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(bl); }); logo = { dataUrl, w: bm.width, h: bm.height }; } } catch (e) { /* no logo file: skip */ }
   const yl = Object.keys(years).map(Number).sort((a, b) => a - b);
-  const d = { logo, chapter: one ? c0.n : 'Selected Questions', cl: cls[0], cc: one ? ccs[0] : '', clLabel: cls.join(' & ').toUpperCase(), chLabel: one ? 'CHAPTER ' + ccs[0].split('M')[1] : ccs.length + ' CHAPTERS',
+  const d = { logo, chapter: one ? c0.n : 'Selected Questions', cl: cls[0], cc: one ? ccs[0] : '', clLabel: cls.join(' & ').toUpperCase(), chLabel: one ? 'CHAPTER ' + ccs[0].replace(/^[A-Za-z]+/, '') : ccs.length + ' CHAPTERS',
     bucket: ex.length === 1 ? ex[0] : 'Main', bucketName: kindLabel, kindLabel, perQ: true, noFront: true, noTopic: true, year: yl.length ? (yl.length === 1 ? String(yl[0]) : 'all') : '\u2014', count: flat.length, years, topics, qs: flat, figs, meta: await pyqMeta() };
   await Promise.all([loadScript('mathdoc.b3.js'), loadScript('office.b9.js'), loadScript(CDN.zip), loadScript(CDN.pptx)]);
   if (explain) d.expl = await explForQs(qs);
@@ -1203,7 +1203,7 @@ function closeShareKey(e) { if (e.key === 'Escape') closeShare(); }
 function shareMenu(btn, o) {
   if (!need('share')) return;
   closeShare();
-  const text = o.title + ' (Unkganit Physics Dashboard)', link = o.url || DASH_URL, full = text + '\n' + link;
+  const text = o.title + ' (PhyNik Physics Dashboard)', link = o.url || DASH_URL, full = text + '\n' + link;
   const item = (ico, label, attrs) => h(attrs.href ? 'a' : 'button', Object.assign({ class: 'smi', type: attrs.href ? undefined : 'button' }, attrs), h('span', { class: 'smic', html: ico }), h('span', { text: label }));
   const m = h('div', { id: 'shareMenu', class: 'smenu', role: 'menu' },
     h('div', { class: 'smh', text: 'Share ' + o.title }),

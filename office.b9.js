@@ -115,7 +115,7 @@ async function buildDocx(D, JSZip, pages, H) {
     const dpps = [...new Set(G.pages.map(dppNo))];
     const hp = (children, align, after) => new D.Paragraph({ alignment: align, spacing: { before: 0, after: after || 0 }, children });
     const hc = (w, kidsP, va) => new D.TableCell({ width: { size: w, type: D.WidthType.DXA }, borders: nb, verticalAlign: va || D.VerticalAlign.BOTTOM, margins: { left: 0, right: 0, top: 0, bottom: 40 }, children: kidsP });
-    const brand = H.logo ? [hp([new D.ImageRun({ data: H.logo.data, transformation: { width: Math.round(40 * H.logo.w / H.logo.h), height: 40 } })])] : [hp([new D.TextRun({ text: 'Unkganit', bold: true, color: NAVY, size: 28, font: 'Cambria' })])];
+    const brand = H.logo ? [hp([new D.ImageRun({ data: H.logo.data, transformation: { width: Math.round(40 * H.logo.w / H.logo.h), height: 40 } })])] : [hp([new D.TextRun({ text: 'PhyNik', bold: true, color: NAVY, size: 28, font: 'Cambria' })])];
     /* exam name 18 pt bold, date 14 pt below it; Mathematics top right; footer Exam - Date left, page number right */
     const examName = p.pyq ? String(p.sub || '').replace(/\s*\u00b7\s*all topics$/, '') : p.title, dateLine = p.pyq ? p.title : (dpps.length > 1 ? '' : p.sub);
     const mid = [hp([new D.TextRun({ text: examName, bold: true, size: 36, font: 'Cambria' })], D.AlignmentType.CENTER, 20)].concat(dateLine ? [hp([new D.TextRun({ text: dateLine, size: 28, color: GREY, font: 'Calibri' })], D.AlignmentType.CENTER)] : []);
@@ -389,7 +389,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
   const card = (s, x, y, w, h, color) => s.addShape(pptx.ShapeType.roundRect, { x, y, w, h, fill: { color }, line: { type: 'none' }, rectRadius: 0.1 });
   const blank = () => { const b = pptx.addSlide(); b.background = { color: BLACK }; };
   const yrs = Object.keys(d.years).map(Number).sort((a, b) => a - b);
-  const chNum = d.cc ? d.cc.split('M')[1] : '';
+  const chNum = d.cc ? d.cc.replace(/^[A-Za-z]+/, '') : '';
   const clLabel = d.clLabel || 'CLASS ' + d.cl, chLabel = d.chLabel || 'CHAPTER ' + chNum, kindLabel = d.kindLabel || (d.bucketName + ' PYQs');
   const yearLabel = d.year === 'all' ? (yrs.length ? 'All years · ' + yrs[0] + '–' + yrs[yrs.length - 1] : 'All years') : String(d.year);
   function leftBlock(s, big, bigColor, bigSize) {
@@ -469,7 +469,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     if (!d.noTopic && tpX < 12.6) s.addText(q._t || '', { x: tpX, y: 0.3, w: 12.83 - tpX, h: 0.5, fontFace: FB, bold: true, fontSize: 14, color: YEL, align: 'right', valign: 'middle', fit: 'shrink' });
     const hasFig = q.f && H.figs && H.figs[q.i], blockX = 61 / 72, blockW = (hasFig ? 8.4 : 924 / 72) - blockX, TOP = 68 / 72;
     /* list labels in the stem ((I), (II), (1), (2) ...) start their own line, like a list; maths is left alone */
-    const QT = q.q.split(/(\\\([\s\S]*?\\\))/).map((seg, i) => i % 2 ? seg : seg.replace(/\s*(\((?:I{1,3}|IV|V|VI)\)|\([1-9]\))(?=\s)/g, (m, lab, off) => (off === 0 && i === 0) ? m : '\n' + lab)).join('');
+    const QT = q.q.split(/(\\\([\s\S]*?\\\))/).map((seg, i) => i % 2 ? seg : seg.replace(/\s*(\((?:I{1,3}|IV|V|VI)\)|\([1-9]\))(?=\s)/g, (m, lab, off) => (off === 0 && i === 0) ? m : '\n' + lab)).join('').replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, '');
     const mtc = MP(q.q);
     if (mtc) {
       const bdc = { type: 'solid', pt: 1, color: '9CAFAE' }, colW = (blockW - 0.0) / 2, nT = Math.max(mtc.left.length, mtc.right.length);
@@ -530,7 +530,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     s.addShape(pptx.ShapeType.rect, { x: 6.17, y: 4.0, w: 1.0, h: 0.07, fill: { color: CORAL }, line: { type: 'none' } });
     s.addText(d.chapter, { x: 0.5, y: 4.3, w: 12.33, h: 0.8, fontFace: FH, bold: true, fontSize: 30, color: WHITE, align: 'center', valign: 'middle' });
     s.addText(kindLabel + ' · ' + d.count + ' questions', { x: 0.5, y: 5.1, w: 12.33, h: 0.5, fontFace: FB, fontSize: 16, color: GRAYC, align: 'center' });
-    s.addText('Unkganit', { x: 0.5, y: 6.7, w: 12.33, h: 0.4, fontFace: FB, fontSize: 12, color: GRAYC, align: 'center', charSpacing: 2 }); }
+    s.addText('- PhyNik', { x: 0.5, y: 6.7, w: 12.33, h: 0.4, fontFace: FB, fontSize: 12, color: GRAYC, align: 'center', charSpacing: 2 }); }
   const buf = await pptx.write({ outputType: 'arraybuffer' });
   if (!eqs.length) return new Blob([buf]);
   const zip = await JSZip.loadAsync(buf);

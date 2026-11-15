@@ -262,7 +262,7 @@
   "chapter_code": "P9",
   "chapter": "The kinetic model of matter",
   "difficulty": "L2",
-  "question": "A fixed mass of gas has a volume of \\(\\mathrm{1.2}{\\mathrm{\\ m}}^{\\mathrm{3}}\\) and is at a pressure of 200 kPa. The gas expands at constant temperature to a volume of \\(\\mathrm{1.8}{\\mathrm{\\ m}}^{\\mathrm{3}}\\).\nWhat is the new pressure of the gas?",
+  "question": "A fixed mass of gas has a volume of \\(\\mathrm{1.2}{\\ \\mathrm{m}}^{\\mathrm{3}}\\) and is at a pressure of 200 kPa. The gas expands at constant temperature to a volume of \\(\\mathrm{1.8}{\\ \\mathrm{m}}^{\\mathrm{3}}\\).\nWhat is the new pressure of the gas?",
   "options": [
    "120 kPa",
    "130 kPa",
@@ -491,8 +491,8 @@
   "options": [
    "0.5",
    "2.0",
-   "\\(\\mathrm{6.0}\\mathrm{\\ \\times \\ }{\\mathrm{10}}^{\\mathrm{8}}\\)",
-   "\\(\\mathrm{1.5}\\mathrm{\\ \\times \\ }{\\mathrm{10}}^{\\mathrm{8}}\\)"
+   "\\(\\mathrm{6.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\)",
+   "\\(\\mathrm{1.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -889,10 +889,10 @@
   "difficulty": "L2",
   "question": "Sodium-24 is a radioactive isotope that emits beta radiation.\nWhich nuclear equation shows how sodium-24 decays?",
   "options": [
-   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\mathrm{\\ \\to \\ }{}_{\\mathrm{12}}^{\\mathrm{24}}\\mathrm{Mg}\\mathrm{\\ +\\ }{}_{\\mathrm{-}\\mathrm{1}}^{\\mathrm{0}}\\mathit{\\beta }\\)",
-   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\mathrm{\\ \\to \\ }{}_{\\mathrm{10}}^{\\mathrm{24}}\\mathrm{Ne}\\mathrm{\\ +\\ }{}_{\\mathrm{-}\\mathrm{1}}^{\\mathrm{0}}\\mathit{\\beta }\\)",
-   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\mathrm{\\ \\to \\ }{}_{\\mathrm{9}}^{\\mathrm{20}}\\mathrm{F}\\mathrm{\\ +\\ }{}_{\\mathrm{2}}^{\\mathrm{4}}\\mathit{\\beta }\\)",
-   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\mathrm{\\ \\to \\ }{}_{\\mathrm{13}}^{\\mathrm{20}}\\mathrm{Al}\\mathrm{\\ +\\ }{}_{\\mathrm{2}}^{\\mathrm{4}}\\mathit{\\beta }\\)"
+   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\ \\to \\ {}_{\\mathrm{12}}^{\\mathrm{24}}\\mathrm{Mg}\\ \\mathrm{+}\\ {}_{-\\mathrm{1}}^{\\mathrm{0}}\\beta \\)",
+   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\ \\to \\ {}_{\\mathrm{10}}^{\\mathrm{24}}\\mathrm{Ne}\\ \\mathrm{+}\\ {}_{-\\mathrm{1}}^{\\mathrm{0}}\\beta \\)",
+   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\ \\to \\ {}_{\\mathrm{9}}^{\\mathrm{20}}\\mathrm{F}\\ \\mathrm{+}\\ {}_{\\mathrm{2}}^{\\mathrm{4}}\\beta \\)",
+   "\\({}_{\\mathrm{11}}^{\\mathrm{24}}\\mathrm{Na}\\ \\to \\ {}_{\\mathrm{13}}^{\\mathrm{20}}\\mathrm{Al}\\ \\mathrm{+}\\ {}_{\\mathrm{2}}^{\\mathrm{4}}\\beta \\)"
   ],
   "answer": "A",
   "topic_code": "",
