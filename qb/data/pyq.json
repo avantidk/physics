@@ -37,7 +37,7 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L2",
-  "question": "The diagram shows the four forces acting on an aircraft in flight.\n{{figure}}\nWhich arrow shows the direction of the resultant of the four forces?\n",
+  "question": "The diagram shows the four forces acting on an aircraft in flight.\n{{figure}}\nWhich arrow shows the direction of the resultant of the four forces?",
   "options": [
    "Arrow A",
    "Arrow B",
@@ -87,7 +87,7 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L1",
-  "question": "A girl has a gold necklace.\nWhich apparatus does she need to find the density of the gold? (Key: ✓ = needed,  ×  = not needed)",
+  "question": "A girl has a gold necklace.\nWhich apparatus does she need to find the density of the gold? (Key: ✓ = needed, ✗ = not needed)",
   "options": [
    "balance: ✓; measuring cylinder: ✓; thermometer: ✓; ruler: ✓",
    "balance: ✓; measuring cylinder: ✓; thermometer: ✓; ruler: ✗",
@@ -112,12 +112,12 @@
   "chapter_code": "P5",
   "chapter": "Forces and matter",
   "difficulty": "L2",
-  "question": "A spring has a length of 25 cm when a load of 2.0 N is suspended from it.\nThe spring has a length of 35 cm when a 7.0 N load is used.\nWhat is the spring constant of the spring?",
+  "question": "A spring has a length of 25 cm when a load of 2.0 N is suspended from it.\nThe spring has a length of 35 cm when a 7.0 N load is used.\nWhat is the spring constant of the spring?",
   "options": [
-   "0.20 N/cm",
-   "0.50 N/cm",
-   "2.0 N/cm",
-   "5.0 N/cm"
+   "0.20 N/cm",
+   "0.50 N/cm",
+   "2.0 N/cm",
+   "5.0 N/cm"
   ],
   "answer": "B",
   "topic_code": "",
@@ -262,12 +262,12 @@
   "chapter_code": "P9",
   "chapter": "The kinetic model of matter",
   "difficulty": "L2",
-  "question": "A fixed mass of gas has a volume of \\(\\mathrm{1.2}{\\ \\mathrm{m}}^{\\mathrm{3}}\\) and is at a pressure of 200 kPa. The gas expands at constant temperature to a volume of \\(\\mathrm{1.8}{\\ \\mathrm{m}}^{\\mathrm{3}}\\).\nWhat is the new pressure of the gas?",
+  "question": "A fixed mass of gas has a volume of \\(\\mathrm{1.2}{\\ \\mathrm{m}}^{\\mathrm{3}}\\) and is at a pressure of 200 kPa. The gas expands at constant temperature to a volume of \\(\\mathrm{1.8}{\\ \\mathrm{m}}^{\\mathrm{3}}\\).\nWhat is the new pressure of the gas?",
   "options": [
-   "120 kPa",
-   "130 kPa",
-   "300 kPa",
-   "600 kPa"
+   "120 kPa",
+   "130 kPa",
+   "300 kPa",
+   "600 kPa"
   ],
   "answer": "B",
   "topic_code": "",
@@ -289,9 +289,9 @@
   "difficulty": "L2",
   "question": "The specific heat capacity of solid P is greater than that of solid Q.\nWhat does this statement mean?",
   "options": [
-   "Less energy is needed to raise the temperature by 1°C of unit mass of solid P than unit mass of solid Q.",
+   "Less energy is needed to raise the temperature by 1 °C of unit mass of solid P than unit mass of solid Q.",
    "Less energy is needed to melt unit mass of solid P than unit mass of solid Q.",
-   "More energy is needed to raise the temperature by 1°C of unit mass of solid P than unit mass of solid Q.",
+   "More energy is needed to raise the temperature by 1 °C of unit mass of solid P than unit mass of solid Q.",
    "More energy is needed to melt unit mass of solid P than unit mass of solid Q."
   ],
   "answer": "C",
@@ -309,8 +309,8 @@
   "qno": 13,
   "type": "MCQ",
   "class": "IGCSE",
-  "chapter_code": "P9",
-  "chapter": "The kinetic model of matter",
+  "chapter_code": "P10",
+  "chapter": "Thermal properties of matter",
   "difficulty": "L1",
   "question": "When water evaporates, what escapes from the surface of the water?",
   "options": [
@@ -491,8 +491,8 @@
   "options": [
    "0.5",
    "2.0",
-   "\\(\\mathrm{6.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\)",
-   "\\(\\mathrm{1.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\)"
+   "\\(\\mathrm{6.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\)",
+   "\\(\\mathrm{1.5} \\times {\\mathrm{10}}^{\\mathrm{8}}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -662,12 +662,12 @@
   "chapter_code": "P19",
   "chapter": "Electric circuits",
   "difficulty": "L3",
-  "question": "The diagram shows three 20 Ω resistors, \\({\\mathit{R}}_{\\mathrm{1}}\\), \\({\\mathit{R}}_{\\mathrm{2}}\\) and \\({\\mathit{R}}_{\\mathrm{3}}\\), and a switch S connected to a d.c. power supply.\n{{figure}}\nSwitch S is open.\nThe potential difference (p.d.) across \\({\\mathit{R}}_{\\mathrm{3}}\\) is 9.0 V.\nWhat is the p.d. across \\({\\mathit{R}}_{\\mathrm{3}}\\) when switch S is closed?",
+  "question": "The diagram shows three 20 Ω resistors, \\({\\mathit{R}}_{\\mathrm{1}}\\), \\({\\mathit{R}}_{\\mathrm{2}}\\) and \\({\\mathit{R}}_{\\mathrm{3}}\\), and a switch S connected to a d.c. power supply.\n{{figure}}\nSwitch S is open.\nThe potential difference (p.d.) across \\({\\mathit{R}}_{\\mathrm{3}}\\) is 9.0 V.\nWhat is the p.d. across \\({\\mathit{R}}_{\\mathrm{3}}\\) when switch S is closed?",
   "options": [
-   "3.0 V",
-   "6.0 V",
-   "12 V",
-   "27 V"
+   "3.0 V",
+   "6.0 V",
+   "12 V",
+   "27 V"
   ],
   "answer": "C",
   "topic_code": "",
@@ -964,7 +964,7 @@
   "difficulty": "L2",
   "question": "Which statement about the Universe is correct?",
   "options": [
-   "The Universe consists of 100 000 galaxies.",
+   "The Universe consists of 100 000 galaxies.",
    "Redshift is a decrease in the observed wavelength of electromagnetic radiation emitted from receding galaxies.",
    "Light emitted from distant galaxies appears redshifted.",
    "Redshift of the light from distant galaxies gives evidence that the Universe is contracting."
@@ -1014,7 +1014,7 @@
   "difficulty": "L1",
   "question": "Which instrument is most suitable to determine the volume of a small irregularly shaped stone?",
   "options": [
-   "30 cm ruler",
+   "30 cm ruler",
    "digital timer",
    "measuring cylinder",
    "tape measure"
@@ -1112,7 +1112,7 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L1",
-  "question": "A student determines the density of copper.\nShe has a rectangular block of copper.\nWhich other apparatus does she need? (Key: ✓ = needed,  ×  = not needed)",
+  "question": "A student determines the density of copper.\nShe has a rectangular block of copper.\nWhich other apparatus does she need? (Key: ✓ = needed, ✗ = not needed)",
   "options": [
    "balance: ✓; ruler: ✓; stop-watch: ✓; thermometer: ✓",
    "balance: ✓; ruler: ✓; stop-watch: ✓; thermometer: ✗",
@@ -1162,7 +1162,7 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L3",
-  "question": "A cricket ball of mass 0.15 kg is moving at a speed of 30 m/s.\nThe diagram shows a batsman holding a bat stationary as the ball hits the bat and bounces back at the same speed in the opposite direction.\nThe ball is in contact with the bat for \\(\\mathrm{1.0}\\ \\times \\ {\\mathrm{10}}^{-\\mathrm{3}}\\ \\mathrm{s}\\).\n{{figure}}\nThe table shows the change in momentum of the ball and the magnitude of the force applied to the ball.\nWhich row is correct?",
+  "question": "A cricket ball of mass 0.15 kg is moving at a speed of 30 m/s.\nThe diagram shows a batsman holding a bat stationary as the ball hits the bat and bounces back at the same speed in the opposite direction.\nThe ball is in contact with the bat for \\(\\mathrm{1.0} \\times {\\mathrm{10}}^{-\\mathrm{3}}\\ \\mathrm{s}\\).\n{{figure}}\nThe table shows the change in momentum of the ball and the magnitude of the force applied to the ball.\nWhich row is correct?",
   "options": [
    "change of momentum/kg m/s: 4.5; force applied to ball/N: 4500",
    "change of momentum/kg m/s: 4.5; force applied to ball/N: 9000",
@@ -1187,12 +1187,12 @@
   "chapter_code": "P6",
   "chapter": "Energy stores and transfers",
   "difficulty": "L2",
-  "question": "A stone is thrown vertically upwards at a speed of 5.0 m/s.\nAll of the energy initially in the kinetic store of the stone is transferred to its gravitational potential store when the stone reaches its maximum height.\nWhich equation gives the maximum height \\(\\mathit{h}\\) reached by the stone?",
+  "question": "A stone is thrown vertically upwards at a speed of 5.0 m/s.\nAll of the energy initially in the kinetic store of the stone is transferred to its gravitational potential store when the stone reaches its maximum height.\nWhich equation gives the maximum height \\(\\mathit{h}\\) reached by the stone?",
   "options": [
-   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{\\mathrm{9.8}}{\\mathrm{2}\\ \\times \\ {\\mathrm{5.0}}^{\\mathrm{2}}}\\)",
-   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{{\\mathrm{5.0}}^{\\mathrm{2}}\\ \\times \\ \\mathrm{2}}{\\mathrm{9.8}}\\)",
-   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{{\\mathrm{5.0}}^{\\mathrm{2}}}{\\mathrm{2}\\ \\times \\ \\mathrm{9.8}}\\)",
-   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{\\mathrm{2}\\ \\times \\ \\mathrm{9.8}}{{\\mathrm{5.0}}^{\\mathrm{2}}}\\)"
+   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{\\mathrm{9.8}}{\\mathrm{2} \\times {\\mathrm{5.0}}^{\\mathrm{2}}}\\)",
+   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{{\\mathrm{5.0}}^{\\mathrm{2}} \\times \\mathrm{2}}{\\mathrm{9.8}}\\)",
+   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{{\\mathrm{5.0}}^{\\mathrm{2}}}{\\mathrm{2} \\times \\mathrm{9.8}}\\)",
+   "\\(\\mathit{h}\\ \\mathrm{=}\\ \\frac{\\mathrm{2} \\times \\mathrm{9.8}}{{\\mathrm{5.0}}^{\\mathrm{2}}}\\)"
   ],
   "answer": "C",
   "topic_code": "",
@@ -1289,10 +1289,10 @@
   "difficulty": "L3",
   "question": "A bubble of gas rises from the bottom of a lake to the top.\nThe table shows readings of the gas pressure inside the bubble and the volume of the bubble.\nThe temperature of the water in the lake is constant.\nThe values in three rows of the table are correct and one row is not correct.\nWhich row is not correct?",
   "options": [
-   "pressure/kPa: 360; \\(\\mathrm{volume}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{3}}\\): 2.4",
-   "pressure/kPa: 270; \\(\\mathrm{volume}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{3}}\\): 3.2",
-   "pressure/kPa: 160; \\(\\mathrm{volume}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{3}}\\): 4.6",
-   "pressure/kPa: 120; \\(\\mathrm{volume}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{3}}\\): 7.2"
+   "pressure/kPa: 360; volume/\\({\\mathrm{cm}}^{\\mathrm{3}}\\): 2.4",
+   "pressure/kPa: 270; volume/\\({\\mathrm{cm}}^{\\mathrm{3}}\\): 3.2",
+   "pressure/kPa: 160; volume/\\({\\mathrm{cm}}^{\\mathrm{3}}\\): 4.6",
+   "pressure/kPa: 120; volume/\\({\\mathrm{cm}}^{\\mathrm{3}}\\): 7.2"
   ],
   "answer": "C",
   "topic_code": "",
@@ -1337,7 +1337,7 @@
   "chapter_code": "P10",
   "chapter": "Thermal properties of matter",
   "difficulty": "L2",
-  "question": "The diagram shows the equipment used in an experiment to determine the specific heat capacity of a metal.\nIn the experiment, a heater is switched on for \\(\\mathit{t}\\ \\mathrm{s}\\) and the increase in temperature \\(\\Delta \\theta \\) of a block of the metal is measured in ^°C.\n{{figure}}\nWhich equation gives the specific heat capacity of the metal?",
+  "question": "The diagram shows the equipment used in an experiment to determine the specific heat capacity of a metal.\nIn the experiment, a heater is switched on for \\(\\mathit{t}\\ \\mathrm{s}\\) and the increase in temperature \\(\\Delta \\theta \\) of a block of the metal is measured in °C.\n{{figure}}\nWhich equation gives the specific heat capacity of the metal?",
   "options": [
    "\\(\\mathit{c}\\ \\mathrm{=}\\ \\frac{\\mathit{P}}{\\mathit{t}\\mathit{m}\\Delta \\theta }\\)",
    "\\(\\mathit{c}\\ \\mathrm{=}\\ \\frac{\\mathit{P}\\mathit{t}}{\\mathit{m}\\Delta \\theta }\\)",
@@ -1412,7 +1412,7 @@
   "chapter_code": "P14",
   "chapter": "Properties of waves",
   "difficulty": "L2",
-  "question": "Which wave will diffract the most when passing through a gap that is 0.85 m wide?",
+  "question": "Which wave will diffract the most when passing through a gap that is 0.85 m wide?",
   "options": [
    "wave speed/m/s: 300; wave frequency/Hz: 280",
    "wave speed/m/s: 300; wave frequency/Hz: 400",
@@ -1514,10 +1514,10 @@
   "difficulty": "L2",
   "question": "A ray of light, travelling in air, is incident on an air-glass boundary.\nThe angles between the incident ray, the refracted ray and the boundary are shown.\n{{figure}}\nWhich equation is used to calculate the refractive index \\(\\mathit{n}\\) of the glass?",
   "options": [
-   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\mathrm{sin}\\mathrm{40}^{\\circ}}{\\mathrm{sin}\\mathrm{26}^{\\circ}}\\)",
-   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\mathrm{sin}\\mathrm{40}^{\\circ}}{\\mathrm{sin}\\mathrm{64}^{\\circ}}\\)",
-   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\mathrm{sin}\\mathrm{50}^{\\circ}}{\\mathrm{sin}\\mathrm{26}^{\\circ}}\\)",
-   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\mathrm{sin}\\mathrm{50}^{\\circ}}{\\mathrm{sin}\\mathrm{64}^{\\circ}}\\)"
+   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\sin \\mathrm{40}^{\\circ}}{\\sin \\mathrm{26}^{\\circ}}\\)",
+   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\sin \\mathrm{40}^{\\circ}}{\\sin \\mathrm{64}^{\\circ}}\\)",
+   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\sin \\mathrm{50}^{\\circ}}{\\sin \\mathrm{26}^{\\circ}}\\)",
+   "\\(\\mathit{n}\\ \\mathrm{=}\\ \\frac{\\sin \\mathrm{50}^{\\circ}}{\\sin \\mathrm{64}^{\\circ}}\\)"
   ],
   "answer": "A",
   "topic_code": "",
@@ -1564,10 +1564,10 @@
   "difficulty": "L1",
   "question": "What is the approximate speed of light in air?",
   "options": [
-   "300 m/s",
-   "300 km/s",
-   "\\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "\\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{km/s}\\)"
+   "300 m/s",
+   "300 km/s",
+   "\\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "\\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{km/s}\\)"
   ],
   "answer": "C",
   "topic_code": "",
@@ -1587,12 +1587,12 @@
   "chapter_code": "P12",
   "chapter": "Sound",
   "difficulty": "L2",
-  "question": "A ship sends an ultrasound pulse to the seabed to measure the depth of the sea.\nThe speed of ultrasound waves in sea water is 1500 m/s.\nThe pulse takes 4.6 seconds to travel to the seabed and back to the ship.\nWhat is the depth of the sea?",
+  "question": "A ship sends an ultrasound pulse to the seabed to measure the depth of the sea.\nThe speed of ultrasound waves in sea water is 1500 m/s.\nThe pulse takes 4.6 seconds to travel to the seabed and back to the ship.\nWhat is the depth of the sea?",
   "options": [
-   "330 m",
-   "650 m",
-   "3500 m",
-   "6900 m"
+   "330 m",
+   "650 m",
+   "3500 m",
+   "6900 m"
   ],
   "answer": "C",
   "topic_code": "",
@@ -1612,12 +1612,12 @@
   "chapter_code": "P12",
   "chapter": "Sound",
   "difficulty": "L2",
-  "question": "A dolphin has a range of audible frequencies of 150 Hz-150 kHz.\nWhich range of frequencies can be heard both by humans with good hearing and by dolphins?",
+  "question": "A dolphin has a range of audible frequencies of 150 Hz–150 kHz.\nWhich range of frequencies can be heard both by humans with good hearing and by dolphins?",
   "options": [
-   "20 Hz-150 Hz",
-   "20 Hz-150 kHz",
-   "20 kHz-150 kHz",
-   "150 Hz-20 kHz"
+   "20 Hz–150 Hz",
+   "20 Hz–150 kHz",
+   "20 kHz–150 kHz",
+   "150 Hz–20 kHz"
   ],
   "answer": "D",
   "topic_code": "",
@@ -1687,7 +1687,7 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L2",
-  "question": "A metallic wire X has a resistance.\nWhat is the difference in resistance for a wire of the same material as X that is:\nshorter than X but the same diameter\nthe same length as X but with a smaller diameter?",
+  "question": "A metallic wire X has a resistance.\nWhat is the difference in resistance for a wire of the same material as X that is:\n• shorter than X but the same diameter\n• the same length as X but with a smaller diameter?",
   "options": [
    "resistance of shorter wire: greater; resistance of wire with smaller diameter: greater",
    "resistance of shorter wire: greater; resistance of wire with smaller diameter: smaller",
@@ -1714,10 +1714,10 @@
   "difficulty": "L2",
   "question": "The diagram shows the circuit for a potential divider.\n{{figure}}\nWhich equation is used to calculate \\({\\mathit{V}}_{\\mathrm{1}}\\)?",
   "options": [
-   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{V}}_{\\mathrm{2}}\\ \\times \\ \\mathrm{(}{\\mathit{R}}_{\\mathrm{1}}\\ \\mathrm{+}\\ {\\mathit{R}}_{\\mathrm{2}}\\mathrm{)}}\\)",
-   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{V}}_{\\mathrm{2}}\\ \\times \\ {\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{R}}_{\\mathrm{2}}}\\)",
-   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{V}}_{\\mathrm{2}}\\ \\times \\ {\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{R}}_{\\mathrm{1}}\\ \\mathrm{+}\\ {\\mathit{R}}_{\\mathrm{2}}}\\)",
-   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{V}}_{\\mathrm{2}}\\ \\times \\ {\\mathit{R}}_{\\mathrm{2}}}\\)"
+   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{V}}_{\\mathrm{2}} \\times \\mathrm{(}{\\mathit{R}}_{\\mathrm{1}}\\ \\mathrm{+}\\ {\\mathit{R}}_{\\mathrm{2}}\\mathrm{)}}\\)",
+   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{V}}_{\\mathrm{2}} \\times {\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{R}}_{\\mathrm{2}}}\\)",
+   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{V}}_{\\mathrm{2}} \\times {\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{R}}_{\\mathrm{1}}\\ \\mathrm{+}\\ {\\mathit{R}}_{\\mathrm{2}}}\\)",
+   "\\({\\mathit{V}}_{\\mathrm{1}}\\ \\mathrm{=}\\ \\frac{{\\mathit{R}}_{\\mathrm{1}}}{{\\mathit{V}}_{\\mathrm{2}} \\times {\\mathit{R}}_{\\mathrm{2}}}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -1762,12 +1762,12 @@
   "chapter_code": "P19",
   "chapter": "Electric circuits",
   "difficulty": "L2",
-  "question": "A cell is connected to a parallel combination of a 2.0 Ω resistor and a 4.0 Ω resistor. The current in the 4.0 Ω resistor is 1.0 A.\n{{figure}}\nWhat is the current in the cell?",
+  "question": "A cell is connected to a parallel combination of a 2.0 Ω resistor and a 4.0 Ω resistor. The current in the 4.0 Ω resistor is 1.0 A.\n{{figure}}\nWhat is the current in the cell?",
   "options": [
-   "1.0 A",
-   "1.5 A",
-   "2.0 A",
-   "3.0 A"
+   "1.0 A",
+   "1.5 A",
+   "2.0 A",
+   "3.0 A"
   ],
   "answer": "D",
   "topic_code": "",
@@ -1812,12 +1812,12 @@
   "chapter_code": "P21",
   "chapter": "Electromagnetic induction",
   "difficulty": "L2",
-  "question": "The primary voltage supplied to a transformer is 3.0 V. The secondary voltage is 5.0 V and the secondary current is 2.0 A. The transformer is 100% efficient.\nWhat is the primary current in the transformer?",
+  "question": "The primary voltage supplied to a transformer is 3.0 V. The secondary voltage is 5.0 V and the secondary current is 2.0 A. The transformer is 100% efficient.\nWhat is the primary current in the transformer?",
   "options": [
-   "1.2 A",
-   "2.0 A",
-   "3.3 A",
-   "7.5 A"
+   "1.2 A",
+   "2.0 A",
+   "3.3 A",
+   "7.5 A"
   ],
   "answer": "C",
   "topic_code": "",
@@ -1912,12 +1912,12 @@
   "chapter_code": "P23",
   "chapter": "Radioactivity",
   "difficulty": "L2",
-  "question": "A sample of a radioactive material has a half-life of 20 minutes.\nWhich statement is correct?",
+  "question": "A sample of a radioactive material has a half-life of 20 minutes.\nWhich statement is correct?",
   "options": [
-   "After 30 minutes, less than half of the material has decayed.",
-   "After 40 minutes, all of the radioactive material has decayed.",
-   "After 60 minutes, an eighth of the radioactive material remains.",
-   "After 120 minutes, a sixth of the radioactive material remains."
+   "After 30 minutes, less than half of the material has decayed.",
+   "After 40 minutes, all of the radioactive material has decayed.",
+   "After 60 minutes, an eighth of the radioactive material remains.",
+   "After 120 minutes, a sixth of the radioactive material remains."
   ],
   "answer": "C",
   "topic_code": "",
@@ -1939,10 +1939,10 @@
   "difficulty": "L1",
   "question": "Which statement is correct?",
   "options": [
-   "The Earth orbits the Sun once in approximately 24 hours.",
+   "The Earth orbits the Sun once in approximately 24 hours.",
    "The Earth orbits the Moon once in approximately 1 week.",
    "The Moon orbits the Earth once in approximately 1 month.",
-   "The Sun orbits the Earth once in approximately 365 days."
+   "The Sun orbits the Earth once in approximately 365 days."
   ],
   "answer": "C",
   "topic_code": "",
@@ -1987,12 +1987,12 @@
   "chapter_code": "P25",
   "chapter": "Stars and the universe",
   "difficulty": "L3",
-  "question": "A galaxy is moving away from the Earth at a velocity of 3000 km/s.\nWhat is the distance between the Earth and the galaxy?",
+  "question": "A galaxy is moving away from the Earth at a velocity of 3000 km/s.\nWhat is the distance between the Earth and the galaxy?",
   "options": [
-   "\\(\\mathrm{7.3}\\ \\times \\ {\\mathrm{10}}^{-\\mathrm{25}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{7.3}\\ \\times \\ {\\mathrm{10}}^{-\\mathrm{22}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{1.4}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{21}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{1.4}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{24}}\\ \\mathrm{m}\\)"
+   "\\(\\mathrm{7.3} \\times {\\mathrm{10}}^{-\\mathrm{25}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{7.3} \\times {\\mathrm{10}}^{-\\mathrm{22}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{1.4} \\times {\\mathrm{10}}^{\\mathrm{21}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{1.4} \\times {\\mathrm{10}}^{\\mathrm{24}}\\ \\mathrm{m}\\)"
   ],
   "answer": "D",
   "topic_code": "",
@@ -2187,12 +2187,12 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L3",
-  "question": "A railway truck of mass 8000 kg moves with a velocity of 1.0 m/s to the right.\nIt collides with a railway truck of mass 12 000 kg moving at 2.0 m/s to the left.\nThe two trucks become joined to each other when they collide and move off together.\nWhat is the velocity of the two trucks after the collision?",
+  "question": "A railway truck of mass 8000 kg moves with a velocity of 1.0 m/s to the right.\nIt collides with a railway truck of mass 12 000 kg moving at 2.0 m/s to the left.\nThe two trucks become joined to each other when they collide and move off together.\nWhat is the velocity of the two trucks after the collision?",
   "options": [
-   "1.6 m/s to the left",
-   "0.80 m/s to the left",
-   "0.80 m/s to the right",
-   "1.6 m/s to the right"
+   "1.6 m/s to the left",
+   "0.80 m/s to the left",
+   "0.80 m/s to the right",
+   "1.6 m/s to the right"
   ],
   "answer": "B",
   "topic_code": "",
@@ -2212,12 +2212,12 @@
   "chapter_code": "P6",
   "chapter": "Energy stores and transfers",
   "difficulty": "L2",
-  "question": "A stone is dropped from a bridge which is 22 m above a river.\nWhat is the speed of the stone when it hits the water?",
+  "question": "A stone is dropped from a bridge which is 22 m above a river.\nWhat is the speed of the stone when it hits the water?",
   "options": [
-   "15 m/s",
-   "21 m/s",
-   "220 m/s",
-   "430 m/s"
+   "15 m/s",
+   "21 m/s",
+   "220 m/s",
+   "430 m/s"
   ],
   "answer": "B",
   "topic_code": "",
@@ -2364,10 +2364,10 @@
   "difficulty": "L2",
   "question": "Four different surfaces are at the same high temperature.\nWhich surface emits thermal radiation at the slowest rate?",
   "options": [
-   "colour of surface: black; texture of surface: dull; \\(\\mathrm{surface}\\ \\mathrm{area}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{2}}\\): 10",
-   "colour of surface: black; texture of surface: dull; \\(\\mathrm{surface}\\ \\mathrm{area}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{2}}\\): 100",
-   "colour of surface: white; texture of surface: shiny; \\(\\mathrm{surface}\\ \\mathrm{area}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{2}}\\): 10",
-   "colour of surface: white; texture of surface: shiny; \\(\\mathrm{surface}\\ \\mathrm{area}\\mathrm{/}{\\mathrm{cm}}^{\\mathrm{2}}\\): 100"
+   "colour of surface: black; texture of surface: dull; surface area/\\({\\mathrm{cm}}^{\\mathrm{2}}\\): 10",
+   "colour of surface: black; texture of surface: dull; surface area/\\({\\mathrm{cm}}^{\\mathrm{2}}\\): 100",
+   "colour of surface: white; texture of surface: shiny; surface area/\\({\\mathrm{cm}}^{\\mathrm{2}}\\): 10",
+   "colour of surface: white; texture of surface: shiny; surface area/\\({\\mathrm{cm}}^{\\mathrm{2}}\\): 100"
   ],
   "answer": "C",
   "topic_code": "",
@@ -2462,12 +2462,12 @@
   "chapter_code": "P13",
   "chapter": "Light",
   "difficulty": "L1",
-  "question": "An object is placed 30 cm in front of a plane mirror.\nWhich statement describes the image of the object?",
+  "question": "An object is placed 30 cm in front of a plane mirror.\nWhich statement describes the image of the object?",
   "options": [
-   "The image is the same size as the object and 30 cm from the object.",
-   "The image is the same size as the object and 60 cm from the object.",
-   "The image is smaller than the object and 30 cm from the object.",
-   "The image is smaller than the object and 60 cm from the object."
+   "The image is the same size as the object and 30 cm from the object.",
+   "The image is the same size as the object and 60 cm from the object.",
+   "The image is smaller than the object and 30 cm from the object.",
+   "The image is smaller than the object and 60 cm from the object."
   ],
   "answer": "B",
   "topic_code": "",
@@ -2514,10 +2514,10 @@
   "difficulty": "L1",
   "question": "What is the speed of radio waves in a vacuum and what is the speed of gamma rays in a vacuum?",
   "options": [
-   "speed of radio waves: less than \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: less than \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "speed of radio waves: less than \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: more than \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "speed of radio waves: \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "speed of radio waves: more than \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: more than \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)"
+   "speed of radio waves: less than \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: less than \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "speed of radio waves: less than \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: more than \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "speed of radio waves: \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "speed of radio waves: more than \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\); speed of gamma rays: more than \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)"
   ],
   "answer": "C",
   "topic_code": "",
@@ -2539,10 +2539,10 @@
   "difficulty": "L2",
   "question": "A student makes a sound in front of a large wall.\nShe hears an echo at time \\(\\mathit{t}\\) after making the sound.\nThe speed of sound in air is \\(\\mathit{v}\\).\nWhich expression is used to calculate the distance between the student and the wall?",
   "options": [
-   "\\(\\mathit{v}\\ \\times \\ \\mathit{t}\\)",
-   "\\(\\mathit{v}\\ \\mathrm{÷}\\ \\mathit{t}\\)",
-   "\\(\\mathrm{(}\\mathit{v}\\ \\times \\ \\mathit{t}\\mathrm{)}\\ \\mathrm{÷}\\ \\mathrm{2}\\)",
-   "\\(\\mathrm{(}\\mathit{v}\\ \\mathrm{÷}\\ \\mathit{t}\\mathrm{)}\\ \\mathrm{÷}\\ \\mathrm{2}\\)"
+   "\\(\\mathit{v} \\times \\mathit{t}\\)",
+   "\\(\\mathit{v} \\div \\mathit{t}\\)",
+   "\\(\\mathrm{(}\\mathit{v} \\times \\mathit{t}\\mathrm{)} \\div \\mathrm{2}\\)",
+   "\\(\\mathrm{(}\\mathit{v} \\div \\mathit{t}\\mathrm{)} \\div \\mathrm{2}\\)"
   ],
   "answer": "C",
   "topic_code": "",
@@ -2612,12 +2612,12 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L3",
-  "question": "A 0.60 m length of resistance wire with a diameter of 0.25 mm has a resistance of 6.0 Ω.\nA second piece of resistance wire of the same material with a diameter of 0.50 mm also has a resistance of 6.0 Ω.\nWhat is the length of the second piece of wire?",
+  "question": "A 0.60 m length of resistance wire with a diameter of 0.25 mm has a resistance of 6.0 Ω.\nA second piece of resistance wire of the same material with a diameter of 0.50 mm also has a resistance of 6.0 Ω.\nWhat is the length of the second piece of wire?",
   "options": [
-   "0.15 m",
-   "0.30 m",
-   "1.20 m",
-   "2.40 m"
+   "0.15 m",
+   "0.30 m",
+   "1.20 m",
+   "2.40 m"
   ],
   "answer": "D",
   "topic_code": "",
@@ -2637,12 +2637,12 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L2",
-  "question": "A circuit contains a cell with an electromotive force (e.m.f.) of 2.0 V. The current in the circuit is 2.0 A.\nHow much energy is transferred by the cell in 2.0 minutes?",
+  "question": "A circuit contains a cell with an electromotive force (e.m.f.) of 2.0 V. The current in the circuit is 2.0 A.\nHow much energy is transferred by the cell in 2.0 minutes?",
   "options": [
-   "2.0 J",
-   "4.0 J",
-   "8.0 J",
-   "480 J"
+   "2.0 J",
+   "4.0 J",
+   "8.0 J",
+   "480 J"
   ],
   "answer": "D",
   "topic_code": "",
@@ -2762,7 +2762,7 @@
   "chapter_code": "P21",
   "chapter": "Electromagnetic induction",
   "difficulty": "L3",
-  "question": "When the generator shown rotates, there is an a.c. electromotive force (e.m.f.) across the resistor between points P and Q.\nDiagram 1 shows the position of the coil at time \\(\\mathit{t}\\ \\mathrm{=}\\ \\mathrm{0}\\).\nThe coil rotates clockwise. At time \\({\\mathit{t}}_{\\mathrm{1}}\\), the coil position is horizontal, as shown in diagram 2.\n{{figure}}\nThe graph shows the output e.m.f. between points P and Q plotted against time.\nWhich point shows the e.m.f. at time \\({\\mathit{t}}_{\\mathrm{1}}\\)?\n",
+  "question": "When the generator shown rotates, there is an a.c. electromotive force (e.m.f.) across the resistor between points P and Q.\nDiagram 1 shows the position of the coil at time \\(\\mathit{t}\\ \\mathrm{=}\\ \\mathrm{0}\\).\nThe coil rotates clockwise. At time \\({\\mathit{t}}_{\\mathrm{1}}\\), the coil position is horizontal, as shown in diagram 2.\n{{figure}}\nThe graph shows the output e.m.f. between points P and Q plotted against time.\nWhich point shows the e.m.f. at time \\({\\mathit{t}}_{\\mathrm{1}}\\)?",
   "options": [
    "A",
    "B",
@@ -2912,7 +2912,7 @@
   "chapter_code": "P23",
   "chapter": "Radioactivity",
   "difficulty": "L3",
-  "question": "An experiment is done to measure the radiation from a radioactive source. The source has a half-life of 10 minutes.\nThe source is placed close to a detector that is connected to a counter, as shown.\n{{figure}}\nThe average background count rate is 20 counts/minute.\nAt the start of the experiment, the count rate recorded by the counter is 1000 counts/minute.\nWhat is the count rate 10 minutes later?",
+  "question": "An experiment is done to measure the radiation from a radioactive source. The source has a half-life of 10 minutes.\nThe source is placed close to a detector that is connected to a counter, as shown.\n{{figure}}\nThe average background count rate is 20 counts/minute.\nAt the start of the experiment, the count rate recorded by the counter is 1000 counts/minute.\nWhat is the count rate 10 minutes later?",
   "options": [
    "490 counts/minute",
    "500 counts/minute",
@@ -2962,12 +2962,12 @@
   "chapter_code": "P25",
   "chapter": "Stars and the universe",
   "difficulty": "L3",
-  "question": "A distant galaxy is moving away from the Milky Way at 4 400 000 m/s.\nWhat is the approximate distance between the Milky Way and this distant galaxy?",
+  "question": "A distant galaxy is moving away from the Milky Way at 4 400 000 m/s.\nWhat is the approximate distance between the Milky Way and this distant galaxy?",
   "options": [
-   "\\(\\mathrm{2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{12}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{11}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{24}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{23}}\\ \\mathrm{m}\\)"
+   "\\(\\mathrm{2} \\times {\\mathrm{10}}^{\\mathrm{12}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{5} \\times {\\mathrm{10}}^{\\mathrm{11}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{2} \\times {\\mathrm{10}}^{\\mathrm{24}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{5} \\times {\\mathrm{10}}^{\\mathrm{23}}\\ \\mathrm{m}\\)"
   ],
   "answer": "C",
   "topic_code": "",
@@ -3037,12 +3037,12 @@
   "chapter_code": "P2",
   "chapter": "Describing motion",
   "difficulty": "L2",
-  "question": "An athlete runs at a speed of 8 m/s for 10 s, and then at a speed of 6 m/s for 12 s.\nWhich calculation gives the average speed of the athlete in m/s?",
+  "question": "An athlete runs at a speed of 8 m/s for 10 s, and then at a speed of 6 m/s for 12 s.\nWhich calculation gives the average speed of the athlete in m/s?",
   "options": [
    "\\(\\frac{\\mathrm{8}\\ \\mathrm{+}\\ \\mathrm{6}}{\\mathrm{2}}\\)",
-   "\\(\\frac{\\mathrm{(}\\mathrm{8}\\ \\times \\ \\mathrm{10}\\mathrm{)}\\ \\mathrm{+}\\ \\mathrm{(}\\mathrm{6}\\ \\times \\ \\mathrm{12}\\mathrm{)}}{\\mathrm{22}}\\)",
-   "\\(\\frac{\\mathrm{(}\\mathrm{8}\\ \\mathrm{÷}\\ \\mathrm{10}\\mathrm{)}\\ \\mathrm{+}\\ \\mathrm{(}\\mathrm{6}\\ \\mathrm{÷}\\ \\mathrm{12}\\mathrm{)}}{\\mathrm{22}}\\)",
-   "\\(\\frac{\\mathrm{(}\\mathrm{10}\\ \\mathrm{÷}\\ \\mathrm{8}\\mathrm{)}\\ \\mathrm{+}\\ \\mathrm{(}\\mathrm{12}\\ \\mathrm{÷}\\ \\mathrm{6}\\mathrm{)}}{\\mathrm{22}}\\)"
+   "\\(\\frac{\\mathrm{(}\\mathrm{8} \\times \\mathrm{10}\\mathrm{)}\\ \\mathrm{+}\\ \\mathrm{(}\\mathrm{6} \\times \\mathrm{12}\\mathrm{)}}{\\mathrm{22}}\\)",
+   "\\(\\frac{\\mathrm{(}\\mathrm{8} \\div \\mathrm{10}\\mathrm{)}\\ \\mathrm{+}\\ \\mathrm{(}\\mathrm{6} \\div \\mathrm{12}\\mathrm{)}}{\\mathrm{22}}\\)",
+   "\\(\\frac{\\mathrm{(}\\mathrm{10} \\div \\mathrm{8}\\mathrm{)}\\ \\mathrm{+}\\ \\mathrm{(}\\mathrm{12} \\div \\mathrm{6}\\mathrm{)}}{\\mathrm{22}}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -3092,7 +3092,7 @@
    "The mass of liquid Q is greater than the mass of liquid P.",
    "The mass of \\(\\mathrm{1}{\\ \\mathrm{cm}}^{\\mathrm{3}}\\) of liquid Q is greater than the mass of \\(\\mathrm{1}{\\ \\mathrm{cm}}^{\\mathrm{3}}\\) of liquid P.",
    "The volume of liquid Q is greater than the volume of liquid P.",
-   "The volume of 1 g of liquid Q is greater than the volume of 1 g of liquid P."
+   "The volume of 1 g of liquid Q is greater than the volume of 1 g of liquid P."
   ],
   "answer": "B",
   "topic_code": "",
@@ -3162,12 +3162,12 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L2",
-  "question": "The momentum of a car changes from 10 000 kg m/s to 15 000 kg m/s in a time of 8.0 s.\nWhat is the resultant force acting on the car?",
+  "question": "The momentum of a car changes from 10 000 kg m/s to 15 000 kg m/s in a time of 8.0 s.\nWhat is the resultant force acting on the car?",
   "options": [
-   "630 N",
-   "3100 N",
-   "40 000 N",
-   "200 000 N"
+   "630 N",
+   "3100 N",
+   "40 000 N",
+   "200 000 N"
   ],
   "answer": "A",
   "topic_code": "",
@@ -3287,7 +3287,7 @@
   "chapter_code": "P10",
   "chapter": "Thermal properties of matter",
   "difficulty": "L1",
-  "question": "The distance between two electricity pylons is 60 m. The cable that connects the two pylons is 62 m in length.\nWhy is the cable longer than the distance between the two pylons?",
+  "question": "The distance between two electricity pylons is 60 m. The cable that connects the two pylons is 62 m in length.\nWhy is the cable longer than the distance between the two pylons?",
   "options": [
    "to allow for contraction of the cable in cold weather",
    "to create a slope in the cable for electrons to flow down",
@@ -3312,12 +3312,12 @@
   "chapter_code": "P10",
   "chapter": "Thermal properties of matter",
   "difficulty": "L3",
-  "question": "A glass beaker contains a mass of 0.20 kg of water at a temperature of 20°C.\nThe specific heat capacity of water is 4200 J/(kg °C).\nA brass block of mass 0.15 kg is at a temperature of 170°C. The block is carefully lowered into the beaker of water.\nThe final temperature of both the water and brass is 30°C.\nWhat is the specific heat capacity of the brass?\n(Assume that no water is lost and no thermal energy has been transferred to the beaker or the surroundings.)",
+  "question": "A glass beaker contains a mass of 0.20 kg of water at a temperature of 20 °C.\nThe specific heat capacity of water is 4200 J/(kg °C).\nA brass block of mass 0.15 kg is at a temperature of 170 °C. The block is carefully lowered into the beaker of water.\nThe final temperature of both the water and brass is 30 °C.\nWhat is the specific heat capacity of the brass?\n(Assume that no water is lost and no thermal energy has been transferred to the beaker or the surroundings.)",
   "options": [
-   "400 J/(kg °C)",
-   "660 J/(kg °C)",
-   "1200 J/(kg °C)",
-   "5600 J/(kg °C)"
+   "400 J/(kg °C)",
+   "660 J/(kg °C)",
+   "1200 J/(kg °C)",
+   "5600 J/(kg °C)"
   ],
   "answer": "A",
   "topic_code": "",
@@ -3462,12 +3462,12 @@
   "chapter_code": "P13",
   "chapter": "Light",
   "difficulty": "L3",
-  "question": "A beam of light passes through a vacuum and then enters a transparent liquid. The diagram shows the path it takes.\n{{figure}}\nThe light travels through the vacuum at a speed of \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\).\nWhat is the speed of light in the liquid?",
+  "question": "A beam of light passes through a vacuum and then enters a transparent liquid. The diagram shows the path it takes.\n{{figure}}\nThe light travels through the vacuum at a speed of \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\).\nWhat is the speed of light in the liquid?",
   "options": [
-   "\\(\\mathrm{1.9}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "\\(\\mathrm{2.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "\\(\\mathrm{4.6}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "\\(\\mathrm{4.8}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)"
+   "\\(\\mathrm{1.9} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "\\(\\mathrm{2.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "\\(\\mathrm{4.6} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "\\(\\mathrm{4.8} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -3612,12 +3612,12 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L2",
-  "question": "A fully charged battery stores a charge of 18 000 C. The battery is charged with a current of 830 mA.\nHow long does it take to fully charge a completely discharged battery?",
+  "question": "A fully charged battery stores a charge of 18 000 C. The battery is charged with a current of 830 mA.\nHow long does it take to fully charge a completely discharged battery?",
   "options": [
-   "about 10 minutes",
-   "about 3.5 hours",
-   "about 4 hours",
-   "about 6 hours"
+   "about 10 minutes",
+   "about 3.5 hours",
+   "about 4 hours",
+   "about 6 hours"
   ],
   "answer": "D",
   "topic_code": "",
@@ -3662,12 +3662,12 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L2",
-  "question": "A cell passes a current of 2.0 A in a circuit for 30 s. In this time, the cell transfers 120 J of energy.\nWhat is the electromotive force (e.m.f.) of the cell?",
+  "question": "A cell passes a current of 2.0 A in a circuit for 30 s. In this time, the cell transfers 120 J of energy.\nWhat is the electromotive force (e.m.f.) of the cell?",
   "options": [
-   "0.50 V",
-   "1.5 V",
-   "2.0 V",
-   "8.0 V"
+   "0.50 V",
+   "1.5 V",
+   "2.0 V",
+   "8.0 V"
   ],
   "answer": "C",
   "topic_code": "",
@@ -3687,12 +3687,12 @@
   "chapter_code": "P19",
   "chapter": "Electric circuits",
   "difficulty": "L3",
-  "question": "The diagram shows two resistors in series connected to a power supply.\n{{figure}}\nThe reading on the voltmeter is 3.0 V when the switch is closed.\nWhat is the resistance of resistor \\(\\mathit{R}\\)?",
+  "question": "The diagram shows two resistors in series connected to a power supply.\n{{figure}}\nThe reading on the voltmeter is 3.0 V when the switch is closed.\nWhat is the resistance of resistor \\(\\mathit{R}\\)?",
   "options": [
-   "0.67 Ω",
-   "1.2 Ω",
-   "1.5 Ω",
-   "2.0 Ω"
+   "0.67 Ω",
+   "1.2 Ω",
+   "1.5 Ω",
+   "2.0 Ω"
   ],
   "answer": "D",
   "topic_code": "",
@@ -3787,7 +3787,7 @@
   "chapter_code": "P21",
   "chapter": "Electromagnetic induction",
   "difficulty": "L3",
-  "question": "Cables transmit electrical power from the output of the transformer at a power station to the input of another transformer at a substation.\n{{figure}}\nThe power at the output of the transformer at the power station is 400 MW.\nWhich situation delivers the most power to the input of the transformer at the substation?",
+  "question": "Cables transmit electrical power from the output of the transformer at a power station to the input of another transformer at a substation.\n{{figure}}\nThe power at the output of the transformer at the power station is 400 MW.\nWhich situation delivers the most power to the input of the transformer at the substation?",
   "options": [
    "potential difference at power station transformer output/kV: 200; diameter of cables: large",
    "potential difference at power station transformer output/kV: 200; diameter of cables: small",
@@ -3987,12 +3987,12 @@
   "chapter_code": "P25",
   "chapter": "Stars and the universe",
   "difficulty": "L3",
-  "question": "A galaxy is at a distance of 60 million light-years from the Earth. The galaxy is moving away at a speed of 1300 km/s.\nOne light-year is about \\(\\mathrm{9.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{12}}\\ \\mathrm{km}\\).\nThere are about \\(\\mathrm{3.2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{7}}\\ \\mathrm{seconds}\\) in one year.\nWhich expression can be used to estimate the age of the Universe in years?",
+  "question": "A galaxy is at a distance of 60 million light-years from the Earth. The galaxy is moving away at a speed of 1300 km/s.\nOne light-year is about \\(\\mathrm{9.5} \\times {\\mathrm{10}}^{\\mathrm{12}}\\ \\mathrm{km}\\).\nThere are about \\(\\mathrm{3.2} \\times {\\mathrm{10}}^{\\mathrm{7}}\\) seconds in one year.\nWhich expression can be used to estimate the age of the Universe in years?",
   "options": [
-   "\\(\\frac{\\mathrm{60}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\times \\ \\mathrm{3.2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{7}}}{\\mathrm{1300}\\ \\times \\ \\mathrm{9.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{12}}}\\)",
-   "\\(\\frac{\\mathrm{60}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\times \\ \\mathrm{9.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{12}}}{\\mathrm{1300}\\ \\times \\ \\mathrm{3.2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{7}}}\\)",
-   "\\(\\frac{\\mathrm{1300}\\ \\times \\ \\mathrm{9.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{12}}}{\\mathrm{60}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\times \\ \\mathrm{3.2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{7}}}\\)",
-   "\\(\\frac{\\mathrm{1300}\\ \\times \\ \\mathrm{3.2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{7}}}{\\mathrm{60}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\times \\ \\mathrm{9.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{12}}}\\)"
+   "\\(\\frac{\\mathrm{60} \\times {\\mathrm{10}}^{\\mathrm{6}} \\times \\mathrm{3.2} \\times {\\mathrm{10}}^{\\mathrm{7}}}{\\mathrm{1300} \\times \\mathrm{9.5} \\times {\\mathrm{10}}^{\\mathrm{12}}}\\)",
+   "\\(\\frac{\\mathrm{60} \\times {\\mathrm{10}}^{\\mathrm{6}} \\times \\mathrm{9.5} \\times {\\mathrm{10}}^{\\mathrm{12}}}{\\mathrm{1300} \\times \\mathrm{3.2} \\times {\\mathrm{10}}^{\\mathrm{7}}}\\)",
+   "\\(\\frac{\\mathrm{1300} \\times \\mathrm{9.5} \\times {\\mathrm{10}}^{\\mathrm{12}}}{\\mathrm{60} \\times {\\mathrm{10}}^{\\mathrm{6}} \\times \\mathrm{3.2} \\times {\\mathrm{10}}^{\\mathrm{7}}}\\)",
+   "\\(\\frac{\\mathrm{1300} \\times \\mathrm{3.2} \\times {\\mathrm{10}}^{\\mathrm{7}}}{\\mathrm{60} \\times {\\mathrm{10}}^{\\mathrm{6}} \\times \\mathrm{9.5} \\times {\\mathrm{10}}^{\\mathrm{12}}}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -4062,12 +4062,12 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L2",
-  "question": "A space probe that has a mass of 600 kg is on the planet Mars.\nThe acceleration of free fall on Mars is \\(\\mathrm{4.0}{\\ \\mathrm{m/s}}^{\\mathrm{2}}\\).\nWhat is the weight of the space probe on Mars?",
+  "question": "A space probe that has a mass of 600 kg is on the planet Mars.\nThe acceleration of free fall on Mars is \\(\\mathrm{4.0}{\\ \\mathrm{m/s}}^{\\mathrm{2}}\\).\nWhat is the weight of the space probe on Mars?",
   "options": [
-   "60 N",
-   "150 N",
-   "2400 N",
-   "6000 N"
+   "60 N",
+   "150 N",
+   "2400 N",
+   "6000 N"
   ],
   "answer": "C",
   "topic_code": "",
@@ -4087,7 +4087,7 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L3",
-  "question": "Students are asked to predict the order in which three liquids, P, Q and R, will float on each other. They are told that the liquids will not mix.\nThe diagrams show how the density of liquid P is determined.\n{{figure}}\nThe table shows the densities of Q and R.\n{{tbl:liquid\u001f\\(\\mathrm{density}\\mathrm{/}{\\mathrm{g/cm}}^{\\mathrm{3}}\\)\u001eQ\u001f0.75\u001eR\u001f1.1}}\nThe liquids are poured gently into a tall beaker and allowed to settle.\nWhich diagram shows the liquids settled in the correct order?\n",
+  "question": "Students are asked to predict the order in which three liquids, P, Q and R, will float on each other. They are told that the liquids will not mix.\nThe diagrams show how the density of liquid P is determined.\n{{figure}}\nThe table shows the densities of Q and R.\n{{tbl:liquid\u001fdensity/\\({\\mathrm{g/cm}}^{\\mathrm{3}}\\)\u001eQ\u001f0.75\u001eR\u001f1.1}}\nThe liquids are poured gently into a tall beaker and allowed to settle.\nWhich diagram shows the liquids settled in the correct order?",
   "options": [
    "Beaker A",
    "Beaker B",
@@ -4137,12 +4137,12 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L3",
-  "question": "Diagram 1 shows a ball X of mass 0.15 kg travelling horizontally with a velocity of 2.1 m/s towards ball Y travelling at 0.4 m/s in the opposite direction.\nDiagram 2 shows the velocities of the balls immediately after they collide.\n{{figure}}\nWhat is the mass of ball Y?",
+  "question": "Diagram 1 shows a ball X of mass 0.15 kg travelling horizontally with a velocity of 2.1 m/s towards ball Y travelling at 0.4 m/s in the opposite direction.\nDiagram 2 shows the velocities of the balls immediately after they collide.\n{{figure}}\nWhat is the mass of ball Y?",
   "options": [
-   "0.15 kg",
-   "0.19 kg",
-   "0.35 kg",
-   "0.79 kg"
+   "0.15 kg",
+   "0.19 kg",
+   "0.35 kg",
+   "0.79 kg"
   ],
   "answer": "C",
   "topic_code": "",
@@ -4264,10 +4264,10 @@
   "difficulty": "L1",
   "question": "In which range of temperatures is water a liquid?",
   "options": [
-   "0 K to 100 K",
-   "0 K to 273 K",
-   "100 K to 373 K",
-   "273 K to 373 K"
+   "0 K to 100 K",
+   "0 K to 273 K",
+   "100 K to 373 K",
+   "273 K to 373 K"
   ],
   "answer": "D",
   "topic_code": "",
@@ -4312,12 +4312,12 @@
   "chapter_code": "P10",
   "chapter": "Thermal properties of matter",
   "difficulty": "L2",
-  "question": "A cup contains 0.25 kg of water at 60°C. Some time later, the water has cooled to 20°C.\nHow much energy has been transferred from the water to the surroundings?\n(The specific heat capacity of water is 4200 J/(kg °C).)",
+  "question": "A cup contains 0.25 kg of water at 60 °C. Some time later, the water has cooled to 20 °C.\nHow much energy has been transferred from the water to the surroundings?\n(The specific heat capacity of water is 4200 J/(kg °C).)",
   "options": [
-   "21 000 J",
-   "42 000 J",
-   "63 000 J",
-   "84 000 J"
+   "21 000 J",
+   "42 000 J",
+   "63 000 J",
+   "84 000 J"
   ],
   "answer": "B",
   "topic_code": "",
@@ -4412,12 +4412,12 @@
   "chapter_code": "P14",
   "chapter": "Properties of waves",
   "difficulty": "L2",
-  "question": "An earthquake-monitoring station records the arrival of 16 complete wavelengths of an earthquake wave in a time of 20 s.\nThe speed of the earthquake wave is 6.0 km/s.\nWhat is the wavelength of the earthquake wave?",
+  "question": "An earthquake-monitoring station records the arrival of 16 complete wavelengths of an earthquake wave in a time of 20 s.\nThe speed of the earthquake wave is 6.0 km/s.\nWhat is the wavelength of the earthquake wave?",
   "options": [
-   "\\(\\mathrm{1.3}\\ \\times \\ {\\mathrm{10}}^{-\\mathrm{4}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{2.1}\\ \\times \\ {\\mathrm{10}}^{-\\mathrm{4}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{4.8}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{3}}\\ \\mathrm{m}\\)",
-   "\\(\\mathrm{7.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{3}}\\ \\mathrm{m}\\)"
+   "\\(\\mathrm{1.3} \\times {\\mathrm{10}}^{-\\mathrm{4}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{2.1} \\times {\\mathrm{10}}^{-\\mathrm{4}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{4.8} \\times {\\mathrm{10}}^{\\mathrm{3}}\\ \\mathrm{m}\\)",
+   "\\(\\mathrm{7.5} \\times {\\mathrm{10}}^{\\mathrm{3}}\\ \\mathrm{m}\\)"
   ],
   "answer": "D",
   "topic_code": "",
@@ -4434,8 +4434,8 @@
   "qno": 18,
   "type": "MCQ",
   "class": "IGCSE",
-  "chapter_code": "P12",
-  "chapter": "Sound",
+  "chapter_code": "P14",
+  "chapter": "Properties of waves",
   "difficulty": "L1",
   "question": "Which statement is correct?",
   "options": [
@@ -4462,7 +4462,7 @@
   "chapter_code": "P13",
   "chapter": "Light",
   "difficulty": "L2",
-  "question": "A water droplet is falling towards a horizontal plane mirror.\nAt one moment, the droplet is a distance of 1.5 m above the mirror and falling at a speed of 2.0 m/s.\nWhat is the distance between the droplet and its image and what is the speed of the image at this moment?",
+  "question": "A water droplet is falling towards a horizontal plane mirror.\nAt one moment, the droplet is a distance of 1.5 m above the mirror and falling at a speed of 2.0 m/s.\nWhat is the distance between the droplet and its image and what is the speed of the image at this moment?",
   "options": [
    "distance between water droplet and its image/m: 1.5; speed of image/m/s: 2.0",
    "distance between water droplet and its image/m: 1.5; speed of image/m/s: 4.0",
@@ -4539,10 +4539,10 @@
   "difficulty": "L2",
   "question": "What is the speed of infrared radiation in glass with a refractive index of 1.5?",
   "options": [
-   "340 m/s",
-   "\\(\\mathrm{2.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "\\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
-   "\\(\\mathrm{4.5}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)"
+   "340 m/s",
+   "\\(\\mathrm{2.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "\\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)",
+   "\\(\\mathrm{4.5} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\)"
   ],
   "answer": "B",
   "topic_code": "",
@@ -4612,12 +4612,12 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L3",
-  "question": "In a circuit, two identical lamps are in parallel. The parallel pair of lamps is in series with a resistor and a battery.\nThe battery does 120 J of work moving 50 C of charge around the circuit in time \\(\\mathit{t}\\).\nIn each lamp, 40 J of work is done by the charge that passes through it in time \\(\\mathit{t}\\).\nThe electromotive force (e.m.f.) of the battery is \\(\\mathit{E}\\) and the potential difference (p.d.) across one lamp is \\(\\mathit{V}\\).\nWhich statement about \\(\\mathit{E}\\) and \\(\\mathit{V}\\) is correct?",
+  "question": "In a circuit, two identical lamps are in parallel. The parallel pair of lamps is in series with a resistor and a battery.\nThe battery does 120 J of work moving 50 C of charge around the circuit in time \\(\\mathit{t}\\).\nIn each lamp, 40 J of work is done by the charge that passes through it in time \\(\\mathit{t}\\).\nThe electromotive force (e.m.f.) of the battery is \\(\\mathit{E}\\) and the potential difference (p.d.) across one lamp is \\(\\mathit{V}\\).\nWhich statement about \\(\\mathit{E}\\) and \\(\\mathit{V}\\) is correct?",
   "options": [
-   "\\(\\mathit{E}\\) is 2.4 V and \\(\\mathit{V}\\) is 0.80 V.",
-   "\\(\\mathit{E}\\) is 2.4 V and \\(\\mathit{V}\\) is 1.6 V.",
-   "\\(\\mathit{E}\\) is 4.8 V and \\(\\mathit{V}\\) is 2.4 V.",
-   "\\(\\mathit{E}\\) is 4.8 V and \\(\\mathit{V}\\) is 4.8 V."
+   "\\(\\mathit{E}\\) is 2.4 V and \\(\\mathit{V}\\) is 0.80 V.",
+   "\\(\\mathit{E}\\) is 2.4 V and \\(\\mathit{V}\\) is 1.6 V.",
+   "\\(\\mathit{E}\\) is 4.8 V and \\(\\mathit{V}\\) is 2.4 V.",
+   "\\(\\mathit{E}\\) is 4.8 V and \\(\\mathit{V}\\) is 4.8 V."
   ],
   "answer": "B",
   "topic_code": "",
@@ -4936,13 +4936,13 @@
   "class": "IGCSE",
   "chapter_code": "P24",
   "chapter": "Earth and the Solar System",
-  "difficulty": "L3",
+  "difficulty": "L2",
   "question": "A space probe measures the gravitational field strength at four different distances from a planet.\nThe point furthest from the planet is measured first and the point nearest the planet is measured last.\nIn which order were the measurements taken?",
   "options": [
-   "6.3 N/kg, 10 N/kg, 14 N/kg, 20 N/kg",
-   "10 N/kg, 14 N/kg, 6.3 N/kg, 20 N/kg",
-   "20 N/kg, 14 N/kg, 6.3 N/kg, 10 N/kg",
-   "20 N/kg, 14 N/kg, 10 N/kg, 6.3 N/kg"
+   "6.3 N/kg, 10 N/kg, 14 N/kg, 20 N/kg",
+   "10 N/kg, 14 N/kg, 6.3 N/kg, 20 N/kg",
+   "20 N/kg, 14 N/kg, 6.3 N/kg, 10 N/kg",
+   "20 N/kg, 14 N/kg, 10 N/kg, 6.3 N/kg"
   ],
   "answer": "A",
   "topic_code": "",
@@ -4962,12 +4962,12 @@
   "chapter_code": "P25",
   "chapter": "Stars and the universe",
   "difficulty": "L3",
-  "question": "The galaxy Draco II is a distance of \\(\\mathrm{6.6}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{20}}\\ \\mathrm{m}\\) from Earth.\nWhat is this distance in light-years?",
+  "question": "The galaxy Draco II is a distance of \\(\\mathrm{6.6} \\times {\\mathrm{10}}^{\\mathrm{20}}\\ \\mathrm{m}\\) from Earth.\nWhat is this distance in light-years?",
   "options": [
-   "\\(\\mathrm{1.4}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{4}}\\ \\mathrm{light-years}\\)",
-   "\\(\\mathrm{6.9}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{4}}\\ \\mathrm{light-years}\\)",
-   "\\(\\mathrm{1.4}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\mathrm{light-years}\\)",
-   "\\(\\mathrm{6.9}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\mathrm{light-years}\\)"
+   "\\(\\mathrm{1.4} \\times {\\mathrm{10}}^{\\mathrm{4}}\\) light-years",
+   "\\(\\mathrm{6.9} \\times {\\mathrm{10}}^{\\mathrm{4}}\\) light-years",
+   "\\(\\mathrm{1.4} \\times {\\mathrm{10}}^{\\mathrm{6}}\\) light-years",
+   "\\(\\mathrm{6.9} \\times {\\mathrm{10}}^{\\mathrm{6}}\\) light-years"
   ],
   "answer": "B",
   "topic_code": "",
@@ -5012,12 +5012,12 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L2",
-  "question": "When a pendulum passes a marker, a timer displays 1 minute 30 seconds.\nThe pendulum passes the marker 12 more times from the same direction.\nOn the final pass, the timer displays a time of 2 minutes 18 seconds.\nWhat is the time period of oscillation of the pendulum?",
+  "question": "When a pendulum passes a marker, a timer displays 1 minute 30 seconds.\nThe pendulum passes the marker 12 more times from the same direction.\nOn the final pass, the timer displays a time of 2 minutes 18 seconds.\nWhat is the time period of oscillation of the pendulum?",
   "options": [
-   "4.0 s",
-   "4.4 s",
-   "7.5 s",
-   "12 s"
+   "4.0 s",
+   "4.4 s",
+   "7.5 s",
+   "12 s"
   ],
   "answer": "A",
   "topic_code": "",
@@ -5037,12 +5037,12 @@
   "chapter_code": "P2",
   "chapter": "Describing motion",
   "difficulty": "L2",
-  "question": "A car driver applies the brakes to bring a car to rest with a constant deceleration of \\(\\mathrm{4.0}{\\ \\mathrm{m/s}}^{\\mathrm{2}}\\) in a time of 8.0 s.\nWhat is the average speed of the car during this time?",
+  "question": "A car driver applies the brakes to bring a car to rest with a constant deceleration of \\(\\mathrm{4.0}{\\ \\mathrm{m/s}}^{\\mathrm{2}}\\) in a time of 8.0 s.\nWhat is the average speed of the car during this time?",
   "options": [
-   "4.0 m/s",
-   "8.0 m/s",
-   "16 m/s",
-   "32 m/s"
+   "4.0 m/s",
+   "8.0 m/s",
+   "16 m/s",
+   "32 m/s"
   ],
   "answer": "C",
   "topic_code": "",
@@ -5112,7 +5112,7 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L1",
-  "question": "Three different liquids are poured into a tall beaker. The liquids do not mix.\nThe liquid densities are shown in the table.\n{{tbl:liquid\u001f\\(\\mathrm{density}\\mathrm{/}{\\mathrm{g/cm}}^{\\mathrm{3}}\\)\u001eP\u001f1.8\u001eQ\u001f2.4\u001eR\u001f1.2}}\nWhat is the correct order of the liquids from the top of the beaker to the bottom?",
+  "question": "Three different liquids are poured into a tall beaker. The liquids do not mix.\nThe liquid densities are shown in the table.\n{{tbl:liquid\u001fdensity/\\({\\mathrm{g/cm}}^{\\mathrm{3}}\\)\u001eP\u001f1.8\u001eQ\u001f2.4\u001eR\u001f1.2}}\nWhat is the correct order of the liquids from the top of the beaker to the bottom?",
   "options": [
    "P → Q → R",
    "Q → P → R",
@@ -5187,12 +5187,12 @@
   "chapter_code": "P3",
   "chapter": "Forces and motion",
   "difficulty": "L3",
-  "question": "A ball is at rest on the ground. A boy kicks the ball. The boy's boot is in contact with the ball for a time of 0.040 s.\nThe average force on the ball is 200 N. The ball leaves the boy's boot with a speed of 20 m/s.\nWhich row gives the impulse of the boot on the ball and the average acceleration of the ball during the time of 0.040 s?",
+  "question": "A ball is at rest on the ground. A boy kicks the ball. The boy's boot is in contact with the ball for a time of 0.040 s.\nThe average force on the ball is 200 N. The ball leaves the boy's boot with a speed of 20 m/s.\nWhich row gives the impulse of the boot on the ball and the average acceleration of the ball during the time of 0.040 s?",
   "options": [
-   "impulse on ball/N s: 8; \\(\\mathrm{average}\\ \\mathrm{acceleration}\\ \\mathrm{of}\\ \\mathrm{ball}\\mathrm{/}{\\mathrm{m/s}}^{\\mathrm{2}}\\): 0.8",
-   "impulse on ball/N s: 8; \\(\\mathrm{average}\\ \\mathrm{acceleration}\\ \\mathrm{of}\\ \\mathrm{ball}\\mathrm{/}{\\mathrm{m/s}}^{\\mathrm{2}}\\): 500",
-   "impulse on ball/N s: 5000; \\(\\mathrm{average}\\ \\mathrm{acceleration}\\ \\mathrm{of}\\ \\mathrm{ball}\\mathrm{/}{\\mathrm{m/s}}^{\\mathrm{2}}\\): 0.8",
-   "impulse on ball/N s: 5000; \\(\\mathrm{average}\\ \\mathrm{acceleration}\\ \\mathrm{of}\\ \\mathrm{ball}\\mathrm{/}{\\mathrm{m/s}}^{\\mathrm{2}}\\): 500"
+   "impulse on ball/N s: 8; average acceleration of ball/\\({\\mathrm{m/s}}^{\\mathrm{2}}\\): 0.8",
+   "impulse on ball/N s: 8; average acceleration of ball/\\({\\mathrm{m/s}}^{\\mathrm{2}}\\): 500",
+   "impulse on ball/N s: 5000; average acceleration of ball/\\({\\mathrm{m/s}}^{\\mathrm{2}}\\): 0.8",
+   "impulse on ball/N s: 5000; average acceleration of ball/\\({\\mathrm{m/s}}^{\\mathrm{2}}\\): 500"
   ],
   "answer": "B",
   "topic_code": "",
@@ -5287,12 +5287,12 @@
   "chapter_code": "P9",
   "chapter": "The kinetic model of matter",
   "difficulty": "L2",
-  "question": "A fixed mass of gas has a volume of \\(\\mathrm{25}{\\ \\mathrm{cm}}^{\\mathrm{3}}\\). The pressure of the gas is 100 kPa.\nThe volume of the gas is slowly decreased by \\(\\mathrm{15}{\\ \\mathrm{cm}}^{\\mathrm{3}}\\) at constant temperature.\nWhat is the change in pressure of the gas?",
+  "question": "A fixed mass of gas has a volume of \\(\\mathrm{25}{\\ \\mathrm{cm}}^{\\mathrm{3}}\\). The pressure of the gas is 100 kPa.\nThe volume of the gas is slowly decreased by \\(\\mathrm{15}{\\ \\mathrm{cm}}^{\\mathrm{3}}\\) at constant temperature.\nWhat is the change in pressure of the gas?",
   "options": [
-   "67 kPa",
-   "150 kPa",
-   "170 kPa",
-   "250 kPa"
+   "67 kPa",
+   "150 kPa",
+   "170 kPa",
+   "250 kPa"
   ],
   "answer": "B",
   "topic_code": "",
@@ -5312,12 +5312,12 @@
   "chapter_code": "P10",
   "chapter": "Thermal properties of matter",
   "difficulty": "L2",
-  "question": "The specific heat capacity of ice is 2000 J/(kg °C).\nWhich thermal energy is required to raise the temperature of 100 g of ice by 5°C?",
+  "question": "The specific heat capacity of ice is 2000 J/(kg °C).\nWhich thermal energy is required to raise the temperature of 100 g of ice by 5 °C?",
   "options": [
-   "40 J",
-   "100 J",
-   "1000 J",
-   "4000 J"
+   "40 J",
+   "100 J",
+   "1000 J",
+   "4000 J"
   ],
   "answer": "C",
   "topic_code": "",
@@ -5409,8 +5409,8 @@
   "qno": 17,
   "type": "MCQ",
   "class": "IGCSE",
-  "chapter_code": "P25",
-  "chapter": "Stars and the universe",
+  "chapter_code": "P11",
+  "chapter": "Thermal energy transfers",
   "difficulty": "L2",
   "question": "Star X has a larger diameter than star Y but they both emit radiation with the same power.\nWhich statement is correct?",
   "options": [
@@ -5487,7 +5487,7 @@
   "chapter_code": "P13",
   "chapter": "Light",
   "difficulty": "L3",
-  "question": "The speed of light in a vacuum is \\(\\mathrm{3.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\).\nThe speed of light in glass is \\(\\mathrm{2.2}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\).\nA light ray in a vacuum enters glass with an angle of incidence of 40°.\nWhat is the angle of refraction within the glass?",
+  "question": "The speed of light in a vacuum is \\(\\mathrm{3.0} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\).\nThe speed of light in glass is \\(\\mathrm{2.2} \\times {\\mathrm{10}}^{\\mathrm{8}}\\ \\mathrm{m/s}\\).\nA light ray in a vacuum enters glass with an angle of incidence of 40°.\nWhat is the angle of refraction within the glass?",
   "options": [
    "28°",
    "29°",
@@ -5512,7 +5512,7 @@
   "chapter_code": "P13",
   "chapter": "Light",
   "difficulty": "L3",
-  "question": "The diagram shows a human eye that correctly focuses the light on the retina.\n{{figure}}\nWhich row shows a short-sighted eye and use of the correct lens to focus the image?\n",
+  "question": "The diagram shows a human eye that correctly focuses the light on the retina.\n{{figure}}\nWhich row shows a short-sighted eye and use of the correct lens to focus the image?",
   "options": [
    "Row A",
    "Row B",
@@ -5587,7 +5587,7 @@
   "chapter_code": "P20",
   "chapter": "Electromagnetic forces",
   "difficulty": "L3",
-  "question": "The diagram shows the magnetic field due to a current in a solenoid.\n{{figure}}\nWhich graph represents the strength of the magnetic field at positions X, Y and Z?\n",
+  "question": "The diagram shows the magnetic field due to a current in a solenoid.\n{{figure}}\nWhich graph represents the strength of the magnetic field at positions X, Y and Z?",
   "options": [
    "Graph A",
    "Graph B",
@@ -5687,12 +5687,12 @@
   "chapter_code": "P18",
   "chapter": "Electrical quantities",
   "difficulty": "L2",
-  "question": "A torch has a simple circuit with a 3.0 V battery and a lamp. There is a 20 mA current in the lamp.\nHow much energy is transferred to the lamp in 5.0 minutes?",
+  "question": "A torch has a simple circuit with a 3.0 V battery and a lamp. There is a 20 mA current in the lamp.\nHow much energy is transferred to the lamp in 5.0 minutes?",
   "options": [
-   "0.30 J",
-   "18 J",
-   "60 J",
-   "0.30 kJ"
+   "0.30 J",
+   "18 J",
+   "60 J",
+   "0.30 kJ"
   ],
   "answer": "B",
   "topic_code": "",
@@ -5762,7 +5762,7 @@
   "chapter_code": "P19",
   "chapter": "Electric circuits",
   "difficulty": "L3",
-  "question": "The circuit diagrams show circuits that can control the potential difference (p.d.) across a lamp.\nWhich circuit allows the p.d. across the lamp to be varied from 0 V to 6.0 V?\n{{figure}}",
+  "question": "The circuit diagrams show circuits that can control the potential difference (p.d.) across a lamp.\nWhich circuit allows the p.d. across the lamp to be varied from 0 V to 6.0 V?\n{{figure}}",
   "options": [
    "Circuit A",
    "Circuit B",
@@ -5812,7 +5812,7 @@
   "chapter_code": "P23",
   "chapter": "Radioactivity",
   "difficulty": "L3",
-  "question": "Some students set up an experiment to measure the count rate for a radioactive source.\nFirst, they measure the radioactive background count rate in the laboratory by taking three measurements. Each measurement is taken over a 10-minute period.\nThe table shows their results.\n{{tbl:first measurement (counts in 10 minutes)\u001fsecond measurement (counts in 10 minutes)\u001fthird measurement (counts in 10 minutes)\u001e170\u001f164\u001f185}}\nNext, the students measure the counts near the radioactive source. This count rate is measured as 949 counts per minute.\nWhat is the corrected count rate for the source?",
+  "question": "Some students set up an experiment to measure the count rate for a radioactive source.\nFirst, they measure the radioactive background count rate in the laboratory by taking three measurements. Each measurement is taken over a 10-minute period.\nThe table shows their results.\n{{tbl:first measurement (counts in 10 minutes)\u001fsecond measurement (counts in 10 minutes)\u001fthird measurement (counts in 10 minutes)\u001e170\u001f164\u001f185}}\nNext, the students measure the counts near the radioactive source. This count rate is measured as 949 counts per minute.\nWhat is the corrected count rate for the source?",
   "options": [
    "932 counts per minute",
    "776 counts per minute",
@@ -5937,12 +5937,12 @@
   "chapter_code": "P24",
   "chapter": "Earth and the Solar System",
   "difficulty": "L3",
-  "question": "An artificial satellite orbits planet X at a distance \\(\\mathit{r}\\ \\mathrm{=}\\ \\mathrm{7.0}\\ \\times \\ {\\mathrm{10}}^{\\mathrm{6}}\\ \\mathrm{m}\\) from the centre of planet X.\nThe average orbital speed \\(\\mathit{v}\\) of the satellite is 3500 m/s.\nWhat is the orbital period?",
+  "question": "An artificial satellite orbits planet X at a distance \\(\\mathit{r}\\ \\mathrm{=}\\ \\mathrm{7.0} \\times {\\mathrm{10}}^{\\mathrm{6}}\\ \\mathrm{m}\\) from the centre of planet X.\nThe average orbital speed \\(\\mathit{v}\\) of the satellite is 3500 m/s.\nWhat is the orbital period?",
   "options": [
-   "21 minutes",
-   "52 minutes",
-   "1 hour and 45 minutes",
-   "3 hours and 29 minutes"
+   "21 minutes",
+   "52 minutes",
+   "1 hour and 45 minutes",
+   "3 hours and 29 minutes"
   ],
   "answer": "D",
   "topic_code": "",
@@ -5962,7 +5962,7 @@
   "chapter_code": "P25",
   "chapter": "Stars and the universe",
   "difficulty": "L3",
-  "question": "The table lists data about four different stars.\nWhich star is the Sun?",
+  "question": "Options A to D give data about four different stars.\nWhich star is the Sun?",
   "options": [
    "main elements in the star: helium, hydrogen, carbon, nitrogen, oxygen; regions of electromagnetic spectrum where most energy is radiated by the star: blue, ultraviolet, X-ray",
    "main elements in the star: helium, hydrogen, carbon, nitrogen, magnesium; regions of electromagnetic spectrum where most energy is radiated by the star: red, infrared",

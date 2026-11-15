@@ -879,6 +879,8 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   var TYPE_ORDER = ['MCQ', 'MSQ', 'Numerical', 'Matching', 'Comprehension', 'Subjective'];
   var LET = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+  /* diagrams are stored at print size (at least 2x the pixels): show them 1.4x larger on screen so their labels are easy to read (max-width keeps them inside the card) */
+  var FIGZ = 1.4;
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
   /* render text with \( \) and \[ \] math and \n line breaks */
@@ -951,11 +953,11 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
         var im2 = CI[Number(cm[2]) - 1], row = el('div', 'qb-figrow');
         row.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0';
         if (cm[1].trim()) { var tx = el('span', 'qb-figtxt'); renderRich(tx, cm[1], null); row.appendChild(tx); }
-        if (im2 && im2.svg) { var ii = el('img', 'qb-fig'); ii.alt = 'Figure'; ii.width = im2.w; ii.height = im2.h; ii.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(im2.svg); row.appendChild(ii); }
+        if (im2 && im2.svg) { var ii = el('img', 'qb-fig'); ii.alt = 'Figure'; ii.width = Math.round(im2.w * FIGZ); ii.height = Math.round(im2.h * FIGZ); ii.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(im2.svg); row.appendChild(ii); }
         target.appendChild(row); prevRow = true; return;
       }
       if (line.trim() === '{{figure}}') {
-        if (fig && fig.svg) { var im = el('img', 'qb-fig'); im.alt = 'Figure'; im.width = fig.w; im.height = fig.h; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fig.svg); target.appendChild(im); }
+        if (fig && fig.svg) { var im = el('img', 'qb-fig'); im.alt = 'Figure'; im.width = Math.round(fig.w * FIGZ); im.height = Math.round(fig.h * FIGZ); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fig.svg); target.appendChild(im); }
         return;
       }
       if (i && !line.trim()) return; /* a blank line in the text never makes an empty gap */
@@ -1232,7 +1234,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     if (S.flag && !isFlagged(q)) return false;
     if (S.attn && !q.attention) return false;
     if (S.q) {
-      var hay = (q.id + ' ' + q.question + ' ' + (q.options || []).join(' ') + ' ' + q.chapter + ' ' + q.block).toLowerCase();
+      var hay = (q.id + ' ' + q.question + ' ' + (q.options || []).join(' ') + ' ' + q.chapter + ' ' + q.block).replace(/\u00a0/g, ' ').toLowerCase(); /* numbers and units are joined by non-breaking spaces */
       if (hay.indexOf(S.q) < 0) return false;
     }
     return true;
@@ -1390,7 +1392,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     if (!tpList.children.length) tpList.appendChild(el('div', 'qb-ms-grp', 'No topics match.'));
   }
 
-  $('.qb-search').addEventListener('input', function (e) { S.q = e.target.value.trim().toLowerCase(); apply(); });
+  $('.qb-search').addEventListener('input', function (e) { S.q = e.target.value.replace(/\u00a0/g, ' ').trim().toLowerCase(); apply(); });
   $('.qb-onlysel').addEventListener('click', function () { S.onlySel = !S.onlySel; apply(); });
   $('.qb-flagf').addEventListener('click', function () { S.flag = !S.flag; apply(); });
   $('.qb-attnf').addEventListener('click', function () { S.attn = !S.attn; apply(); });
