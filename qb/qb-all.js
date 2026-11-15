@@ -1443,18 +1443,33 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     $$('.qb-panel').forEach(function (pn) { pn.hidden = true; });
     document.querySelectorAll('[data-qbpanel]').forEach(function (x) { x.setAttribute('aria-selected', 'false'); x.setAttribute('aria-checked', 'false'); });
   }
-  $$('.qb-pclose').forEach(function (b) { b.addEventListener('click', closePanels); });
+  function isShown(n) { return !!(n && n.isConnected && n.getClientRects().length); }
+  var FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  function focusables(root) { return Array.prototype.filter.call(root.querySelectorAll(FOCUSABLE), isShown); }
+  /* the x of a count panel: the panel goes away, so focus moves to the menu button that opens the panels, else the start of the page */
+  $$('.qb-pclose').forEach(function (b) {
+    b.addEventListener('click', function () {
+      closePanels();
+      var ib = document.getElementById('qbInfoBtn'), lay = $('.qb-layout');
+      var to = isShown(ib) ? ib : (lay ? focusables(lay)[0] : null);
+      if (to) to.focus();
+    });
+  });
   /* clear every filter, apply the given one, close the count panels and scroll to the question list */
   function showOnly(set) {
     closeClassPopup();
     ['year', 'sess', 'cls', 'blk', 'diff', 'type', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
     S.q = ''; S.onlySel = false; S.flag = false; S.attn = false; S.oos = false; $('.qb-search').value = '';
-    set(); apply(); closePanels();
+    set(); lastKey = null; /* always start again at page 1, even when the filters are the same as before */
+    apply(); closePanels();
     var to = $('.qb-layout'); if (to && to.scrollIntoView) to.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    var list = $('#questions');
+    if (list) { list.setAttribute('tabindex', '-1'); try { list.focus({ preventScroll: true }); } catch (e) { list.focus(); } }
+    var n = shown().length; msg('Showing ' + n + (n === 1 ? ' question.' : ' questions.'));
   }
   /* a class tile (IGCSE, AS & A Level) opens a list of its chapters with their question counts */
   var popOff = null;
-  function closeClassPopup() { var m = document.getElementById('qbClassPop'); if (m) m.parentNode.removeChild(m); if (popOff) { popOff(); popOff = null; } }
+  function closeClassPopup(refocus) { if (popOff) { var f = popOff; popOff = null; f(refocus); } var m = document.getElementById('qbClassPop'); if (m) m.parentNode.removeChild(m); }
   function classPopup(k, from) {
     closeClassPopup();
     var rows = VR().filter(function (q) { return q.class === k; }), n = {};
@@ -1464,7 +1479,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var box = el('div', 'qb-cpop'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', k + ' chapters');
     var head = el('div', 'qb-cpop-head');
     var tt = el('div'); tt.appendChild(el('h3', null, k + ' chapters')); tt.appendChild(el('p', null, rows.length ? rows.length + (rows.length === 1 ? ' question' : ' questions') + ' in ' + Object.keys(n).length + ' of ' + chs.length + ' chapters. Click a chapter to see its questions.' : 'No ' + k + ' questions have been added yet.'));
-    var x = el('button', 'qb-pclose', '\u00d7'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.title = 'Close'; x.addEventListener('click', function () { closeClassPopup(); if (from) from.focus(); });
+    var x = el('button', 'qb-pclose', '\u00d7'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.title = 'Close'; x.addEventListener('click', function () { closeClassPopup(true); });
     head.appendChild(tt); head.appendChild(x); box.appendChild(head);
     if (rows.length) { var all = el('button', 'qb-btn qb-cpop-all', 'Show all ' + rows.length + ' ' + k + ' questions'); all.type = 'button'; all.addEventListener('click', function () { showOnly(function () { S.cls.add(k); }); }); box.appendChild(all); }
     var wrap = el('div', 'qb-cpop-list'), tb = el('table'), th = el('thead'), hr = el('tr');
@@ -1482,10 +1497,44 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     });
     if (!chs.length) { var er = el('tr'), ed = el('td', 'z', 'No chapters yet.'); ed.colSpan = 6; er.appendChild(ed); body.appendChild(er); }
     tb.appendChild(body); wrap.appendChild(tb); box.appendChild(wrap); back.appendChild(box);
-    back.addEventListener('click', function (e) { if (e.target === back) closeClassPopup(); });
-    (document.getElementById('dash-root') || document.body).appendChild(back);
-    var key = function (e) { if (e.key === 'Escape') { e.stopPropagation(); closeClassPopup(); if (from) from.focus(); } };
-    document.addEventListener('keydown', key, true); popOff = function () { document.removeEventListener('keydown', key, true); };
+    back.addEventListener('click', function (e) { if (e.target === back) closeClassPopup(true); });
+    var root = document.getElementById('dash-root') || document.body;
+    root.appendChild(back);
+    /* the rest of the page cannot be reached while the pop-up is open (given back when it closes) */
+    var hid = [];
+    Array.prototype.forEach.call(root.children, function (c) {
+      if (c === back || c.tagName === 'SCRIPT' || c.tagName === 'STYLE' || c.hasAttribute('inert')) return;
+      hid.push([c, c.getAttribute('aria-hidden')]); c.setAttribute('inert', ''); c.setAttribute('aria-hidden', 'true');
+    });
+    var offs = [];
+    /* the pop-up only acts while it can be seen: once another tab hides the Dashboard (or removes the pop-up) it closes and lets keys through */
+    var gone = function () { if (!isShown(back)) { closeClassPopup(); return true; } return false; };
+    offs.push(window.__qbG.on(document, 'keydown', function (e) {
+      if (gone()) return;
+      if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); closeClassPopup(true); }
+      else if (e.key === 'Tab') {
+        var fs = focusables(box), i = fs.indexOf(document.activeElement);
+        if (!fs.length) { e.preventDefault(); return; }
+        if (e.shiftKey && i <= 0) { e.preventDefault(); fs[fs.length - 1].focus(); }
+        else if (!e.shiftKey && (i < 0 || i === fs.length - 1)) { e.preventDefault(); fs[0].focus(); }
+      }
+    }, true));
+    offs.push(window.__qbG.on(document, 'focusin', function (e) {
+      if (gone()) return;
+      if (!box.contains(e.target)) (focusables(box)[0] || x).focus();
+    }, true));
+    var mo = window.MutationObserver ? new MutationObserver(function () { if (popOff === off && !isShown(back)) closeClassPopup(); }) : null;
+    if (mo) {
+      mo.observe(root, { childList: true });
+      for (var an = root; an && an !== document.documentElement; an = an.parentElement) mo.observe(an, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
+      offs.push(window.__qbG.add(function () { mo.disconnect(); }));
+    }
+    offs.push(window.__qbG.add(function () { hid.forEach(function (h) { h[0].removeAttribute('inert'); if (h[1] == null) h[0].removeAttribute('aria-hidden'); else h[0].setAttribute('aria-hidden', h[1]); }); hid = []; }));
+    var off = function (refocus) {
+      offs.splice(0).forEach(function (f) { f(); });
+      if (refocus && from && isShown(from)) from.focus();
+    };
+    popOff = off;
     x.focus();
   }
 
