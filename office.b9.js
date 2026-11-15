@@ -28,6 +28,8 @@ function optPerLine(q, W) {
   return 1;
 }
 function optLayout(q) { const L = q.o.map(o => M().width(o)); return q.o.length && Math.max(...L) <= 3.5 && L.reduce((x, y) => x + y, 0) <= 11 ? 'row' : 'col'; }
+/* a figure in a box of at most mw x mh inches (keeps its shape, centred across the box width) */
+function figFit(f, x, y, mw, mh) { let w = mw, h = w * f.h / f.w; if (h > mh) { h = mh; w = h * f.w / f.h; } return { x: x + (mw - w) / 2, y, w, h }; }
 function chapterName(H, q) { const c = H.CHMAP.get(q.cc); return c ? c.n : ''; }
 
 /* answer-key text: pages of the same sheet become one continuous line; a label only when there are several sheets */
@@ -237,6 +239,7 @@ async function buildDocx(D, JSZip, pages, H) {
   const zip = await JSZip.loadAsync(raw), f = zip.file('word/document.xml');
   let xml = await f.async('string');
   xml = xml.replace(/<w:r>(?:(?!<\/w:r>)[\s\S])*?<w:t[^>]*>⟦E(\d+)⟧<\/w:t><\/w:r>/g, (all, id) => { const e = eqs[+id]; return M().omml(e.tex, e.display, 'docx'); });
+  let nid = 0; xml = xml.replace(/(<(?:wp:docPr|pic:cNvPr)\b[^>]*?\bid=")\d+"/g, (m, a) => a + (++nid) + '"');   /* docx gives every picture id 1 / 0: make them unique */
   zip.file('word/document.xml', xml);
   return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 }
@@ -288,13 +291,15 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
       const row = (a, b, head) => [a, b].map(t => ({ text: runs(t || ' ', Object.assign({}, cellOpt, head ? { bold: true } : {})), options: Object.assign({}, cellOpt, head ? { bold: true, fill: { color: 'EEF8F8' } } : {}) }));
       const rowsT = [row(mt.head[0], mt.head[1], true)]; for (let r = 0; r < nTab; r++) rowsT.push(row(mt.left[r], mt.right[r]));
       const pre = M().plainText(mt.pre).trim();
-      if (pre) s.addText(runs(mt.pre, base), { x: 0.6, y: 1.1, w: 12.1, h: 1.0, valign: 'top', margin: 4, fit: 'shrink' });
-      s.addTable(rowsT, { x: 0.6, y: pre ? 2.2 : 1.2, w: 12.1, colW: [6.05, 6.05] });
-      if (q.o.length) { const of = []; q.o.forEach((opt, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '00C0AA' }) }].concat(runs(opt, base)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: 0.6, y: 5.3, w: 12.1, h: 1.9, valign: 'top', margin: 4, fit: 'shrink' }); }
+      const tw = hasFig ? 7.6 : 12.1;   /* a figure takes the right-hand side, as on the other slides */
+      if (pre) s.addText(runs(mt.pre, base), { x: 0.6, y: 1.1, w: tw, h: 1.0, valign: 'top', margin: 4, fit: 'shrink' });
+      s.addTable(rowsT, { x: 0.6, y: pre ? 2.2 : 1.2, w: tw, colW: [tw / 2, tw / 2] });
+      if (q.o.length) { const of = []; q.o.forEach((opt, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '00C0AA' }) }].concat(runs(opt, base)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: 0.6, y: 5.3, w: tw, h: 1.9, valign: 'top', margin: 4, fit: 'shrink' }); }
+      if (hasFig) { const f = H.figs[q.i]; s.addImage(Object.assign({ data: f.dataUrl }, figFit(f, 8.5, 1.4, 4.4, 5.8))); }
       continue;
     }
     s.addText(flat, { x: 0.6, y: 1.1, w: hasFig ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
-    if (hasFig) { const f = H.figs[q.i]; const w = 4.4, h = w * f.h / f.w; s.addImage({ data: f.dataUrl, x: 8.5, y: 1.4, w, h }); }
+    if (hasFig) { const f = H.figs[q.i]; s.addImage(Object.assign({ data: f.dataUrl }, figFit(f, 8.5, 1.4, 4.4, 5.8))); }
   }
   const keys = pages.filter(p => p.key);
   if (keys.length) {
@@ -310,7 +315,7 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
       s.addText('Q' + e.n + ' \u00b7 Explanation', { x: 0.5, y: 0.3, w: 8, h: 0.6, fontFace: 'Calibri', bold: true, fontSize: 24, color: NAVY });
       const txt = String(e.text).replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, ''), L = M().plainText(txt).length, fs = L > 1100 ? 12 : L > 800 ? 14 : L > 500 ? 16 : 18;
       s.addText(runs(txt, { fontFace: 'Calibri', fontSize: fs, color: '141413' }), { x: 0.6, y: 1.1, w: e.fig ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
-      if (e.fig) { const f = e.fig, w = 4.4, hh = w * f.h / f.w; s.addImage({ data: f.dataUrl, x: 8.5, y: 1.4, w, h: hh }); }
+      if (e.fig) s.addImage(Object.assign({ data: e.fig.dataUrl }, figFit(e.fig, 8.5, 1.4, 4.4, 5.8)));
     }
   }
   const buf = await pptx.write({ outputType: 'arraybuffer' });
@@ -507,7 +512,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
       if (mtc.pre) { s.addText(qRuns(mtc.pre, baseQ), { x: blockX, y: yy, w: blockW, h: G.preT, valign: 'top', margin: 0 }); yy += G.preT; }
       s.addTable(rowsT, { x: blockX, y: yy, w: colW * 2, colW: [colW, colW], rowH: [G.hH].concat(G.rowH) }); yy += G.th + 0.15;
       if (q.o && q.o.length) { const of = []; q.o.forEach((o, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, baseQ, { bold: true, color: '3BFFEC' }) }].concat(runs(o, baseQ, WHITE)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; ro.paraSpaceAfter = 6; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: blockX, y: yy, w: blockW, h: G.opH + 0.1, valign: 'top', margin: 0 }); }
-      if (hasFig) { const f = H.figs[q.i], w = 3.7, h = w * f.h / f.w; s.addImage({ data: f.dataUrl, x: 9.1, y: TOP, w, h }); }
+      if (hasFig) s.addImage(Object.assign({ data: H.figs[q.i].dataUrl }, figFit(H.figs[q.i], 9.1, TOP, 3.7, 7.1 - TOP)));
       s.addText([{ text: 'Ans: ', options: { bold: true, fontFace: FB, fontSize: 16, color: GRAYC } }].concat(runs(ansText(q), { fontFace: FB, fontSize: 16, color: GRAYC }, GRAYC)), { x: 0.5, y: 6.6, w: 6, h: 0.5, valign: 'middle', margin: 0 });
       blank(); return;
     }
@@ -525,9 +530,10 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     L.paras.forEach((pr, k) => pr.forEach((r, j) => { const o = Object.assign({}, r.options); if (j === pr.length - 1 && k < L.paras.length - 1) o.breakLine = true; o.paraSpaceAfter = 6; flat.push({ text: r.text, options: o }); }));
     s.addShape(pptx.ShapeType.rect, { x: 0.5, y: TOP, w: 6 / 72, h: L.h, fill: { color: CORAL }, line: { type: 'none' } });
     s.addText(flat, { x: blockX, y: TOP, w: blockW, h: L.h + 0.1, valign: 'top', margin: 0 });
-    if (hasFig) { const f = H.figs[q.i], w = 3.7, h = w * f.h / f.w; s.addImage({ data: f.dataUrl, x: 9.1, y: TOP, w, h }); }
+    const fb = hasFig ? figFit(H.figs[q.i], 9.1, TOP, 3.7, TB.length ? 3.6 : 7.1 - TOP) : null;   /* capped so it stays on the slide (and leaves room for a table under it) */
+    if (fb) s.addImage(Object.assign({ data: H.figs[q.i].dataUrl }, fb));
     if (TB.length) {
-      let ty = TOP + (hasFig ? 3.7 * H.figs[q.i].h / H.figs[q.i].w + 0.3 : 0);
+      let ty = TOP + (fb ? fb.h + 0.3 : 0);
       const tbd = { type: 'solid', pt: 1, color: '9CAFAE' };
       TB.forEach(rows => {
         const nc = Math.max(...rows.map(r => r.length)), fsT = nc > 2 ? 11 : 14;
@@ -539,6 +545,28 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     s.addText([{ text: 'Ans: ', options: { bold: true, fontFace: FB, fontSize: 16, color: GRAYC } }].concat(runs(ansText(q), { fontFace: FB, fontSize: 16, color: GRAYC }, GRAYC)), { x: 0.5, y: 6.6, w: 6, h: 0.5, valign: 'middle', margin: 0 });
     blank();
   });
+  /* answer key (d.key): question number + answer, numbered 1, 2, 3 ... as the slides run, a heading for each topic when there are several; before the explanations */
+  if (d.key && d.qs.length) {
+    const fsK = 16, groups = []; d.qs.forEach((q, i) => { const g = groups[groups.length - 1], t = q._t || ''; if (g && g.t === t) g.items.push(i); else groups.push({ t, items: [i] }); });
+    const heads = groups.length > 1 && groups.some(g => g.t);
+    const cellW = Math.min(12.33, Math.max(1.5, ...d.qs.map((q, i) => (String(i + 1).length + 1) * 0.6 * fsK / 72 + M().width(ansText(q)) * fsK / 72 + 0.35)));
+    const cols = Math.max(1, Math.min(8, Math.floor((12.33 + 0.12) / (cellW + 0.12)))), cw = (12.33 - (cols - 1) * 0.12) / cols, RH = 0.46, HH = 0.42, Y0 = 1.45, YMAX = 7.1;
+    let s = null, y = 0, page = 0;
+    const newSlide = () => { s = pptx.addSlide(); s.background = { color: BLACK }; page++;
+      s.addText('Answer key' + (page > 1 ? ' (contd.)' : ''), { x: 0.5, y: 0.3, w: 12.3, h: 0.7, fontFace: FH, bold: true, fontSize: 30, color: WHITE });
+      s.addText(d.chapter + ' · ' + d.qs.length + ' questions', { x: 0.5, y: 0.95, w: 12.3, h: 0.35, fontFace: FB, bold: true, fontSize: 13, color: CORAL, charSpacing: 3 }); y = Y0; };
+    newSlide();
+    groups.forEach(g => {
+      if (heads) { if (y + HH + RH > YMAX && y > Y0) newSlide(); s.addText(g.t || 'Other questions', { x: 0.5, y, w: 12.33, h: HH - 0.06, fontFace: FB, bold: true, fontSize: 14, color: TEAL, charSpacing: 2, valign: 'middle', margin: 0 }); y += HH; }
+      for (let r = 0; r < g.items.length; r += cols) {
+        if (y + RH > YMAX) newSlide();
+        g.items.slice(r, r + cols).forEach((qi, c) => { const x = 0.5 + c * (cw + 0.12);
+          card(s, x, y, cw, RH - 0.08, NAVYC);
+          s.addText([{ text: (qi + 1) + '  ', options: { fontFace: FH, bold: true, fontSize: fsK, color: CORAL } }].concat(runs(ansText(d.qs[qi]), { fontFace: FB, bold: true, fontSize: fsK, color: WHITE }, WHITE)), { x: x + 0.1, y, w: cw - 0.15, h: RH - 0.08, valign: 'middle', margin: 0 }); });
+        y += RH;
+      }
+    });
+  }
   if (d.expl && d.expl.length) {
     { const s = pptx.addSlide(); s.background = { color: BLACK }; s.addText('Explanations', { x: 0.5, y: 2.6, w: 12.33, h: 1.6, fontFace: FH, bold: true, fontSize: 60, color: CORAL, align: 'center', valign: 'middle' }); }
     for (const e of d.expl) {
@@ -546,7 +574,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
       s.addText('Q' + e.n + '  \u00b7  Explanation', { x: 0.5, y: 0.3, w: 9, h: 0.6, fontFace: FB, bold: true, fontSize: 20, color: CORAL });
       const txt = String(e.text).replace(/\s*\{\{figure\}\}\s*/g, '\n').replace(/^\n+|\n+$/g, ''), L = M().plainText(txt).length, fs = L > 1100 ? 12 : L > 800 ? 14 : L > 500 ? 16 : 18;
       s.addText(runs(txt, { fontFace: FQ, fontSize: fs, color: WHITE }, LIME), { x: 0.6, y: 1.1, w: e.fig ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
-      if (e.fig) { const f = e.fig, w = 4.4, hh = w * f.h / f.w; s.addImage({ data: f.dataUrl, x: 8.5, y: 1.4, w, h: hh }); }
+      if (e.fig) s.addImage(Object.assign({ data: e.fig.dataUrl }, figFit(e.fig, 8.5, 1.4, 4.4, 5.8)));
     }
   }
   /* last: closing slide */

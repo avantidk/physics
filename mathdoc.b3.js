@@ -3,7 +3,7 @@
 (function (root) {
 'use strict';
 const GREEK = { alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ϵ', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', vartheta: 'ϑ', iota: 'ι', kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ', phi: 'ϕ', varphi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω', Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π', Sigma: 'Σ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω' };
-const SYM = { cdot: '⋅', times: '×', pm: '±', mp: '∓', le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠', approx: '≈', equiv: '≡', sim: '∼', simeq: '≃', cong: '≅', infty: '∞', to: '→', rightarrow: '→', leftarrow: '←', longrightarrow: '⟶', Rightarrow: '⇒', Leftarrow: '⇐', Leftrightarrow: '⇔', leftrightarrow: '↔', implies: '⇒', iff: '⇔', in: '∈', ni: '∋', notin: '∉', subset: '⊂', subseteq: '⊆', supset: '⊃', supseteq: '⊇', cup: '∪', cap: '∩', forall: '∀', exists: '∃', ldots: '…', dots: '…', cdots: '⋯', vdots: '⋮', ddots: '⋱', circ: '∘', degree: '°', triangle: '△', angle: '∠', mid: '∣', partial: '∂', nabla: '∇', ell: 'ℓ', perp: '⊥', parallel: '∥', propto: '∝', emptyset: '∅', varnothing: '∅', therefore: '∴', because: '∵', langle: '⟨', rangle: '⟩', lfloor: '⌊', rfloor: '⌋', lceil: '⌈', rceil: '⌉', prime: '′', setminus: '∖', div: '÷', ast: '∗', star: '⋆', oplus: '⊕', otimes: '⊗', lbrace: '{', rbrace: '}', aleph: 'ℵ', hbar: 'ℏ', Re: 'ℜ', Im: 'ℑ', neg: '¬', lnot: '¬', land: '∧', lor: '∨', wedge: '∧', vee: '∨', bullet: '•', lt: '<', gt: '>', lbrack: '[', rbrack: ']', vert: '|', Vert: '‖', bigtriangleup: '△', bot: '⊥', odot: '⊙', circledast: '⊛', le: '≤', nleq: '≰', ngeq: '≱', mapsto: '↦', longleftrightarrow: '⟷', Longrightarrow: '⟹', Longleftarrow: '⟸', Longleftrightarrow: '⟺', uparrow: '↑', downarrow: '↓', nexists: '∄', complement: '∁', smallsetminus: '∖', bullet: '•', square: '□', Box: '□', checkmark: '✓', '|': '‖', '{': '{', '}': '}', '%': '%', '$': '$', '&': '&', '#': '#', '_': '_', '\\': ' ' };
+const SYM = { cdot: '⋅', times: '×', pm: '±', mp: '∓', le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠', approx: '≈', equiv: '≡', sim: '∼', simeq: '≃', cong: '≅', infty: '∞', to: '→', rightarrow: '→', leftarrow: '←', longrightarrow: '⟶', Rightarrow: '⇒', Leftarrow: '⇐', Leftrightarrow: '⇔', leftrightarrow: '↔', implies: '⇒', iff: '⇔', in: '∈', ni: '∋', notin: '∉', subset: '⊂', subseteq: '⊆', supset: '⊃', supseteq: '⊇', cup: '∪', cap: '∩', forall: '∀', exists: '∃', ldots: '…', dots: '…', cdots: '⋯', vdots: '⋮', ddots: '⋱', circ: '∘', degree: '°', triangle: '△', angle: '∠', mid: '∣', partial: '∂', nabla: '∇', ell: 'ℓ', perp: '⊥', parallel: '∥', propto: '∝', emptyset: '∅', varnothing: '∅', therefore: '∴', because: '∵', langle: '⟨', rangle: '⟩', lfloor: '⌊', rfloor: '⌋', lceil: '⌈', rceil: '⌉', prime: '′', setminus: '∖', div: '÷', ast: '∗', star: '⋆', oplus: '⊕', otimes: '⊗', lbrace: '{', rbrace: '}', aleph: 'ℵ', hbar: 'ℏ', Re: 'ℜ', Im: 'ℑ', neg: '¬', lnot: '¬', land: '∧', lor: '∨', wedge: '∧', vee: '∨', bullet: '•', lt: '<', gt: '>', lbrack: '[', rbrack: ']', vert: '|', Vert: '‖', bigtriangleup: '△', bot: '⊥', odot: '⊙', circledast: '⊛', le: '≤', nleq: '≰', ngeq: '≱', mapsto: '↦', longleftrightarrow: '⟷', Longrightarrow: '⟹', Longleftarrow: '⟸', Longleftrightarrow: '⟺', uparrow: '↑', downarrow: '↓', nexists: '∄', complement: '∁', smallsetminus: '∖', bullet: '•', square: '□', Box: '□', checkmark: '✓', lvert: '|', rvert: '|', lVert: '‖', rVert: '‖', backslash: '∖', updownarrow: '↕', Uparrow: '⇑', Downarrow: '⇓', lgroup: '⟮', rgroup: '⟯', '|': '‖', '{': '{', '}': '}', '%': '%', '$': '$', '&': '&', '#': '#', '_': '_', '\\': ' ' };
 const FN = ['sin', 'cos', 'tan', 'cot', 'sec', 'csc', 'log', 'ln', 'exp', 'arg', 'det', 'gcd', 'lim', 'max', 'min', 'inf', 'sup', 'sinh', 'cosh', 'tanh', 'arcsin', 'arccos', 'arctan', 'deg', 'dim', 'ker', 'mod', 'Pr', 'cosec'];
 const FN_LIM = { lim: 1, max: 1, min: 1, inf: 1, sup: 1 };
 const BB = { R: 'ℝ', N: 'ℕ', Z: 'ℤ', Q: 'ℚ', C: 'ℂ', P: 'ℙ', H: 'ℍ' };
@@ -12,6 +12,19 @@ const ACC = { hat: '̂', widehat: '̂', vec: '⃗', tilde: '̃', widetilde: '̃'
 const TEXTY = { text: 'nor', mbox: 'nor', textrm: 'nor', textit: 'nor', textbf: 'nor', mathrm: 'p', operatorname: 'p', mathit: 'i', mathbf: 'b', boldsymbol: 'b', bm: 'b', mathsf: 'p', mathtt: 'p', mathcal: 'scr', mathscr: 'scr', mathbb: 'bb', mathfrak: 'p' };
 const ENV_DELIM = { pmatrix: ['(', ')'], bmatrix: ['[', ']'], Bmatrix: ['{', '}'], vmatrix: ['|', '|'], Vmatrix: ['‖', '‖'], cases: ['{', ''] };
 const UNKNOWN = {};
+/* delimiters after \left \right \middle \big...: always one character (Office wants a single char in begChr/endChr) */
+const DELIM = { '|': '‖', '{': '{', '}': '}', langle: '⟨', rangle: '⟩', lvert: '|', rvert: '|', vert: '|', lVert: '‖', rVert: '‖', Vert: '‖' };
+/* commands inside \text{...} (text mode) */
+const TXT = { AA: 'Å', aa: 'å', textdegree: '°', degree: '°', textmu: 'μ', micro: 'µ', ohm: 'Ω', textohm: 'Ω', textpm: '±', textasciitilde: '~', textendash: '–', textemdash: '—', textbackslash: '\\', textbar: '|', textless: '<', textgreater: '>', textperiodcentered: '·', S: '§', ss: 'ß', o: 'ø', O: 'Ø', ae: 'æ', i: 'ı' };
+const textConv = s => String(s).replace(/\$([^$]*)\$/g, (m, x) => lin(parse(x))).replace(/\\(?:text\w*|mbox|emph|mathrm)\s*\{([^{}]*)\}/g, '$1')
+  .replace(/\\([a-zA-Z]+)\s*|\\([^a-zA-Z])/g, (m, w, c) => { if (w) { const r = TXT[w] !== undefined ? TXT[w] : GREEK[w] || (SPACES[w] !== undefined ? SPACES[w] : SYM[w]); if (r !== undefined) return r; UNKNOWN[w] = (UNKNOWN[w] || 0) + 1; return w; } return c === '-' || c === '/' ? '' : SPACES[c] !== undefined ? SPACES[c] : SYM[c] !== undefined ? SYM[c] : c; })
+  .replace(/~/g, ' ').replace(/[{}]/g, '');
+/* every italic run of a parsed group in one style (\mathrm, \mathbf ...), going into fractions, scripts, roots ... */
+function restyle(a, sty) {
+  (a || []).forEach(n => { if (!n) return; if (n.k === 'r') { if (sty === 'p' ? !n.sty : n.sty !== 'nor') n.sty = sty; return; } ['e', 'n', 'd', 'sub', 'sup', 'lim', 'deg'].forEach(k => { if (Array.isArray(n[k])) restyle(n[k], sty); }); if (n.rows) n.rows.forEach(r => r.forEach(c => restyle(c, sty))); });
+  return a;
+}
+const primes = a => a.map(n => (n.k === 'r' ? Object.assign(n, { s: n.s.replace(/″/g, '′′').replace(/‴/g, '′′′').replace(/′′′/g, '‴').replace(/′′/g, '″') }) : n));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /* ---------- tokenizer ---------- */
@@ -55,7 +68,7 @@ function parse(src) {
     return naryWrap(merge(pairBars(out)));
   }
   function script(base, sub, sup) {
-    if (base.k === 'script') { base = Object.assign({}, base); if (sub) base.sub = sub; if (sup) base.sup = sup; return base; }
+    if (base.k === 'script') { base = Object.assign({}, base); if (sub) base.sub = base.sub ? merge(base.sub.concat(sub)) : sub; if (sup) base.sup = base.sup ? primes(merge(base.sup.concat(sup))) : sup; return base; }   /* f'' -> f″, v'^2 -> v′² */
     return { k: 'script', e: [base], sub, sup };
   }
   function arg() {
@@ -71,10 +84,15 @@ function parse(src) {
     const s = src.slice(T[i].e, T[j] ? T[j].p : src.length); i = j + 1; return s;
   }
   function delimTok() {
-    const t = next(); if (!t) return '';
-    if (t.k === 'ch') return t.v === '.' ? '' : t.v;
-    if (t.k === 'cmd') return t.v === '|' ? '‖' : (SYM[t.v] || t.v);
-    return '';
+    const t = peek(); if (!t || (t.k !== 'ch' && t.k !== 'cmd')) return ''; i++;
+    if (t.k === 'ch') return t.v === '.' ? '' : t.v === '<' ? '⟨' : t.v === '>' ? '⟩' : t.v;
+    const c = DELIM[t.v] || SYM[t.v] || ''; return [...c].length === 1 ? c : '';
+  }
+  /* \\[4pt]: drop the optional space after a line break */
+  function skipLen() {
+    const t = peek(); if (!t || t.k !== 'ch' || t.v !== '[') return;
+    let j = i + 1; while (j < T.length && !(T[j].k === 'ch' && T[j].v === ']') && j - i < 12) j++;
+    if (T[j] && T[j].k === 'ch' && T[j].v === ']' && /^\s*-?[\d.]+\s*[a-z]{0,2}\s*$/.test(src.slice(T[i].e, T[j].p))) i = j + 1;
   }
   function matrixRows(end) {
     const rows = []; let row = [], cell = [];
@@ -83,10 +101,11 @@ function parse(src) {
       if (!t) break;
       if (t.k === 'cmd' && t.v === 'end') { i++; rawGroup(); break; }
       if (t.k === '&') { i++; row.push(cell); cell = []; continue; }
-      if (t.k === 'row') { i++; row.push(cell); rows.push(row); row = []; cell = []; continue; }
+      if (t.k === 'row') { i++; skipLen(); row.push(cell); rows.push(row); row = []; cell = []; continue; }
       if (t.k === '}') { i++; continue; }
-      if (t.k === 'cmd' && (t.v === 'hline' || t.v === 'cline')) { i++; continue; }
-      cell = cell.concat(seq());
+      if (t.k === 'cmd' && (t.v === 'hline' || t.v === 'cline')) { i++; if (t.v === 'cline') rawGroup(); continue; }
+      if (t.k === 'cmd' && (t.v === 'right' || t.v === 'middle')) { i++; const c = delimTok(); if (c) cell.push(run(c, 'p')); continue; }   /* \left( in one cell, \right) in another */
+      const i0 = i; cell = cell.concat(seq()); if (i === i0) i++;   /* always move on: never loop on a token seq() cannot take */
     }
     if (cell.length || row.length) { row.push(cell); rows.push(row); }
     return rows.filter(r => r.some(c => c.length));
@@ -102,7 +121,7 @@ function parse(src) {
     if (v === 'frac' || v === 'dfrac' || v === 'tfrac' || v === 'cfrac') { const n = arg(), d = arg(); return { k: 'frac', n, d }; }
     if (v === 'binom' || v === 'dbinom') { const n = arg(), d = arg(); return { k: 'delim', beg: '(', end: ')', e: [{ k: 'frac', n, d, noBar: true }] }; }
     if (v === 'sqrt') { let deg = null; const p = peek(); if (p && p.k === 'ch' && p.v === '[') { i++; const s = []; while (peek() && !(peek().k === 'ch' && peek().v === ']')) { const a = atom(); if (a) s.push(a); else break; } i++; deg = s; } return { k: 'rad', deg, e: arg() }; }
-    if (v === 'left') { const beg = delimTok(); const body = seq(); let end = ''; const p = peek(); if (p && p.k === 'cmd' && p.v === 'right') { i++; end = delimTok(); } return { k: 'delim', beg, end, e: body }; }
+    if (v === 'left') { const beg = delimTok(); let body = seq(); while (peek() && peek().k === 'cmd' && peek().v === 'middle') { i++; const c = delimTok(); body = merge(body.concat(c ? [run(c, 'p')] : [], seq())); } let end = ''; const p = peek(); if (p && p.k === 'cmd' && p.v === 'right') { i++; end = delimTok(); } return { k: 'delim', beg, end, e: body }; }
     if (v === 'middle') { return run(delimTok(), 'p'); }
     if (/^(big|Big|bigg|Bigg|bigl|bigr|Bigl|Bigr|biggl|biggr)$/.test(v)) { const d = delimTok(); return d ? run(d, 'p') : null; }
     if (ACC[v]) { const e = arg(); return { k: 'acc', chr: ACC[v], e }; }
@@ -116,13 +135,17 @@ function parse(src) {
       return { k: v === 'underset' ? 'under' : 'over', e: base, lim: top };
     }
     if (v === 'textcolor' || v === 'color') { rawGroup(); return v === 'color' ? null : { k: 'grp', e: arg() }; }
+    if (v === 'cline') { rawGroup(); return null; }
     if (v === 'def') { i++; rawGroup(); return null; }
-    if (v === 'substack') { const s = rawGroup(); const rows = s.split(/\\\\/).map(x => parse(x)); return { k: 'mat', rows: rows.map(r => [r]), left: false }; }
+    if (v === 'substack') { const s = rawGroup(); const rows = s.split(/\\\\(?:\s*\[[^\]]*\])?/).map(x => parse(x)); return { k: 'mat', rows: rows.map(r => [r]), left: false }; }
     if (TEXTY[v]) {
       const sty = TEXTY[v];
-      if (sty === 'nor' || v === 'operatorname' || v === 'mathrm') return run(rawGroup(), sty === 'nor' ? 'nor' : 'p', v === 'operatorname');
+      if (sty === 'nor') return run(textConv(rawGroup()), 'nor');
       if (sty === 'bb') { const s = rawGroup(); return run(s.split('').map(ch => BB[ch] || ch).join(''), 'p'); }
-      const s = rawGroup(); return run(s, sty);
+      const p = peek(), star = v === 'operatorname' && p && p.k === 'ch' && p.v === '*'; if (star) i++;
+      const g = merge(restyle(arg(), sty));
+      if (v === 'operatorname' && g.length && g.every(n => n.k === 'r')) return Object.assign(run(g.map(n => n.s).join(''), 'p', true), { lim: star });
+      return g.length === 1 ? g[0] : g.length ? { k: 'grp', e: g } : run('', 'p');
     }
     if (FN.includes(v)) return Object.assign(run(v === 'cosec' ? 'cosec' : v, 'p'), { fn: true, lim: !!FN_LIM[v] });
     if (v === 'int' || v === 'oint' || v === 'iint' || v === 'iiint') return run({ int: '∫', oint: '∮', iint: '∬', iiint: '∭' }[v], 'p');
@@ -142,9 +165,19 @@ function parse(src) {
     UNKNOWN[v] = (UNKNOWN[v] || 0) + 1;
     return run(v, 'nor');
   }
-  const out = seq();
-  while (i < T.length) { i++; }
-  return out;
+  /* top level: nothing is dropped. \\ starts a new line (an equation array), & is alignment (ignored), a stray } \right \end is skipped */
+  const lines = [[]];
+  for (;;) {
+    const i0 = i, cur = lines[lines.length - 1]; cur.push(...seq());
+    const t = peek(); if (!t) break;
+    i++;
+    if (t.k === 'row') { skipLen(); lines.push([]); }
+    else if (t.k === 'cmd' && (t.v === 'right' || t.v === 'middle')) { const c = delimTok(); if (c) cur.push(run(c, 'p')); }
+    else if (t.k === 'cmd' && t.v === 'end') rawGroup();
+    if (i === i0) i++;
+  }
+  const ls = lines.map(l => merge(l)).filter(l => l.length);
+  return ls.length > 1 ? [{ k: 'mat', rows: ls.map(l => [l]), left: true, eq: true }] : (ls[0] || []);
 }
 const INTS = { '∫': 1, '∮': 1, '∬': 1, '∭': 1 };
 const isIntNode = n => (n.k === 'r' && INTS[n.s] && !n.fn) || (n.k === 'script' && n.e[0].k === 'r' && INTS[n.e[0].s]);
@@ -209,9 +242,10 @@ function nd(n, fl) {
     case 'bar': return '<m:bar><m:barPr><m:pos m:val="' + (n.pos || 'top') + '"/></m:barPr><m:e>' + body(n.e, fl) + '</m:e></m:bar>';
     case 'nary': return '<m:nary><m:naryPr><m:chr m:val="' + esc(n.chr) + '"/><m:limLoc m:val="subSup"/>' + (n.sub ? '' : '<m:subHide m:val="1"/>') + (n.sup ? '' : '<m:supHide m:val="1"/>') + ((fl || '').indexOf('pptx') === 0 ? '<m:ctrlPr>' + rpr(fl, 'p') + '</m:ctrlPr>' : '') + '</m:naryPr><m:sub>' + (n.sub ? body(n.sub, fl) : '') + '</m:sub><m:sup>' + (n.sup ? body(n.sup, fl) : '') + '</m:sup><m:e>' + body(n.e, fl) + '</m:e></m:nary>';
     case 'mat': {
-      const w = Math.max(1, ...n.rows.map(r => r.length));
-      const rows = n.rows.map(r => '<m:mr>' + Array.from({ length: w }, (_, j) => '<m:e>' + body(r[j] || [], fl) + '</m:e>').join('') + '</m:mr>').join('');
-      return '<m:m><m:mPr>' + (n.left && n.rows.some(r => JSON.stringify(r).match(/"k":"(frac|rad|nary)"/)) ? '<m:rSpRule m:val="1"/>' : '') + '<m:mcs><m:mc><m:mcPr><m:count m:val="' + w + '"/><m:mcJc m:val="' + (n.left ? 'left' : 'center') + '"/></m:mcPr></m:mc></m:mcs></m:mPr>' + rows + '</m:m>';
+      if (n.eq) return '<m:eqArr>' + n.rows.map(r => '<m:e>' + body(r[0], fl) + '</m:e>').join('') + '</m:eqArr>';
+      const R = n.rows.length ? n.rows : [[[]]], w = Math.max(1, ...R.map(r => r.length));
+      const rows = R.map(r => '<m:mr>' + Array.from({ length: w }, (_, j) => '<m:e>' + body(r[j] || [], fl) + '</m:e>').join('') + '</m:mr>').join('');
+      return '<m:m><m:mPr>' + (n.left && R.some(r => JSON.stringify(r).match(/"k":"(frac|rad|nary)"/)) ? '<m:rSpRule m:val="1"/>' : '') + '<m:mcs><m:mc><m:mcPr><m:count m:val="' + w + '"/><m:mcJc m:val="' + (n.left ? 'left' : 'center') + '"/></m:mcPr></m:mc></m:mcs></m:mPr>' + rows + '</m:m>';
     }
     case 'script': {
       const b = n.e[0], base = body(n.e, fl), sub = n.sub && body(n.sub, fl), sup = n.sup && body(n.sup, fl);
@@ -235,7 +269,7 @@ function omml(tex, display, fl) {
 }
 
 /* ---------- plain linear text (fallback, and for anything that can't hold equations) ---------- */
-const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', '+': '⁺', '-': '⁻', '−': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', n: 'ⁿ', i: 'ⁱ', x: 'ˣ', y: 'ʸ', a: 'ᵃ', b: 'ᵇ', c: 'ᶜ', k: 'ᵏ', m: 'ᵐ', p: 'ᵖ', t: 'ᵗ', '′': '′', '∘': '°' };
+const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', '+': '⁺', '-': '⁻', '−': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', n: 'ⁿ', i: 'ⁱ', x: 'ˣ', y: 'ʸ', a: 'ᵃ', b: 'ᵇ', c: 'ᶜ', k: 'ᵏ', m: 'ᵐ', p: 'ᵖ', t: 'ᵗ', '′': '′', '″': '″', '‴': '‴', '∘': '°' };
 const SUB = { 0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄', 5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉', '+': '₊', '-': '₋', '−': '₋', '=': '₌', '(': '₍', ')': '₎', a: 'ₐ', e: 'ₑ', i: 'ᵢ', j: 'ⱼ', k: 'ₖ', n: 'ₙ', m: 'ₘ', o: 'ₒ', p: 'ₚ', r: 'ᵣ', t: 'ₜ', x: 'ₓ' };
 function uni(s, map) { let o = ''; for (const c of s) { if (!map[c]) return null; o += map[c]; } return o; }
 function lin(nodes) {
