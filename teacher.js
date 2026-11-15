@@ -2,6 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
+const SITE_VERSION = '19';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -156,9 +157,9 @@ function colWidth(cols) { return Math.floor((SHEET_W - 2 * PAD_X - (cols - 1) * 
 /* question label (preview and exports): class, year, paper */
 function pyqLabel(q) {
   const y = q.y ? String(q.y) : '', p = String(q.p || '');
-  return [q.cl, y, p].filter(Boolean).join(' \u00b7 ');
+  return q.i;
 }
-function tagText(q) { if (q.s !== 'P') return q.i ? '[' + q.i + ']' : '';   /* practice (non-PYQ) questions: only their question code */
+function tagText(q) { if (q._noTag) return ''; if (q.s !== 'P') return q.i ? '[' + q.i + ']' : '';   /* practice (non-PYQ) questions: only their question code */
   const lv = q.lvTag ? 'L' + practiceLevel(q) : ''; const ex = pyqLabel(q); return lv || ex ? '[' + [lv, ex].filter(Boolean).join(' \u00b7 ') + ']' : ''; }
 /* "match the lists" questions: split into intro + two lists so they can be drawn as a table */
 function matchParts(text) {
@@ -253,7 +254,7 @@ function layoutSheet(p, host, minFs) {
   nodes.forEach(nd => { nd.style.flex = 'none'; meas.append(nd); });
   document.body.append(meas);
   let best = null, fs = p.maxFs || MAX_FS;
-  const floor = minFs || (p.maxFs ? FIT_MIN : MAN_MIN);
+  const floor = minFs || (p.pyq ? 12 : p.maxFs ? FIT_MIN : MAN_MIN);
   for (; fs >= floor - 0.001; fs -= 0.25) {
     meas.style.setProperty('--fs', fs + 'px'); nodes.forEach(fitMath);
     const hs = nodes.map(nd => nd.offsetHeight);
@@ -915,7 +916,7 @@ function pdfPages(T, r) {
     const c = PYQT[r.k], topics = c ? c.topics.map(t => ({ label: t.code || ('Topic ' + t.no), name: t.name, qs: t.qs.filter(q => cwYearOk(q)) })).concat([{ label: 'Other', name: 'Other topics', qs: c.other.filter(q => cwYearOk(q)) }]) : [{ label: '', name: 'All topics', qs: r.qs }];
     topics.forEach(t => t.qs.forEach((q, i) => flat.push(Object.assign({}, q, { _pf: 1, _t: (t.label ? t.label + ' \u00b7 ' : '') + t.name, head: i === 0 ? (t.label ? t.label + ' \u00b7 ' : '') + t.name : '' }))));
   } else {
-    r.qs.slice().sort((a, b) => (+String(a.i).split('-').pop() || 0) - (+String(b.i).split('-').pop() || 0)).forEach(q => flat.push(Object.assign({}, q, { _pf: 1, _t: '', head: '' }))); /* question paper: no chapter names, like a real paper */
+    r.qs.slice().sort((a, b) => (+String(a.i).split('-').pop() || 0) - (+String(b.i).split('-').pop() || 0)).forEach(q => flat.push(Object.assign({}, q, { _pf: 1, _noTag: 1, _t: '', head: '' }))); /* question paper: no chapter names, like a real paper */
   }
   const pages = packPages(flat, (g, i, n) => ({ title: r.name, sub, pyq: true, pg: n > 1 ? (i + 1) + ' of ' + n : '' }));
   if (T === 'cw') pages.forEach(pg => { if (pg.qs.length && !pg.qs[0].head) pg.qs = [Object.assign({}, pg.qs[0], { head: pg.qs[0]._t + ' (continued)' })].concat(pg.qs.slice(1)); });
@@ -1024,8 +1025,8 @@ function renderPdfTab(T) {
         h('div', { class: 'tglrow' }, keySwitch(T + 'Key', 'pdfkey', { 'data-t': T }), expSwitch(T + 'Expl', 'pdfexp', { 'data-t': T })),
         h('div', { class: 'pyqkind', role: 'group', 'aria-label': 'PYQs' }, [['sw', 'Question Paper', 'A whole paper'], ['cw', 'Chapterwise', 'Every chapter, all topics']].map(([k, t, d]) =>
           h('button', { type: 'button', class: 'pyqk', 'aria-pressed': String(T === k), onclick: () => { if (PYQSUB !== k) { PYQSUB = k; pyqShow(); } } }, h('strong', { text: t }), h('span', { text: d })))),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), msel(T + 'Yr', 'years')),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), msel(T + 'Cl', 'classes')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), T === 'cw' ? msel(T + 'Yr', 'years') : ssel(T + 'Yr', 'a year')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), T === 'cw' ? msel(T + 'Cl', 'classes') : ssel(T + 'Cl', 'a class')),
         h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: T === 'cw' ? 'Chapter' : 'Question paper (code)' }), ssel(T + 'Pick', T === 'cw' ? 'a chapter' : 'a paper'))),
         T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')) : null,
         T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')) : null)),
@@ -1039,8 +1040,15 @@ function renderPdfTab(T) {
     const cnt = {}; all.forEach(q => { if (q.y) cnt[q.y] = (cnt[q.y] || 0) + 1; });
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
     P.years = P.years.filter(y => ys.includes(+y));
-    mfill(T + 'Yr', ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
-    mfill(T + 'Cl', ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']), P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
+    const yItems = ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), cItems = ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']);
+    if (T === 'cw') {
+      mfill('cwYr', yItems, P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
+      mfill('cwCl', cItems, P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
+    } else {
+      P.years = P.years.slice(0, 1); P.cls = P.cls.slice(0, 1);
+      sfill('swYr', [['all', 'All years (' + all.length + ')']].concat(yItems), P.years[0] || 'all', v => { P.years = v === 'all' ? [] : [v]; refresh(); }, 'a year', { empty: 'No years yet' });
+      sfill('swCl', [['all', 'All classes (' + all.length + ')']].concat(cItems), P.cls[0] || 'all', v => { P.cls = v === 'all' ? [] : [v]; refresh(); }, 'a class');
+    }
     if (T === 'cw') {
       mfill('cwLv', ['L1', 'L2', 'L3'].map(l => [l, l + ' (' + all.filter(q => q.d === l).length + ')']), P.lv, v => { P.lv = v; refresh(); }, 'levels', { none: 'All levels' });
       mfill('cwTy', ['MCQ', 'Subjective'].map(t => [t, t + ' (' + all.filter(q => q.t === t).length + ')']), P.types, v => { P.types = v; refresh(); }, 'question types', { none: 'All question types' });
@@ -1341,7 +1349,7 @@ const GUIDE_HTML = () => `
 <li>On a phone the menu wraps into two rows; everything works there too.</li>
 <li>Formulas are written in proper notation. If one looks broken, refresh the page once.</li>
 </ul>
-<p class="gd-foot">Built by Ankit for the Unkganit teaching team.</p>`;
+<p class="gd-foot">Built by Nikhil.</p>`;
 
 function guideOpen() {
   let m = document.getElementById('guideModal');
@@ -1382,9 +1390,9 @@ function buildShell() {
         h('div', { id: 'viewSyl', class: 'sy-wrap', hidden: true }),
         h('div', { id: 'viewPortal', class: 'pt-wrap', hidden: true })),
       h('footer', { class: 'app-foot', id: 'appFoot' },
-        h('span', { class: 'af-brand' }, 'Made with ', h('span', { class: 'af-heart', style: 'color:#e11d48', 'aria-label': 'love', text: '\u2665' }), ' by Ankit'),
+        h('span', { class: 'af-brand' }, 'Made with ', h('span', { class: 'af-heart', style: 'color:#e11d48', 'aria-label': 'love', text: '\u2665' }), ' by Nikhil'),
         h('span', { class: 'af-ver', id: 'appFootSite' }),
-        h('span', { class: 'af-ver', id: 'appFootVer' }),
+        h('span', { class: 'af-ver', id: 'appFootVer', text: 'Version ' + SITE_VERSION }),
         h('span', { class: 'af-link', id: 'appFootLink' }))));
   if (!document.getElementById('app-fit-css')) { const fs2 = document.createElement('style'); fs2.id = 'app-fit-css'; fs2.textContent = 'html,body{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}.tb-menu{max-width:100%}.katex-mathml{max-width:1px!important;overflow:hidden!important}'; document.head.appendChild(fs2); }
   if (!document.getElementById('app-foot-css')) { const st = document.createElement('style'); st.id = 'app-foot-css'; st.textContent = '.app-foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 14px;margin:28px auto 0;padding:14px 16px 20px;border-top:1px solid var(--color-border-line,rgba(128,128,128,.28));font-size:12px;line-height:1.4;letter-spacing:.02em;color:var(--color-fg-muted,#6b807f)}.app-foot .af-brand{font-weight:600;order:3;flex-basis:100%;text-align:center;margin-top:8px}.app-foot .af-ver::before{display:none!important}.app-foot .af-ver:not(:empty)::before,.app-foot .af-link:not(:empty)::before{content:"|";margin-right:14px;opacity:.45}.app-foot .qb-sstat-link{font:inherit;color:inherit;text-decoration:none;cursor:pointer;border-bottom:1px dotted currentColor;padding:0}.app-foot .qb-sstat-link:hover{color:var(--color-fg,#111);border-bottom-style:solid}'; document.head.append(st); }

@@ -1,5 +1,5 @@
 /* Lite view: question list and PYQs only. */
-.app-foot #appFootVer,.app-foot #appFootLink,.app-foot #appFootSite{display:none}
+.app-foot #appFootLink,.app-foot #appFootSite{display:none}
 
 .pt-dmenu{position:fixed;z-index:1200;min-width:260px;max-width:calc(100vw - 16px);background:var(--color-bg,#fff);color:var(--color-fg,#0e3331);border:1px solid var(--color-border-line,rgba(128,128,128,.3));border-radius:12px;padding:6px;box-shadow:0 18px 44px rgba(5,32,31,.28);display:flex;flex-direction:column}
 .pt-ditem{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:9px 10px;border-radius:8px;cursor:pointer;font:inherit}

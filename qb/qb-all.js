@@ -12,7 +12,7 @@ function QBP(k) { var p = window.AvantiAuth && window.AvantiAuth.perm; return !!
   };
   window.d3 = window.d3 || { format: function () { return function (n) { return Number(n).toLocaleString('en-US'); }; } };
   window.__qbStart = async function () {
-    try { var bl = document.querySelector('.qb-build'), fv = document.getElementById('appFootVer'); if (bl) { if (fv) { fv.textContent = ''; } bl.style.display = 'none'; } } catch (e) { /* label only */ }
+    try { var bl = document.querySelector('.qb-build'), fv = document.getElementById('appFootVer'); if (bl) { bl.style.display = 'none'; } } catch (e) { /* label only */ }
     var pre = window.__qbPre || {}, pd = pre.data || {};
     var get = function (n) { return pd[n] || fetch('qb/data/' + n + '.json').then(function (r) { if (!r.ok) throw new Error(n); return r.json(); }); };
     var small = await Promise.all([get('topics'), get('chapters')]);
@@ -781,10 +781,10 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   dash.calc('by_chapter', {
     inputs: ['chapters', 'pyq', 'nonpyq'],
     title: 'Questions per chapter',
-    description: 'For every chapter, the number of questions.',
+    description: 'For every chapter, the number of questions in total and per level.',
     fn: function (chapters, pyq, nonpyq) {
-      var T = {}; pyq.concat(nonpyq).forEach(function (q) { T[q.chapter_code] = (T[q.chapter_code] || 0) + 1; });
-      return chapters.map(function (c) { return { chapter_code: c.chapter_code, chapter: c.chapter, block: c.block, total: T[c.chapter_code] || 0 }; });
+      var T = {}, L = {}; pyq.concat(nonpyq).forEach(function (q) { T[q.chapter_code] = (T[q.chapter_code] || 0) + 1; var k = q.chapter_code + '|' + q.difficulty; L[k] = (L[k] || 0) + 1; });
+      return chapters.map(function (c) { return { chapter_code: c.chapter_code, chapter: c.chapter, class: (c.classes || [''])[0], l1: L[c.chapter_code + '|L1'] || 0, l2: L[c.chapter_code + '|L2'] || 0, l3: L[c.chapter_code + '|L3'] || 0, total: T[c.chapter_code] || 0 }; });
     }
   });
 
@@ -1545,13 +1545,17 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     rows.forEach(function (r) {
       r.flagged = 0; r.attn = 0; r.oos = 0;
       var tr = el('tr'); tr.dataset.key = r.chapter_code;
-      ['chapter_code', 'chapter', 'block', 'total'].forEach(function (k) {
+      ['chapter_code', 'chapter', 'class', 'l1', 'l2', 'l3', 'total'].forEach(function (k) {
         var td = el('td', typeof r[k] === 'number' && r[k] === 0 ? 'z' : null, String(r[k]));
         tr.appendChild(td);
       });
       tr.addEventListener('click', function () { if (S.ch.has(r.chapter_code)) S.ch.delete(r.chapter_code); else S.ch.add(r.chapter_code); apply(); });
       tb.appendChild(tr);
     });
+    var sum = function (k) { return rows.reduce(function (a, r) { return a + (r[k] || 0); }, 0); };
+    var tot = el('tr', 'qb-total'); tot.style.fontWeight = '700'; tot.style.cursor = 'default';
+    ['', 'All chapters', '', sum('l1'), sum('l2'), sum('l3'), sum('total')].forEach(function (v) { tot.appendChild(el('td', null, String(v))); });
+    tb.appendChild(tot);
     $$('#overview tbody tr').forEach(function (tr) { tr.classList.toggle('on', S.ch.has(tr.dataset.key)); });
   }
 
