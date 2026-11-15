@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '21';   /* website version: matches the published version number */
+const SITE_VERSION = '22';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -886,6 +886,7 @@ function exportLib(kind) {
 /* ---------- "PYQ ChapterWise PDF" and "Shift Wise PDF" tabs ---------- */
 const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], types: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], key: false } };
 const BUCKET_NAME = { School: 'School Level' };
+const clsName = qs => [...new Set(qs.map(q => q.cl).filter(Boolean))].join(' & ') || 'Physics';
 const chOrder = cc => { const c = CHMAP.get(cc); return c.cl * 100 + c.o; };
 function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P'); }
 const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
@@ -900,7 +901,7 @@ function pdfRows(T) {
   const qs = pyqOf(P.bucket).filter(q => T !== 'cw' || cwYearOk(q)); let rows = [];
   if (T === 'cw') {
     const by = {}; qs.forEach(q => { (by[q.cc] = by[q.cc] || []).push(q); });
-    rows = Object.keys(by).sort((a, b) => chOrder(a) - chOrder(b)).map(cc => ({ k: cc, name: CHMAP.get(cc).n, qs: by[cc], file: CHMAP.get(cc).n + ' ' + BUCKET_NAME[P.bucket] + ' Questions' + (T === 'cw' ? cwYrSfx() : '') }));
+    rows = Object.keys(by).sort((a, b) => chOrder(a) - chOrder(b)).map(cc => ({ k: cc, name: CHMAP.get(cc).n, qs: by[cc], file: CHMAP.get(cc).n + ' ' + clsName(by[cc]) + ' Questions' + (T === 'cw' ? cwYrSfx() : '') }));
   } else {
     const by = {}; qs.filter(swOk).forEach(q => { const k = q.p || q.i; (by[k] = by[k] || []).push(q); });
     rows = Object.keys(by).sort((a, b) => (by[b][0].y || 0) - (by[a][0].y || 0) || a.localeCompare(b)).map(k => ({ k, name: k, qs: by[k], file: k.replace(/\//g, '-') + ' Question Paper' }));
@@ -910,7 +911,7 @@ function pdfRows(T) {
 /* one page set per row; chapter wise = topic wise inside the chapter, shift wise = chapter order */
 function pdfPages(T, r) {
   const key = 'pg|' + T + '|' + PDFT[T].bucket + '|' + (T === 'cw' ? cwYrKey() : swKey()) + '|' + r.k; if (BK[key]) return BK[key];
-  const bucket = PDFT[T].bucket, sub = (T !== 'cw' && bucket === 'Adv' && r.qs[0] && r.qs[0].y && r.qs[0].y < 2013 ? 'IIT-JEE' : BUCKET_NAME[bucket]) + (T === 'cw' ? ' \u00b7 all topics' : '');
+  const bucket = PDFT[T].bucket, sub = (T !== 'cw' && bucket === 'Adv' && r.qs[0] && r.qs[0].y && r.qs[0].y < 2013 ? 'IIT-JEE' : clsName(r.qs)) + (T === 'cw' ? ' \u00b7 all topics' : '');
   let flat = [];
   if (T === 'cw') {
     const c = PYQT[r.k], topics = c ? c.topics.map(t => ({ label: t.code || ('Topic ' + t.no), name: t.name, qs: t.qs.filter(q => cwYearOk(q)) })).concat([{ label: 'Other', name: 'Other topics', qs: c.other.filter(q => cwYearOk(q)) }]) : [{ label: '', name: 'All topics', qs: r.qs }];
@@ -933,7 +934,7 @@ async function cwPptxData(r) {
   const topics = pc ? pc.topics.map(t => ({ name: t.name, n: t.qs.filter(inScope).length })).concat(pc.other.filter(inScope).length ? [{ name: 'Other topics', n: pc.other.filter(inScope).length }] : []) : [];
   const figs = {}; for (const q of flat) if (q.f && !figs[q.i]) { try { figs[q.i] = await figPng(q.f); } catch (e) { /* skip the picture */ } }
   let logo = null; try { const rs = await fetch('img/ankit-logo.png'); if (rs.ok) { const bl = await rs.blob(), bm = await createImageBitmap(bl), dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(bl); }); logo = { dataUrl, w: bm.width, h: bm.height }; } } catch (e) { /* no logo file: skip */ }
-  return { logo, chapter: c.n, cl: c.cl, clLabel: (c.cls || [''])[0].toUpperCase(), cc, bucket, bucketName: BUCKET_NAME[bucket], bucketLabel: bucket, year: cwYrText(), count: flat.length, years, topics, qs: flat, figs, meta: await pyqMeta() };
+  return { logo, chapter: c.n, cl: c.cl, clLabel: (c.cls || [''])[0].toUpperCase(), cc, bucket, bucketName: clsName(r.qs), bucketLabel: bucket, year: cwYrText(), count: flat.length, years, topics, qs: flat, figs, meta: await pyqMeta() };
 }
 async function exportCwPptx(r) {
   if (!need('pptx')) return;
@@ -1025,9 +1026,10 @@ function renderPdfTab(T) {
         h('div', { class: 'tglrow' }, keySwitch(T + 'Key', 'pdfkey', { 'data-t': T }), expSwitch(T + 'Expl', 'pdfexp', { 'data-t': T })),
         h('div', { class: 'pyqkind', role: 'group', 'aria-label': 'PYQs' }, [['sw', 'Question Paper', 'A whole paper'], ['cw', 'Chapterwise', 'Every chapter, all topics']].map(([k, t, d]) =>
           h('button', { type: 'button', class: 'pyqk', 'aria-pressed': String(T === k), onclick: () => { if (PYQSUB !== k) { PYQSUB = k; pyqShow(); } } }, h('strong', { text: t }), h('span', { text: d })))),
+        T === 'cw' ? h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapter' }), ssel(T + 'Pick', 'a chapter'))) : null,
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), T === 'cw' ? msel(T + 'Yr', 'years') : ssel(T + 'Yr', 'a year')),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), T === 'cw' ? msel(T + 'Cl', 'classes') : ssel(T + 'Cl', 'a class')),
-        h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: T === 'cw' ? 'Chapter' : 'Question paper (code)' }), ssel(T + 'Pick', T === 'cw' ? 'a chapter' : 'a paper'))),
+        T === 'sw' ? h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question paper (code)' }), ssel(T + 'Pick', 'a paper'))) : null,
         T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')) : null,
         T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')) : null)),
       h('div', { class: 'stage' }, h('div', { class: 'statbar' }, h('div', { class: 'msg', id: T + 'Msg', 'aria-live': 'polite' }), h('div', { class: 'pgbtns', id: T + 'Pages', hidden: true }), h('div', { class: 'rowbtns', id: T + 'Exp', hidden: true }, ...[['docx', 'Word (editable)'], ['pdf', 'PDF'], ['pptx', 'PowerPoint (editable)']].map(([f, nm]) => h('button', { type: 'button', class: 'btn ibtn', 'data-act': 'pdfdl', 'data-t': T, 'data-k': '', 'data-f': f, title: 'Download ' + nm, 'aria-label': 'Download ' + nm, html: FIMG[f] })), ...['xprint', 'xshare'].map(a => { const b = a === 'xprint' ? prtBtn('pyq') : shrBtn('pyq'); b.dataset.t = T; b.dataset.k = ''; return b; }), wsRow(T)), h('button', { type: 'button', class: 'btn ibtn maxbtn', 'data-act': 'max', 'aria-pressed': 'false', title: 'Maximize', 'aria-label': 'Maximize', html: ICO.max })), h('div', { class: 'pgwrap', id: T + 'Prev' })));
