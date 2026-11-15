@@ -6,10 +6,10 @@ window.AvantiAuth = { perm: { pdf: true, docx: true, pptx: true, print: true, sh
 /* small pop-up menu under a button (the Export menu) and the icons it uses */
 function h(tag, props, ...kids) { const e = document.createElement(tag); for (const k in (props || {})) { const v = props[k]; if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? '' : v); } kids.flat().forEach(c => { if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c)); }); return e; }
 function dropMenu(btn, items) {
-  const old = document.querySelector('.pt-dmenu'); if (old) { const same = old.owner === btn; old.remove(); if (same) return; }
+  const old = document.querySelector('.pt-dmenu'); if (old) { const same = old.owner === btn; if (old.close) old.close(); else old.remove(); if (same) return; }
   const m = h('div', { class: 'pt-dmenu', role: 'menu' }, items.filter(Boolean).map(it => it === '-' ? h('div', { class: 'pt-dsep', role: 'separator' })
     : h('button', { type: 'button', role: 'menuitem', class: 'pt-ditem', onclick: () => { close(); it.onclick(); } }, it.icon ? h('span', { class: 'pt-dic', html: it.icon }) : null, h('span', { class: 'pt-dtx' }, h('b', { text: it.text }), it.sub ? h('small', { text: it.sub }) : null))));
-  m.owner = btn; document.body.append(m);
+  m.owner = btn; m.close = () => close(); document.body.append(m); /* closing from the button again also removes the listeners and resets aria-expanded */
   const r = btn.getBoundingClientRect(), w = m.offsetWidth;
   m.style.top = Math.min(window.innerHeight - m.offsetHeight - 8, r.bottom + 6) + 'px';
   m.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.right - w)) + 'px';

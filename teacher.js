@@ -695,21 +695,27 @@ async function sendPdf(app, blob, file, title) {
   if (window.AvantiPortal && window.AvantiPortal.shareReady) { window.AvantiPortal.shareReady(blob, file, title); return; }
   await downloads.save({ filename: file, data: blob }); toast('PDF saved. Attach "' + file + '" in your app.');
 }
+/* every export button stays off while any export (PDF, Word, PowerPoint, print, share) is still being made, and comes back on only when the last one ends */
+const EXP_SEL = '[data-act="exp"],[data-act="lexp"],[data-act="lexpall"],[data-act="pdfdl"],[data-act="xprint"],[data-act="xshare"]';
+let expBusyN = 0;
+function expBusy(d) { expBusyN = Math.max(0, expBusyN + d); document.querySelectorAll(EXP_SEL).forEach(b => { b.disabled = expBusyN > 0; }); }
 function shareFrom(btn, title, get) {
   if (!need('share')) return;
   closeShare(); toast('Preparing the PDF\u2026');
-  if (btn) btn.disabled = true;
+  expBusy(1); if (btn) btn.disabled = true;
   Promise.resolve().then(get).then(r => sendPdf('', r.blob, r.file, title))
     .catch(e => toast('Could not prepare the PDF' + (e && e.message ? ': ' + e.message : '')))
-    .then(() => { if (btn) btn.disabled = false; });
+    .then(() => { expBusy(-1); if (btn && !expBusyN) btn.disabled = false; });
 }
 function printFrom(get) {
   if (!need('print')) return;
   const w = window.open('', '_blank');
   if (!w) { toast('This view does not allow a print window. Use Download PDF, then print the file.'); return; }
   try { w.document.write('<!doctype html><title>Preparing…</title><body style="font-family:sans-serif;padding:24px">Preparing the PDF for printing…</body>'); } catch (e) { /* ignore */ }
-  Promise.resolve().then(get).then(r => { w.location.href = URL.createObjectURL(r.blob); setTimeout(() => { try { w.focus(); w.print(); } catch (e) { /* the PDF is open: print from there */ } }, 1000); })
-    .catch(e => { try { w.close(); } catch (x) { /* ignore */ } toast('Could not prepare the PDF' + (e && e.message ? ': ' + e.message : '')); });
+  expBusy(1);
+  Promise.resolve().then(get).then(r => { const u = URL.createObjectURL(r.blob); w.location.href = u; setTimeout(() => { try { w.focus(); w.print(); } catch (e) { /* the PDF is open: print from there */ } }, 1000); setTimeout(() => URL.revokeObjectURL(u), 120000); /* free the PDF once the print window has it */ })
+    .catch(e => { try { w.close(); } catch (x) { /* ignore */ } toast('Could not prepare the PDF' + (e && e.message ? ': ' + e.message : '')); })
+    .then(() => expBusy(-1));
 }
 window.__pdfPrint = printFrom; window.__pdfShare = shareFrom;
 const prtBtn = src => h('button', { type: 'button', class: 'btn ibtn', 'data-act': 'xprint', 'data-src': src, title: 'Print', 'aria-label': 'Print', html: ICO.print });
@@ -785,10 +791,10 @@ async function cwPptxData(r) {
 async function exportCwPptx(r) {
   if (!need('pptx')) return;
   if (!downloads) { toast('Downloads are not available in this view'); return; }
-  const btns = document.querySelectorAll('[data-act="pdfdl"]'); btns.forEach(b => { b.disabled = true; });
+  expBusy(1);
   toast('Preparing PowerPoint…');
   try {
-    const d = await cwPptxData(r); if (PDFT.cw.exp) d.expl = await explForQs(d.qs);
+    const d = await cwPptxData(r); if (PDFT.cw.exp) d.expl = await explForQs(d.qs); if (PDFT.cw.key) d.key = true;
     await Promise.all([loadScript('mathdoc.b3.js'), loadScript('office.b9.js'), loadScript(CDN.zip), loadScript(CDN.pptx)]);
     const blob = await window.OfficeDoc.buildCwPptx(window.PptxGenJS, window.JSZip, Object.assign(d, { bucket: d.bucketLabel }), { CHMAP, figs: d.figs });
     const file = r.file + '.pptx';
@@ -796,7 +802,7 @@ async function exportCwPptx(r) {
   } catch (e) {
     if (e && e.code === 'declined') toast('Download cancelled');
     else toast('PowerPoint export failed: ' + (e && e.message ? e.message : 'try again'));
-  } finally { btns.forEach(b => { b.disabled = false; }); }
+  } finally { expBusy(-1); }
 }
 /* ---------- one source of truth: the question list for DPPs, PYQs and tests is built from the SAME files as the Question Bank (qb/data/pyq.json + nonpyq.json). bank-meta.json only holds the chapter list and syllabus. ---------- */
 const QBJ = {};
@@ -954,7 +960,7 @@ function setTab(t) {
   const pv = $('#viewPyq'); if (pv) pv.hidden = true;
   setTabInner(t);
 }
-function hideViews() { ['Qb', 'Lib', 'Cw', 'Sw', 'Syl', 'Pyq', 'Portal'].forEach(n => { const e = $('#view' + n); if (e) e.hidden = true; }); }
+function hideViews() { ['Qb', 'Lib', 'Cw', 'Sw', 'Syl', 'Pyq', 'Portal'].forEach(n => { const e = $('#view' + n); if (e) e.hidden = true; }); const cp = document.getElementById('qbClassPop'); if (cp) { const x = cp.querySelector('.qb-pclose'); if (x) x.click(); else cp.remove(); } /* a Dashboard pop-up never stays open behind another tab */ }
 function setTabInner(t) {
   hideViews(); const v = $('#view' + ({ qb: 'Qb', lib: 'Lib', cw: 'Cw', sw: 'Sw', syl: 'Syl' })[t]); if (v) v.hidden = false;
   if (window.AvantiPortal) window.AvantiPortal.leave();
@@ -1064,7 +1070,7 @@ async function doExport(kind, p0) {
   const pages = p0.pages ? p0.pages : [p0], pk = p0 && p0.pages ? p0 : pages[0];
   if (!pages.length || !pages[0].qs.length) { toast('Add some questions first'); return; }
   if (!downloads) { toast('Downloads are not available in this view'); return; }
-  const btns = document.querySelectorAll('[data-act="exp"],[data-act="lexp"],[data-act="lexpall"],[data-act="pdfdl"],[data-act="xprint"],[data-act="xshare"]'); btns.forEach(b => { b.disabled = true; });
+  expBusy(1);
   const multi = pages.length > 1, file = fname(pk, '.' + kind);
   toast('Preparing ' + kind.toUpperCase() + '\u2026');
   if (kind !== 'pdf') {
@@ -1075,7 +1081,7 @@ async function doExport(kind, p0) {
     } catch (e) {
       if (e && e.code === 'declined') toast('Download cancelled');
       else toast('Export failed: ' + (e && e.message ? e.message : 'try again'));
-    } finally { btns.forEach(b => { b.disabled = false; }); }
+    } finally { expBusy(-1); }
     return;
   }
   const hst = exportHost();
@@ -1102,7 +1108,7 @@ async function doExport(kind, p0) {
     if (pk.onFail) pk.onFail(e);
     if (e && e.code === 'declined') toast('Download cancelled');
     else toast('Export failed: ' + (e && e.message ? e.message : 'try again'));
-  } finally { hst.remove(); btns.forEach(b => { b.disabled = false; }); }
+  } finally { hst.remove(); expBusy(-1); }
 }
 /* Explanation toggle: full solutions come from qb/data/sol.json, shown after the answer key on their own pages */
 let SOLT = null;
@@ -1311,6 +1317,10 @@ function ensureDpp() {
 function boot() {
   buildShell(); themeInit();
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMax(); }); document.addEventListener('click', onAct); document.addEventListener('change', onAct);
+  /* the filter lists (tick-box and one-choice) close with Escape, which returns focus to their button, and close when focus moves out of them */
+  const mselClose = (m, focusBtn) => { m.classList.remove('open'); const b = m.querySelector('.mbtn'); if (b) { b.setAttribute('aria-expanded', 'false'); if (focusBtn) b.focus({ preventScroll: true }); } };
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const m = document.activeElement && document.activeElement.closest && document.activeElement.closest('.msel.open'); if (m) { e.preventDefault(); mselClose(m, true); } });
+  document.addEventListener('focusout', e => { const m = e.target.closest && e.target.closest('.msel.open'); if (m && e.relatedTarget && !m.contains(e.relatedTarget)) mselClose(m, false); });
   window.addEventListener('resize', rescale);
   /* the artifact's download permission is looked up when the viewer saves, not at start-up */
   const anchorSave = downloads.save;
