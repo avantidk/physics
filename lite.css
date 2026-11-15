@@ -7,7 +7,6 @@
 .pt-dic{width:26px;display:grid;place-items:center;flex:none;color:var(--color-fg-muted,#5d8583)}
 .pt-dtx{display:flex;flex-direction:column;gap:1px;min-width:0}.pt-dtx b{font-size:14px;font-weight:600}.pt-dtx small{font-size:12px;color:var(--color-fg-muted,#5d8583)}
 .pt-dsep{height:1px;background:var(--color-border-line,rgba(128,128,128,.3));margin:4px 6px}
-#selection .qb-exp{display:none!important}
 
 /* PYQ: Question Paper / Chapterwise switch */
 .pyqkind{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 16px}
@@ -26,4 +25,21 @@
   html body .tb-menu{margin:0!important}
   html body .tb-logo{top:calc(50% - 27px)!important}
   html body .tb-theme{top:calc(50% - 20px)!important}
+}
+
+/* dashboard export box: four icons (PDF, Word, PowerPoint, Share) instead of an Export menu */
+#selection .qb-exp{display:flex!important;gap:10px;align-items:center;margin:2px 0 4px;flex-wrap:wrap}
+#selection .qb-exp .qb-print{display:none!important}
+#selection .qb-exp .qb-pdf{order:1}#selection .qb-exp .qb-docx{order:2}#selection .qb-exp .qb-ppt{order:3}#selection .qb-exp .qb-share{order:4}
+#selection .qb-exp .qb-ibtn{width:46px;height:46px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:12px}
+#selection .qb-exp .qb-ibtn[disabled]{opacity:.4;cursor:not-allowed}
+
+/* phone header: logo and buttons on the first row, the two tabs share the second row equally */
+@media (max-width:640px){
+  html body .topbar{padding-top:58px!important}
+  html body .tb-menu{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;margin:12px auto 14px!important}
+  html body .tb-menu>*,html body .tb-menu>:nth-child(-n+3),html body .tb-menu>:nth-child(n+4){grid-column:auto!important}
+  html body .tb-menu .tb{padding:10px 8px!important;font-size:14px!important}
+  html body .tb-logo{height:40px!important;top:10px!important}
+  html body .tb-theme{top:12px!important;width:38px;height:38px}
 }

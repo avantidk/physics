@@ -1642,7 +1642,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var ids = function () { return selected().map(function (q) { return q.id; }); };
     if (QBP('createTests') && QBP('worksheets')) mk('qb-savews', ICO.save, 'Save as worksheet', 'Keep the ticked questions in Saved worksheets', function () { if (S.sel.size && window.AvantiPortal) window.AvantiPortal.saveWorksheet(ids(), exportName(selected())); });
     if (QBP('createTests')) mk('qb-mktest', ICO.test, 'Create test', 'Make an online test from the ticked questions', function () { if (S.sel.size && window.AvantiPortal) window.AvantiPortal.createTestFrom(ids(), exportName(selected())); });
-    if (QBP('pdf')) {
+    if (false) {   /* the four icon buttons (PDF, Word, PowerPoint, Share) sit in the export box instead of one Export menu */
       var eb = mk('qb-expbtn', ICO.down, 'Export', 'Download, print or share the ticked questions', function (e) {
         var P = window.AvantiPortal, IC = P && P.icons; if (!P || !P.dropMenu || !S.sel.size) return;
         var go = function (k) { return function () { var b = $(k); if (b) b.click(); }; };

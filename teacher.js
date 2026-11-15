@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '25';   /* website version: matches the published version number */
+const SITE_VERSION = '26';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -1333,27 +1333,46 @@ const THEME_ICONS = {
 function themeInit() { let m = null; try { m = localStorage.getItem(THEME_KEY); } catch (e) { m = null; } if (m === 'dark' || m === 'light') document.documentElement.setAttribute('data-theme', m); themeApply(themeNow()); }
 function themeToggle() { const m = themeNow() === 'dark' ? 'light' : 'dark'; themeApply(m); try { localStorage.setItem(THEME_KEY, m); } catch (e) { /* optional */ } }
 const GUIDE_HTML = () => `
-<p class="gd-lead">This dashboard holds Cambridge Board Physics questions for Classes 9 to 12, with answers and solutions. There is no sign-in and nothing to install.</p>
-<nav class="gd-toc" aria-label="Guide sections"><a href="#gd-qb">Dashboard</a><a href="#gd-cnt">Counts</a><a href="#gd-pyq">PYQs</a><a href="#gd-tips">Tips</a></nav>
+<p class="gd-lead">PhyNik holds Cambridge Physics questions (IGCSE and AS &amp; A Level) with answers, one paper at a time. There is no sign-in and nothing to install.</p>
+<nav class="gd-toc" aria-label="Guide sections"><a href="#gd-qb">Dashboard</a><a href="#gd-card">Question cards</a><a href="#gd-exp">Download and share</a><a href="#gd-cnt">Counts</a><a href="#gd-pyq">PYQs</a><a href="#gd-tips">Tips</a></nav>
 <h3 id="gd-qb">1. Dashboard</h3>
-<p>All questions in one list, grouped by chapter.</p>
+<p>All questions in one list, grouped by chapter. Use <b>Find questions</b> to narrow the list. The filters work in this order:</p>
 <ul>
-<li><b>Find questions:</b> search by words or question id, or filter by year, class, block, chapter and level (L1 easy, L2 medium, L3 hard), in that order.</li>
-<li><b>Each question card</b> shows the class, year and level. Use the eye icon to show the answer and the book icon to open the full solution.</li>
-<li><b>Show all answers</b> and <b>Hide options</b> change how the whole page looks.</li>
+<li><b>Year</b>, then <b>Session</b> (March, May/June, October/November), then <b>Class</b> (IGCSE or AS &amp; A Level).</li>
+<li><b>Chapters</b> (pick one or more), then <b>Level</b> (L1 easy, L2 medium, L3 hard), then <b>Question type</b> (MCQ or Subjective).</li>
+<li>You can also search by words or by question ID, for example <b>0625/21/M/J/25-3</b>. <b>Reset filters</b> clears everything.</li>
+<li><b>Show all answers</b> and <b>Hide options</b> change how the whole page looks. <b>Attention</b> shows only the questions that carry an attention note.</li>
 </ul>
-<h3 id="gd-cnt">2. Counts (bar-chart icon, top right)</h3>
+<h3 id="gd-card">2. Question cards</h3>
+<ul>
+<li>The top row shows the <b>question ID</b> (blue for the extended MCQ papers 21, 22 and 23, red for the extended theory papers 41, 42 and 43) and the <b>level</b> (L1 green, L2 orange, L3 red).</li>
+<li>The eye icon shows the answer. The book icon opens the solution when there is one. The menu icon shows the chapter, the question type and the ID. Tap the ID to copy it.</li>
+<li>A red <b>Attention</b> tag means the question needs checking. The note under the tag says what to check.</li>
+<li>The ID is the paper code plus the question number: <b>0625/21/M/J/25-3</b> is question 3 of paper 0625/21, May/June 2025. M/J is May/June, O/N is October/November and F/M is March. Papers 11 to 13 are core MCQ, 21 to 23 extended MCQ, 31 to 33 core theory and 41 to 43 extended theory. The last two digits are the year.</li>
+</ul>
+<h3 id="gd-exp">3. Download and share</h3>
+<ul>
+<li>Tick the questions you want (or use <b>Select all filtered</b>). The four icons at the top left then switch on: <b>PDF</b>, <b>Word</b> (editable), <b>PowerPoint</b> (one question per slide) and <b>Share</b>.</li>
+<li>Turn on <b>Answer Key</b> to add the answers on a separate page, and <b>Explanation</b> to add solutions.</li>
+</ul>
+<h3 id="gd-cnt">4. Counts (bar-chart icon, top right)</h3>
 <ul>
 <li><b>Physics Bank: Question Counts</b> shows how many questions there are in total and by class.</li>
-<li><b>Chapter-wise Count</b> shows how many questions come from each chapter. Click a chapter row to see only that chapter's questions.</li>
+<li><b>Chapter-wise Count</b> shows each chapter with its L1, L2 and L3 counts and a total. Click a chapter row to see only that chapter's questions.</li>
 </ul>
-<h3 id="gd-pyq">3. PYQs</h3>
-<p>The same questions as printable sheets, one chapter at a time. Pick a year, class, block, chapter and level, and see the live page preview. Turn on <b>Answer Key</b> to add the answers on a separate page and <b>Explanation</b> to add the full solutions.</p>
+<h3 id="gd-pyq">5. PYQs</h3>
+<p>The same questions as printable sheets. Use the switch at the top:</p>
+<ul>
+<li><b>Question Paper</b>: pick a year, a session and a class, then a paper code. You get the whole paper in question order.</li>
+<li><b>Chapterwise</b>: pick a chapter first, then narrow by year, session, class, level and question type.</li>
+<li>The page preview is live. Turn on <b>Answer Key</b> or <b>Explanation</b> and use the PDF, Word, PowerPoint, print and share buttons above the preview.</li>
+</ul>
 <h3 id="gd-tips">Tips</h3>
 <ul>
 <li>The <b>moon/sun icon</b> (top right) switches between light and dark mode.</li>
-<li>On a phone the menu wraps into two rows; everything works there too.</li>
+<li>On a phone everything works too: the tabs sit under the logo.</li>
 <li>Formulas are written in proper notation. If one looks broken, refresh the page once.</li>
+<li>The footer shows the website version.</li>
 </ul>
 <p class="gd-foot">Built by Nikhil.</p>`;
 

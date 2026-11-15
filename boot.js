@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 /* no account: every plan-gated feature (downloads, copy, tests, worksheets) stays off */
-window.AvantiAuth = { perm: { pdf: true, docx: true, pptx: true, share: true, copy: true }, renderMenu: function () {} };
+window.AvantiAuth = { perm: { pdf: true, docx: true, pptx: true, share: true, copy: true, attention: true }, renderMenu: function () {} };
 /* small pop-up menu under a button (the Export menu) and the icons it uses */
 function h(tag, props, ...kids) { const e = document.createElement(tag); for (const k in (props || {})) { const v = props[k]; if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? '' : v); } kids.flat().forEach(c => { if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c)); }); return e; }
 function dropMenu(btn, items) {

@@ -5297,7 +5297,8 @@
   "answer": "B",
   "topic_code": "",
   "topic": "",
-  "sort_date": "2025-05-01"
+  "sort_date": "2025-05-01",
+  "attention": "Please check the answer key. The key says B (150 kPa), but 100 kPa × 25 cm³ ÷ 10 cm³ gives 250 kPa (option D) when the volume falls by 15 cm³, and 167 kPa (about C) if it falls to 15 cm³. No option matches 150 kPa. Check the stem and the key against the paper."
  },
  {
   "id": "0625/23/O/N/25-13",
