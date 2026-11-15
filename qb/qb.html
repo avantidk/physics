@@ -26,6 +26,35 @@
 .qb-tools>*{white-space:normal!important;text-overflow:clip!important;line-height:1.15!important}
 @media (max-width:640px){.qb-tools .qb-revall,.qb-tools .qb-hideopts,.qb-tools .qb-onlysel,.qb-tools .qb-attnf,.qb-tools .qb-reset,.qb-tools .qb-selall,.qb-tools .qb-clear{grid-column:span 1!important}}
 .qb-dt{border-collapse:collapse;margin:8px 0;max-width:100%}.qb-dt th,.qb-dt td{border:1px solid var(--qb-line,rgba(128,128,128,.45));padding:6px 14px;text-align:center}.qb-dt th{background:color-mix(in srgb,var(--qb-accent,#1b8f87) 12%,transparent);font-weight:700}
+.qb-panel{position:relative}
+.qb-pclose{position:absolute;top:10px;right:10px;width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--qb-line);border-radius:999px;background:var(--color-panel);color:var(--color-fg-muted);font-size:20px;line-height:1;cursor:pointer;z-index:2}
+.qb-pclose:hover,.qb-pclose:focus-visible{color:var(--qb-accent);border-color:var(--qb-accent)}
+.qb-cpop-head .qb-pclose{position:static;flex:0 0 auto}
+.qb-tbtn{font:inherit;color:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.qb-tbtn:hover,.qb-tbtn:focus-visible{border-color:var(--qb-accent)!important;background:var(--qb-soft)}
+.qb-ov tbody tr:focus-visible,.qb-cpop tbody tr:focus-visible{outline:2px solid var(--qb-accent);outline-offset:-2px}
+.qb-ov tbody tr.qb-total{cursor:pointer}
+.qb-ov tbody tr.empty{cursor:default}.qb-ov tbody tr.empty:hover{background:none}
+.qb-cpop td:first-child{color:var(--qb-accent)!important}
+.qb-cpop-back{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:16px}
+.qb-cpop{background:var(--color-panel);color:var(--color-fg,inherit);border:1px solid var(--qb-line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.25);width:min(640px,100%);max-height:min(80vh,720px);display:flex;flex-direction:column;padding:16px 16px 8px}
+.qb-cpop-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.qb-cpop-head h3{margin:0;font-size:1.15rem}
+.qb-cpop-head p{margin:4px 0 0;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.qb-cpop-all{align-self:flex-start;margin:12px 0 8px}
+.qb-cpop-list{overflow:auto;margin:0 -4px}
+.qb-cpop table{border-collapse:collapse;width:100%;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.qb-cpop th,.qb-cpop td{padding:7px 8px;border-bottom:1px solid var(--qb-line);text-align:right;white-space:nowrap}
+.qb-cpop th:nth-child(-n+2),.qb-cpop td:nth-child(-n+2){text-align:left}
+.qb-cpop td:nth-child(2){white-space:normal}
+.qb-cpop td:first-child{color:var(--qb-accent);font-weight:600}
+.qb-cpop td:last-child{font-weight:600}
+.qb-cpop th{position:sticky;top:0;background:var(--color-panel);color:var(--color-fg-muted);font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.qb-cpop tbody tr[tabindex]{cursor:pointer}
+.qb-cpop tbody tr[tabindex]:hover{background:var(--qb-soft)}
+.qb-cpop tbody tr.empty td{opacity:.55}
+.qb-cpop td.z{color:var(--color-fg-muted);opacity:.6}
+@media (max-width:620px){.qb-cpop th:nth-child(n+3):nth-child(-n+5),.qb-cpop td:nth-child(n+3):nth-child(-n+5){display:none}}
 </style>
 <style>
 #dash-root{--dash-gutter:clamp(12px,3vw,32px)}
@@ -142,11 +171,7 @@
   .qb-sbar .qb-pills{margin-top:6px}
   /* phone: after the chapter picker, Question type on its own line, then paired rows Year | Session and Class | Level
      (buildDropdown in qb-all.js turns each [data-f] box into a .qb-dd dropdown) */
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=type]){order:1;grid-column:1/-1}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=year]){order:2}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=sess]){order:3}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=cls]){order:4}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=diff]){order:5}
+  .qb-sbar .qb-frow>.qb-fg-type{grid-column:1/-1}
 }
 .qb-dd{min-width:min(100%,12rem);max-width:100%}.qb-dd .qb-ms-panel{width:min(18rem,calc(100vw - 48px))}
 .qb-input{font:inherit;font-size:var(--cds-font-size-body);padding:7px 12px;border:1px solid var(--qb-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg)}
@@ -429,17 +454,19 @@
 <div class="qb" id="top">
 
   <section class="qb-card qb-ov qb-panel" id="heroov" role="tabpanel" aria-label="Question counts" hidden>
+  <button type="button" class="qb-pclose" aria-label="Close" title="Close">&times;</button>
   <section class="qb-hero" id="header">
   <header class="qb-head">
     <div class="qb-eyebrow">Cambridge Board · IGCSE and AS &amp; A Level · Physics</div>
     <h1>Question counts</h1>
-    <p>Cambridge Physics questions, tagged by class and chapter. Filter by year, class, chapter, level and question type.</p>
+    <p>Cambridge Physics questions, tagged by class and chapter. Click a class to see its chapters, or All questions to see everything.</p>
   </header>
   <div class="qb-tiles" id="tiles" aria-label="Question counts"></div>
   </section>
   </section>
   <section class="qb-card qb-ov qb-panel" id="overview" role="tabpanel" aria-label="Chapter-wise count" hidden>
-    <p class="note">Questions per chapter, in total and by level. Click a row to see only that chapter in the list.</p>
+    <button type="button" class="qb-pclose" aria-label="Close" title="Close">&times;</button>
+    <p class="note">Questions per chapter, in total and by level. Click a row to see all the questions of that chapter.</p>
     <div class="qb-tablewrap">
       <table data-source="by_chapter" data-row-key="chapter_code">
         <thead><tr><th data-field="chapter_code">Code</th><th data-field="chapter">Chapter</th><th data-field="class">Class</th><th data-field="l1">L1</th><th data-field="l2">L2</th><th data-field="l3">L3</th><th data-field="total">Total</th></tr></thead>
@@ -485,11 +512,11 @@
           <div class="qb-ms-list" data-source="chapters"></div>
         </div>
       </div>
+      <div class="qb-fgroup qb-fg-type"><span class="cap">Question type</span><div class="qb-dd" data-f="type"></div></div>
       <div class="qb-fgroup"><span class="cap">Year</span><div class="qb-dd" data-f="year"></div></div>
       <div class="qb-fgroup"><span class="cap">Session</span><div class="qb-dd" data-f="sess"></div></div>
       <div class="qb-fgroup"><span class="cap">Class</span><div class="qb-dd" data-f="cls"></div></div>
       <div class="qb-fgroup"><span class="cap">Question Level</span><div class="qb-dd" data-f="diff"></div></div>
-      <div class="qb-fgroup"><span class="cap">Question type</span><div class="qb-dd" data-f="type"></div></div>
       <div style="display:none"><div class="qb-fgroup qb-ms" id="topic-filter" hidden>
         <span class="cap">Topics (pick one or more)</span>
         <button class="qb-ms-btn" type="button" aria-haspopup="true" aria-expanded="false">All topics</button>

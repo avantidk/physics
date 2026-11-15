@@ -1243,21 +1243,25 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var host = document.getElementById('tiles'); if (!host) return;
     host.replaceChildren();
     function tile(cls, lbl, n) {
-      var t = document.createElement('div'); t.className = cls;
+      var t = document.createElement('button'); t.type = 'button'; t.className = cls + ' qb-tbtn';
       var l = document.createElement('div'); l.className = 'lbl'; l.textContent = lbl;
       var v = document.createElement('div'); v.className = 'num'; v.textContent = Number(n).toLocaleString('en-US');
       t.appendChild(l); t.appendChild(v); return t;
     }
     var rows = VR(), r = document.createElement('div'); r.className = 'qb-trow h-all';
-    r.appendChild(tile('qb-tile all', 'All questions', rows.length));
-    ['IGCSE', 'AS & A Level'].forEach(function (k) { r.appendChild(tile('qb-tile', k, rows.filter(function (q) { return q.class === k; }).length)); });
+    var ta = tile('qb-tile all', 'All questions', rows.length); ta.title = 'Show all questions in the list';
+    ta.addEventListener('click', function () { showOnly(function () {}); }); r.appendChild(ta);
+    ['IGCSE', 'AS & A Level'].forEach(function (k) {
+      var t = tile('qb-tile', k, rows.filter(function (q) { return q.class === k; }).length); t.title = 'See the ' + k + ' chapters and their question counts';
+      t.setAttribute('aria-haspopup', 'dialog'); t.addEventListener('click', function () { classPopup(k, t); }); r.appendChild(t);
+    });
     host.appendChild(r);
   }
   function buildChips() {
     buildYearTiles();
     var defs = {
       year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(function (a, b) { return Number(b) - Number(a); }), label: function (v) { return v; } },
-      sess: { vals: ['March', 'May/June', 'October/November'], label: function (v) { return v; } },
+      sess: { vals: ['March', 'May/June', 'Oct/Nov'], label: function (v) { return v; } },
       cls: { vals: ['IGCSE', 'AS & A Level'], label: function (v) { return v; } },
       diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } },
       type: { vals: ['MCQ', 'Subjective'], label: function (v) { return v; } }
@@ -1434,6 +1438,57 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     S.q = ''; S.onlySel = false; S.flag = false; S.attn = false; S.oos = false; $('.qb-search').value = ''; apply();
   });
 
+  /* ---------- count panels: close button, and clicking a count shows those questions ---------- */
+  function closePanels() {
+    $$('.qb-panel').forEach(function (pn) { pn.hidden = true; });
+    document.querySelectorAll('[data-qbpanel]').forEach(function (x) { x.setAttribute('aria-selected', 'false'); x.setAttribute('aria-checked', 'false'); });
+  }
+  $$('.qb-pclose').forEach(function (b) { b.addEventListener('click', closePanels); });
+  /* clear every filter, apply the given one, close the count panels and scroll to the question list */
+  function showOnly(set) {
+    closeClassPopup();
+    ['year', 'sess', 'cls', 'blk', 'diff', 'type', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
+    S.q = ''; S.onlySel = false; S.flag = false; S.attn = false; S.oos = false; $('.qb-search').value = '';
+    set(); apply(); closePanels();
+    var to = $('.qb-layout'); if (to && to.scrollIntoView) to.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  /* a class tile (IGCSE, AS & A Level) opens a list of its chapters with their question counts */
+  var popOff = null;
+  function closeClassPopup() { var m = document.getElementById('qbClassPop'); if (m) m.parentNode.removeChild(m); if (popOff) { popOff(); popOff = null; } }
+  function classPopup(k, from) {
+    closeClassPopup();
+    var rows = VR().filter(function (q) { return q.class === k; }), n = {};
+    rows.forEach(function (q) { var c = n[q.chapter_code] || (n[q.chapter_code] = { t: 0, L1: 0, L2: 0, L3: 0 }); c.t++; if (c[q.difficulty] != null) c[q.difficulty]++; });
+    var chs = CHAPTERS.filter(function (c) { return n[c.chapter_code] || (c.classes || []).indexOf(k) >= 0 || c.class === k; });
+    var back = el('div', 'qb-cpop-back'); back.id = 'qbClassPop';
+    var box = el('div', 'qb-cpop'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', k + ' chapters');
+    var head = el('div', 'qb-cpop-head');
+    var tt = el('div'); tt.appendChild(el('h3', null, k + ' chapters')); tt.appendChild(el('p', null, rows.length ? rows.length + (rows.length === 1 ? ' question' : ' questions') + ' in ' + Object.keys(n).length + ' of ' + chs.length + ' chapters. Click a chapter to see its questions.' : 'No ' + k + ' questions have been added yet.'));
+    var x = el('button', 'qb-pclose', '\u00d7'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.title = 'Close'; x.addEventListener('click', function () { closeClassPopup(); if (from) from.focus(); });
+    head.appendChild(tt); head.appendChild(x); box.appendChild(head);
+    if (rows.length) { var all = el('button', 'qb-btn qb-cpop-all', 'Show all ' + rows.length + ' ' + k + ' questions'); all.type = 'button'; all.addEventListener('click', function () { showOnly(function () { S.cls.add(k); }); }); box.appendChild(all); }
+    var wrap = el('div', 'qb-cpop-list'), tb = el('table'), th = el('thead'), hr = el('tr');
+    ['Code', 'Chapter', 'L1', 'L2', 'L3', 'Questions'].forEach(function (h) { hr.appendChild(el('th', null, h)); }); th.appendChild(hr); tb.appendChild(th);
+    var body = el('tbody');
+    chs.forEach(function (c) {
+      var v = n[c.chapter_code] || { t: 0, L1: 0, L2: 0, L3: 0 }, tr = el('tr', v.t ? null : 'empty');
+      [c.chapter_code, c.chapter, v.L1, v.L2, v.L3, v.t].forEach(function (val) { tr.appendChild(el('td', typeof val === 'number' && val === 0 ? 'z' : null, String(val))); });
+      if (v.t) {
+        tr.tabIndex = 0; tr.title = 'Show the ' + v.t + ' questions of ' + c.chapter;
+        var go = function () { showOnly(function () { S.ch.add(c.chapter_code); }); };
+        tr.addEventListener('click', go); tr.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+      }
+      body.appendChild(tr);
+    });
+    if (!chs.length) { var er = el('tr'), ed = el('td', 'z', 'No chapters yet.'); ed.colSpan = 6; er.appendChild(ed); body.appendChild(er); }
+    tb.appendChild(body); wrap.appendChild(tb); box.appendChild(wrap); back.appendChild(box);
+    back.addEventListener('click', function (e) { if (e.target === back) closeClassPopup(); });
+    (document.getElementById('dash-root') || document.body).appendChild(back);
+    var key = function (e) { if (e.key === 'Escape') { e.stopPropagation(); closeClassPopup(); if (from) from.focus(); } };
+    document.addEventListener('keydown', key, true); popOff = function () { document.removeEventListener('keydown', key, true); };
+    x.focus();
+  }
+
   /* ---------- selection ---------- */
   function toggleSel(id, on) { if (on) S.sel.add(id); else S.sel.delete(id); updateSelUI(); }
   $('.qb-selall').addEventListener('click', function () { shown().forEach(function (q) { S.sel.add(q.id); }); updateSelUI(); });
@@ -1599,11 +1654,15 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
         var td = el('td', typeof r[k] === 'number' && r[k] === 0 ? 'z' : null, String(r[k]));
         tr.appendChild(td);
       });
-      tr.addEventListener('click', function () { if (S.ch.has(r.chapter_code)) S.ch.delete(r.chapter_code); else S.ch.add(r.chapter_code); apply(); });
+      if (!r.total) tr.classList.add('empty');
+      else { tr.tabIndex = 0; tr.title = 'Show the ' + r.total + ' questions of ' + r.chapter; }
+      var go = function () { if (r.total) showOnly(function () { S.ch.add(r.chapter_code); }); };
+      tr.addEventListener('click', go); tr.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
       tb.appendChild(tr);
     });
     var sum = function (k) { return rows.reduce(function (a, r) { return a + (r[k] || 0); }, 0); };
-    var tot = el('tr', 'qb-total'); tot.style.fontWeight = '700'; tot.style.cursor = 'default';
+    var tot = el('tr', 'qb-total'); tot.style.fontWeight = '700'; tot.tabIndex = 0; tot.title = 'Show all questions';
+    tot.addEventListener('click', function () { showOnly(function () {}); }); tot.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showOnly(function () {}); } });
     ['', 'All chapters', '', sum('l1'), sum('l2'), sum('l3'), sum('total')].forEach(function (v) { tot.appendChild(el('td', null, String(v))); });
     tb.appendChild(tot);
     $$('#overview tbody tr').forEach(function (tr) { tr.classList.toggle('on', S.ch.has(tr.dataset.key)); });
