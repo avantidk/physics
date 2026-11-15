@@ -8,3 +8,22 @@
 .pt-dtx{display:flex;flex-direction:column;gap:1px;min-width:0}.pt-dtx b{font-size:14px;font-weight:600}.pt-dtx small{font-size:12px;color:var(--color-fg-muted,#5d6a85)}
 .pt-dsep{height:1px;background:var(--color-border-line,rgba(128,128,128,.3));margin:4px 6px}
 #selection .qb-exp{display:none!important}
+
+/* PYQ: Question Paper / Chapterwise switch */
+.pyqkind{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 16px}
+.pyqk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:12px 14px;border:2px solid transparent;border-radius:12px;background:var(--field,#eef1f8);color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+.pyqk strong{font-size:15px;font-weight:700;line-height:1.2}
+.pyqk span{font-size:12px;line-height:1.3;opacity:.7}
+.pyqk:hover{background:color-mix(in srgb,#1f3f95 9%,var(--field,#eef1f8))}
+.pyqk:focus-visible{outline:2px solid #1f3f95;outline-offset:2px}
+.pyqk[aria-pressed=true]{background:color-mix(in srgb,#1f3f95 10%,#fff);border-color:#2b4aa0}
+.pyqk[aria-pressed=true] strong{color:#1c3a8c}
+@media (max-width:420px){.pyqkind{grid-template-columns:1fr}}
+
+/* top bar: logo, tabs and buttons all on one line */
+@media (min-width:641px){
+  html body .topbar{flex-direction:row!important;justify-content:center;align-items:center;padding:0!important;height:84px;min-height:84px}
+  html body .tb-menu{margin:0!important}
+  html body .tb-logo{top:calc(50% - 27px)!important}
+  html body .tb-theme{top:calc(50% - 20px)!important}
+}

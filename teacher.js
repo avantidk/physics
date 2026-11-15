@@ -883,42 +883,39 @@ function exportLib(kind) {
   doExport(kind, { pages, file: pages[0].file });
 }
 /* ---------- "PYQ ChapterWise PDF" and "Shift Wise PDF" tabs ---------- */
-const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], types: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, year: 'all', key: false } };
+const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], types: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], key: false } };
 const BUCKET_NAME = { School: 'School Level' };
 const chOrder = cc => { const c = CHMAP.get(cc); return c.cl * 100 + c.o; };
 function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P'); }
 const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
+const swOk = q => { const P = PDFT.sw; return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))); };
+const swKey = () => ['years', 'cls'].map(k => PDFT.sw[k].length ? PDFT.sw[k].slice().sort().join(',') : 'all').join('/');
 const cwYrKey = () => ['years', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
 const cwYrSfx = () => ['cls', 'years', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
 function pdfRows(T) {
-  const P = PDFT[T], key = 'rows|' + T + '|' + P.bucket + (T === 'cw' ? '|' + cwYrKey() : '');
+  const P = PDFT[T], key = 'rows|' + T + '|' + P.bucket + '|' + (T === 'cw' ? cwYrKey() : swKey());
   if (BK[key]) return BK[key];
   const qs = pyqOf(P.bucket).filter(q => T !== 'cw' || cwYearOk(q)); let rows = [];
   if (T === 'cw') {
     const by = {}; qs.forEach(q => { (by[q.cc] = by[q.cc] || []).push(q); });
     rows = Object.keys(by).sort((a, b) => chOrder(a) - chOrder(b)).map(cc => ({ k: cc, name: CHMAP.get(cc).n, qs: by[cc], file: CHMAP.get(cc).n + ' ' + BUCKET_NAME[P.bucket] + ' Questions' + (T === 'cw' ? cwYrSfx() : '') }));
   } else {
-    const by = {};
-    qs.forEach(q => { if (/^PYQARC/.test(q.i) || /shift not given|Year not printed/i.test(q.p || '')) return; const k = (q.y || '') + '|' + q.p; (by[k] = by[k] || []).push(q); });
-    const sk = k => { const q = by[k][0], m = /^(?:J[MA]|IIT)(\d{4})(\d{2})(\d{2})(\d)/.exec(q.i) || /^(?:KCET|IAT|NDA)(\d{4})(\d{2})(\d{2})()/.exec(q.i); return m ? m[1] + m[2] + m[3] + m[4] : String(q.y || '') + '0000' + (/(\d)\s*$/.exec(q.p) || [0, 0])[1]; };
-    rows = Object.keys(by).sort((a, b) => sk(b).localeCompare(sk(a))).map(k => {
-      const q = by[k][0], name = P.bucket === 'Adv' && q.y >= 2013 ? q.y + ' \u00b7 ' + q.p : q.p.replace(/\s+(Shift|Screening|Mains|Paper)/, ' \u00b7 $1');
-      return { k, name, qs: by[k], file: BUCKET_NAME[P.bucket] + ' ' + name + ' Questions' };
-    });
+    const by = {}; qs.filter(swOk).forEach(q => { const k = q.p || q.i; (by[k] = by[k] || []).push(q); });
+    rows = Object.keys(by).sort((a, b) => (by[b][0].y || 0) - (by[a][0].y || 0) || a.localeCompare(b)).map(k => ({ k, name: k, qs: by[k], file: k.replace(/\//g, '-') + ' Question Paper' }));
   }
   return (BK[key] = rows);
 }
 /* one page set per row; chapter wise = topic wise inside the chapter, shift wise = chapter order */
 function pdfPages(T, r) {
-  const key = 'pg|' + T + '|' + PDFT[T].bucket + '|' + (T === 'cw' ? cwYrKey() + '|' : '') + r.k; if (BK[key]) return BK[key];
+  const key = 'pg|' + T + '|' + PDFT[T].bucket + '|' + (T === 'cw' ? cwYrKey() : swKey()) + '|' + r.k; if (BK[key]) return BK[key];
   const bucket = PDFT[T].bucket, sub = (T !== 'cw' && bucket === 'Adv' && r.qs[0] && r.qs[0].y && r.qs[0].y < 2013 ? 'IIT-JEE' : BUCKET_NAME[bucket]) + (T === 'cw' ? ' \u00b7 all topics' : '');
   let flat = [];
   if (T === 'cw') {
     const c = PYQT[r.k], topics = c ? c.topics.map(t => ({ label: t.code || ('Topic ' + t.no), name: t.name, qs: t.qs.filter(q => cwYearOk(q)) })).concat([{ label: 'Other', name: 'Other topics', qs: c.other.filter(q => cwYearOk(q)) }]) : [{ label: '', name: 'All topics', qs: r.qs }];
     topics.forEach(t => t.qs.forEach((q, i) => flat.push(Object.assign({}, q, { _pf: 1, _t: (t.label ? t.label + ' \u00b7 ' : '') + t.name, head: i === 0 ? (t.label ? t.label + ' \u00b7 ' : '') + t.name : '' }))));
   } else {
-    r.qs.slice().sort((a, b) => chOrder(a.cc) - chOrder(b.cc)).forEach(q => flat.push(Object.assign({}, q, { _pf: 1, _t: '', head: '' }))); /* question paper: no chapter names, like a real paper */
+    r.qs.slice().sort((a, b) => (+String(a.i).split('-').pop() || 0) - (+String(b.i).split('-').pop() || 0)).forEach(q => flat.push(Object.assign({}, q, { _pf: 1, _t: '', head: '' }))); /* question paper: no chapter names, like a real paper */
   }
   const pages = packPages(flat, (g, i, n) => ({ title: r.name, sub, pyq: true, pg: n > 1 ? (i + 1) + ' of ' + n : '' }));
   if (T === 'cw') pages.forEach(pg => { if (pg.qs.length && !pg.qs[0].head) pg.qs = [Object.assign({}, pg.qs[0], { head: pg.qs[0]._t + ' (continued)' })].concat(pg.qs.slice(1)); });
@@ -1025,38 +1022,34 @@ function renderPdfTab(T) {
     view.append(
       h('div', { class: 'rail' }, h('div', { class: 'card' },
         h('div', { class: 'tglrow' }, keySwitch(T + 'Key', 'pdfkey', { 'data-t': T }), expSwitch(T + 'Expl', 'pdfexp', { 'data-t': T })),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), msel('cwYr', 'years')),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), msel('cwCl', 'classes')),
-        h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapter' }), ssel(T + 'Pick', 'a chapter'))),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')))),
+        h('div', { class: 'pyqkind', role: 'group', 'aria-label': 'PYQs' }, [['sw', 'Question Paper', 'A whole paper'], ['cw', 'Chapterwise', 'Every chapter, all topics']].map(([k, t, d]) =>
+          h('button', { type: 'button', class: 'pyqk', 'aria-pressed': String(T === k), onclick: () => { if (PYQSUB !== k) { PYQSUB = k; pyqShow(); } } }, h('strong', { text: t }), h('span', { text: d })))),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), msel(T + 'Yr', 'years')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), msel(T + 'Cl', 'classes')),
+        h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: T === 'cw' ? 'Chapter' : 'Question paper (code)' }), ssel(T + 'Pick', T === 'cw' ? 'a chapter' : 'a paper'))),
+        T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')) : null,
+        T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')) : null)),
       h('div', { class: 'stage' }, h('div', { class: 'statbar' }, h('div', { class: 'msg', id: T + 'Msg', 'aria-live': 'polite' }), h('div', { class: 'pgbtns', id: T + 'Pages', hidden: true }), h('div', { class: 'rowbtns', id: T + 'Exp', hidden: true }, ...[['docx', 'Word (editable)'], ['pdf', 'PDF'], ['pptx', 'PowerPoint (editable)']].map(([f, nm]) => h('button', { type: 'button', class: 'btn ibtn', 'data-act': 'pdfdl', 'data-t': T, 'data-k': '', 'data-f': f, title: 'Download ' + nm, 'aria-label': 'Download ' + nm, html: FIMG[f] })), ...['xprint', 'xshare'].map(a => { const b = a === 'xprint' ? prtBtn('pyq') : shrBtn('pyq'); b.dataset.t = T; b.dataset.k = ''; return b; }), wsRow(T)), h('button', { type: 'button', class: 'btn ibtn maxbtn', 'data-act': 'max', 'aria-pressed': 'false', title: 'Maximize', 'aria-label': 'Maximize', html: ICO.max })), h('div', { class: 'pgwrap', id: T + 'Prev' })));
     if (window.ResizeObserver) new ResizeObserver(rescale).observe($('#' + T + 'Prev'));
   }
   const list = $('#' + T + 'List'); list.querySelectorAll('.hint').forEach(e => e.remove());
   let rows = pdfRows(T); const my = ++P.v;
-  if (T === 'cw') {
-    const all = pyqOf(P.bucket), refresh = () => { P.sel = null; P.page = 0; renderPdfTab('cw'); };
+  {
+    const all = pyqOf(P.bucket), refresh = () => { P.sel = null; P.page = 0; renderPdfTab(T); };
     const cnt = {}; all.forEach(q => { if (q.y) cnt[q.y] = (cnt[q.y] || 0) + 1; });
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
     P.years = P.years.filter(y => ys.includes(+y));
-    mfill('cwYr', ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
-    mfill('cwCl', ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']), P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
-    mfill('cwLv', ['L1', 'L2', 'L3'].map(l => [l, l + ' (' + all.filter(q => q.d === l).length + ')']), P.lv, v => { P.lv = v; refresh(); }, 'levels', { none: 'All levels' });
-    mfill('cwTy', ['MCQ', 'Subjective'].map(t => [t, t + ' (' + all.filter(q => q.t === t).length + ')']), P.types, v => { P.types = v; refresh(); }, 'question types', { none: 'All question types' });
+    mfill(T + 'Yr', ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
+    mfill(T + 'Cl', ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']), P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
+    if (T === 'cw') {
+      mfill('cwLv', ['L1', 'L2', 'L3'].map(l => [l, l + ' (' + all.filter(q => q.d === l).length + ')']), P.lv, v => { P.lv = v; refresh(); }, 'levels', { none: 'All levels' });
+      mfill('cwTy', ['MCQ', 'Subjective'].map(t => [t, t + ' (' + all.filter(q => q.t === t).length + ')']), P.types, v => { P.types = v; refresh(); }, 'question types', { none: 'All question types' });
+    }
     rows = pdfRows(T);
-  }
-  if (T === 'sw') {
-    const ys = [...new Set(rows.map(r => r.qs[0].y))].filter(Boolean).sort((a, b) => b - a), sel = $('#swYear');
-    if (P.year !== 'all' && !ys.includes(+P.year)) P.year = 'all';
-    sel.textContent = ''; sel.append(h('option', { value: 'all', text: 'All years (' + rows.length + ' papers)' }));
-    ys.forEach(y => sel.append(h('option', { value: String(y), text: y + ' (' + rows.filter(r => r.qs[0].y === y).length + ')' })));
-    sel.value = P.year;
-    if (P.year !== 'all') rows = rows.filter(r => String(r.qs[0].y) === P.year);
   }
   if (P.sel && !rows.some(r => r.k === P.sel)) P.sel = null;
   if (!rows.length) { list.append(h('p', { class: 'hint', text: 'No questions here yet.' })); }
-  sfill(T + 'Pick', rows.map(r => [r.k, (T === 'cw' ? r.k + ' ' : '') + r.name + ' (' + qWord(r.qs.length) + ')']), P.sel, k => { P.sel = k; P.page = 0; const r0 = rows.find(r => r.k === k); if (r0) $('.mt', $('#' + T + 'Pick')).textContent = (T === 'cw' ? r0.k + ' ' : '') + r0.name; showPdfPrev(T); }, T === 'cw' ? 'a chapter' : 'a shift', { empty: 'No questions here yet' });
+  sfill(T + 'Pick', rows.map(r => [r.k, (T === 'cw' ? r.k + ' ' : '') + r.name + ' (' + qWord(r.qs.length) + ')']), P.sel, k => { P.sel = k; P.page = 0; const r0 = rows.find(r => r.k === k); if (r0) $('.mt', $('#' + T + 'Pick')).textContent = (T === 'cw' ? r0.k + ' ' : '') + r0.name; showPdfPrev(T); }, T === 'cw' ? 'a chapter' : 'a paper', { empty: 'No questions here yet' });
   markPdfRows(T);
   showPdfPrev(T);
 }
@@ -1077,7 +1070,7 @@ function renderHandouts() {}
 function renderMust() {}
 function mustPages() { return null; }
 
-let PYQSUB = 'cw';
+let PYQSUB = (() => { try { return localStorage.getItem('avanti-pyqsub') === 'cw' ? 'cw' : 'sw'; } catch (e) { return 'sw'; } })();
 function pyqShow() {
   hideViews();
   try { localStorage.setItem('avanti-pyqsub', PYQSUB); } catch (e) { /* optional */ }
@@ -1137,7 +1130,7 @@ function onAct(e) {
     case 'guideback': if (e.target === t) guideClose(); break;
     case 'qbinfo': { const pp = $('#qbPop'), op = pp.hidden; pp.hidden = !op; t.setAttribute('aria-expanded', String(op)); break; }
     case 'tab': setTab(k); break;
-    case 'pyqsub': PYQSUB = 'cw'; pyqShow(); break;
+    case 'pyqsub': PYQSUB = k === 'cw' ? 'cw' : 'sw'; pyqShow(); break;
     case 'libkind': LS.kind = k; LS.idk = ''; LS.chTouched = false; renderLib(); break;
     case 'oos': { OOS.ex = k === 'ex'; try { localStorage.setItem('oosEx2', OOS.ex ? '1' : '0'); } catch (e) {} applyOos(); LS.idk = ''; syncOos(); renderLib(); toast(OOS.ex ? 'Out-of-syllabus questions excluded' : 'Out-of-syllabus questions included'); break; }
     case 'pdfex': { const T = t.dataset.t; PDFT[T].bucket = k; PDFT[T].sel = null; PDFT[T].page = 0; renderPdfTab(T); break; }
