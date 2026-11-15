@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '22';   /* website version: matches the published version number */
+const SITE_VERSION = '23';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -1038,7 +1038,7 @@ function renderPdfTab(T) {
   const list = $('#' + T + 'List'); list.querySelectorAll('.hint').forEach(e => e.remove());
   let rows = pdfRows(T); const my = ++P.v;
   {
-    const all = pyqOf(P.bucket), refresh = () => { P.sel = null; P.page = 0; renderPdfTab(T); };
+    const all = pyqOf(P.bucket), refresh = () => { P.page = 0; renderPdfTab(T); };   /* keep the picked chapter / paper; it is dropped below only if the new filters leave it with no questions */
     const cnt = {}; all.forEach(q => { if (q.y) cnt[q.y] = (cnt[q.y] || 0) + 1; });
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
     P.years = P.years.filter(y => ys.includes(+y));
