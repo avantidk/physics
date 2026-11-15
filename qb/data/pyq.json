@@ -1387,7 +1387,7 @@
   "chapter_code": "P11",
   "chapter": "Thermal energy transfers",
   "difficulty": "L2",
-  "question": "Three solid copper spheres, X, Y and Z, are heated to the same temperature.\n{{figure}}\nWhich row gives the order for the rate of emission of radiation?",
+  "question": "Three solid copper spheres, X, Y and Z, are heated to the same temperature.\n{{tbl:sphere\u001fdiameter\u001fcolour of surface\u001eX\u001f\\(\\mathrm{2}\\mathit{d}\\)\u001fblack\u001eY\u001f\\(\\mathit{d}\\)\u001fwhite\u001eZ\u001f\\(\\mathrm{2}\\mathit{d}\\)\u001fwhite}}\nWhich row gives the order for the rate of emission of radiation?",
   "options": [
    "highest rate of emission: X; second highest rate of emission: Y; lowest rate of emission: Z",
    "highest rate of emission: X; second highest rate of emission: Z; lowest rate of emission: Y",
@@ -4087,7 +4087,7 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L3",
-  "question": "Students are asked to predict the order in which three liquids, P, Q and R, will float on each other. They are told that the liquids will not mix.\nThe diagrams show how the density of liquid P is determined.\n{{figure}}\nThe table shows the densities of Q and R.\nThe liquids are poured gently into a tall beaker and allowed to settle.\nWhich diagram shows the liquids settled in the correct order?\n{{f3}}",
+  "question": "Students are asked to predict the order in which three liquids, P, Q and R, will float on each other. They are told that the liquids will not mix.\nThe diagrams show how the density of liquid P is determined.\n{{figure}}\nThe table shows the densities of Q and R.\n{{tbl:liquid\u001f\\(\\mathrm{density}\\mathrm{/}{\\mathrm{g/cm}}^{\\mathrm{3}}\\)\u001eQ\u001f0.75\u001eR\u001f1.1}}\nThe liquids are poured gently into a tall beaker and allowed to settle.\nWhich diagram shows the liquids settled in the correct order?\n",
   "options": [
    "Beaker A",
    "Beaker B",
@@ -5112,7 +5112,7 @@
   "chapter_code": "P1",
   "chapter": "Making measurements",
   "difficulty": "L1",
-  "question": "Three different liquids are poured into a tall beaker. The liquids do not mix.\nThe liquid densities are shown in the table.\n{{figure}}\nWhat is the correct order of the liquids from the top of the beaker to the bottom?",
+  "question": "Three different liquids are poured into a tall beaker. The liquids do not mix.\nThe liquid densities are shown in the table.\n{{tbl:liquid\u001f\\(\\mathrm{density}\\mathrm{/}{\\mathrm{g/cm}}^{\\mathrm{3}}\\)\u001eP\u001f1.8\u001eQ\u001f2.4\u001eR\u001f1.2}}\nWhat is the correct order of the liquids from the top of the beaker to the bottom?",
   "options": [
    "P → Q → R",
    "Q → P → R",
@@ -5388,7 +5388,7 @@
   "chapter_code": "P11",
   "chapter": "Thermal energy transfers",
   "difficulty": "L2",
-  "question": "A scientist measures the air temperature at different heights from the floor in a cave. The results are recorded in the table.\n{{figure}}\nWhy does altering the height affect the temperature of the air?",
+  "question": "A scientist measures the air temperature at different heights from the floor in a cave. The results are recorded in the table.\n{{tbl:height/m\u001ftemperature/°C\u001e0\u001f10\u001e10\u001f11\u001e20\u001f13\u001e30\u001f14\u001e40\u001f16}}\nWhy does altering the height affect the temperature of the air?",
   "options": [
    "The particles in warm air have less energy than the particles in cool air.",
    "The particles in cool air are further apart than the particles in warm air.",
@@ -5813,7 +5813,7 @@
   "chapter_code": "P23",
   "chapter": "Radioactivity",
   "difficulty": "L3",
-  "question": "Some students set up an experiment to measure the count rate for a radioactive source.\nFirst, they measure the radioactive background count rate in the laboratory by taking three measurements. Each measurement is taken over a 10-minute period.\nThe table shows their results.\n{{figure}}\nNext, the students measure the counts near the radioactive source. This count rate is measured as 949 counts per minute.\nWhat is the corrected count rate for the source?",
+  "question": "Some students set up an experiment to measure the count rate for a radioactive source.\nFirst, they measure the radioactive background count rate in the laboratory by taking three measurements. Each measurement is taken over a 10-minute period.\nThe table shows their results.\n{{tbl:first measurement (counts in 10 minutes)\u001fsecond measurement (counts in 10 minutes)\u001fthird measurement (counts in 10 minutes)\u001e170\u001f164\u001f185}}\nNext, the students measure the counts near the radioactive source. This count rate is measured as 949 counts per minute.\nWhat is the corrected count rate for the source?",
   "options": [
    "932 counts per minute",
    "776 counts per minute",

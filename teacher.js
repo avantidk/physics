@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '26';   /* website version: matches the published version number */
+const SITE_VERSION = '27';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -192,15 +192,17 @@ function buildQ(q, n, p) {
   const t = p.tag ? tagText(q) : '';
   const mt = matchParts(q.q);
   let txt = String(mt ? mt.pre : q.q), after = '';
+  const stemKids = s => { const out = []; let buf = []; const flush = () => { if (buf.length) { const d = h('div', { class: 'stem' }); d.insertAdjacentHTML('afterbegin', boldHtml(tallToDisplay(buf.join('\n')))); out.push(d); buf = []; } }; s.split('\n').forEach(line => { const m = /^\{\{tbl:([\s\S]*)\}\}$/.exec(line.trim()); if (m) { flush(); const rows = m[1].split('\x1e').map(r => r.split('\x1f')); out.push(h('table', { class: 'dt' }, rows.map((r, ri) => h('tr', {}, r.map(c => { const cell = h(ri ? 'td' : 'th'); cell.insertAdjacentHTML('afterbegin', boldHtml(tallToDisplay(c))); return cell; }))))); } else buf.push(line); }); flush(); return out; };
   const fx = txt.indexOf('{{figure}}');
   if (fx > -1) { after = txt.slice(fx + 10).trim(); txt = txt.slice(0, fx).trim(); }
   const tags = [hint ? h('span', { class: 'tag', text: hint }) : null, t ? h('span', { class: 'tag', text: t }) : null];
-  const stem = h('div', { class: 'stem' }, ...(after ? [] : tags));
-  stem.insertAdjacentHTML('afterbegin', boldHtml(tallToDisplay(txt)));
-  const kids = [stem];
+  const stems = stemKids(txt), stem = stems[stems.length - 1] && stems[stems.length - 1].tagName === 'DIV' ? stems[stems.length - 1] : h('div', { class: 'stem' });
+  if (!after) tags.forEach(t => t && stem.append(t));
+  if (!stems.includes(stem)) stems.push(stem);
+  const kids = [...stems];
   if (mt) kids.push(matchTable(mt));
   if (q.f) kids.push(h('img', { class: 'fig', alt: 'Figure', src: figSrc(q.f), width: q.f.w, height: q.f.h }));
-  if (after) { const st2 = h('div', { class: 'stem' }, ...tags); st2.insertAdjacentHTML('afterbegin', boldHtml(tallToDisplay(after))); kids.push(st2); }
+  if (after) { const aft = stemKids(after); let st2 = aft[aft.length - 1] && aft[aft.length - 1].tagName === 'DIV' ? aft[aft.length - 1] : null; if (!st2) { st2 = h('div', { class: 'stem' }); aft.push(st2); } tags.forEach(t => t && st2.append(t)); kids.push(...aft); }
   if (q.o.length) kids.push(h('div', { class: 'opts ' + cls, style: q.o.some(o => /\\d?frac/.test(o)) ? 'row-gap:.8em' : '' }, q.o.map((o, i) => h('div', { class: 'opt' }, h('b', { text: '(' + 'ABCD'[i] + ')' }), h('span', { text: o })))));
   const node = h('div', { class: 'sq' }, q.head ? h('div', { class: 'qhead', text: q.head }) : null, h('div', { class: 'qn', text: n + '.' }), h('div', { class: 'qb' }, kids));
   math(node);

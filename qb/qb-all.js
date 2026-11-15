@@ -1,4 +1,7 @@
 /* Plan permissions (set from the Supabase profile by auth.js): Free views only, Premium gets PDF, Staff gets everything. */
+/* tables inside a question: one text line  {{tbl:cell\x1fcell\x1erow...}}  (\x1f between cells, \x1e between rows) */
+window.__tblRows = function (s) { return String(s).split('\x1e').map(function (r) { return r.split('\x1f'); }); };
+window.__tblPlain = function (s) { return String(s).replace(/(^|\n)\{\{tbl:([^\n]*)\}\}/g, function (m, a, t) { return a + window.__tblRows(t).map(function (r) { return r.join(' | '); }).join('\n'); }); };
 function QBP(k) { var p = window.AvantiAuth && window.AvantiAuth.perm; return !!(p && p[k] === true); }
 /* Runs the question bank's own code (written for a dashboard page) inside this page. */
 (function () {
@@ -303,12 +306,19 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var lab = function (m) { return m[1] + '-' + m[2] + (m[3] ? ' ' + m[3] : ''); };
     return { pre: ls.slice(0, a).join('\n'), h1: lab(ma).replace(/^List-/, 'List-').replace(/^Column-/, 'Column '), h2: lab(mb).replace(/^Column-/, 'Column '), a: A, b: B };
   }
+  function tblWord(rows) {
+    var nc = Math.max.apply(null, rows.map(function (r) { return r.length; })), w = Math.floor(7600 / nc), bd = function (n) { return '<w:' + n + ' w:val="single" w:sz="4" w:space="0" w:color="444444"/>'; };
+    return '<w:tbl><w:tblPr><w:tblW w:w="' + (w * nc) + '" w:type="dxa"/><w:tblInd w:w="284" w:type="dxa"/><w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(bd).join('') + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="100" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>' + Array(nc + 1).join('<w:gridCol w:w="' + w + '"/>') + '</w:tblGrid>' +
+      rows.map(function (r, ri) { var cells = ''; for (var j = 0; j < nc; j++) cells += '<w:tc><w:tcPr><w:tcW w:w="' + w + '" w:type="dxa"/>' + (ri ? '' : '<w:shd w:val="clear" w:color="auto" w:fill="E8F0EF"/>') + '</w:tcPr>' + (r[j] ? richParas(r[j], '', { after: 0 }) : '<w:p/>') + '</w:tc>'; return '<w:tr><w:trPr><w:cantSplit/></w:trPr>' + cells + '</w:tr>'; }).join('') + '</w:tbl>' + para('', { after: 60 });
+  }
   function richParas(s, prefix, o) {
     var mt = matchParse(s);
     if (mt) return matchWord(mt, prefix, o);
     var out = [];
     String(s).split('\n').forEach(function (line, li) {
       var cur = li === 0 && prefix ? prefix : '';
+      var tm = /^\{\{tbl:([\s\S]*)\}\}$/.exec(line.trim());
+      if (tm) { if (cur) out.push(para(cur, o)); out.push(tblWord(window.__tblRows(tm[1]))); return; }
       if (line.trim() === '{{figure}}') { if (cur) out.push(para(cur, o)); if (FIG) out.push(para(wDrawing(FIG), { after: 60 })); return; }
       segments(line).forEach(function (sg) {
         if (sg.t === 'text') boldParts(sg.v).forEach(function (bp) { cur += wRun(bp.s, bp.b ? { b: 1 } : null); });
@@ -629,6 +639,8 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
       return (mt.pre.trim() ? richHtml(mt.pre, fig) : '') + '<table class="mt">' + rows + '</table>';
     }
     return String(fig ? figLines(s) : s).split('\n').map(function (line) {
+      var tm = /^\{\{tbl:([\s\S]*)\}\}$/.exec(line.trim());
+      if (tm) return '<table class="dt">' + window.__tblRows(tm[1]).map(function (r, ri) { return '<tr>' + r.map(function (c) { var t = ri ? 'td' : 'th'; return '<' + t + '>' + richHtml(c) + '</' + t + '>'; }).join('') + '</tr>'; }).join('') + '</table>';
       if (line.trim() === '{{figure}}') return fig && fig.svg ? '<div class="fig" style="margin:6px 0">' + String(fig.svg).replace(/<svg /, '<svg style="width:' + fig.w + 'px;height:' + fig.h + 'px" ') + '</div>' : '';
       return segments(line).map(function (sg) {
         if (sg.t === 'text') return boldParts(sg.v).map(function (bp) { return bp.b ? '<b>' + esc(bp.s) + '</b>' : esc(bp.s); }).join('');
@@ -649,7 +661,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     return '<div class="key">' + qs.slice(from, to).map(function (q, k) { return '<div><b>' + (from + k + 1) + '.</b> ' + esc(q.answer || '—') + '</div>'; }).join('') + '</div>';
   }
   /* CSS scoped to .qbp (PDF pages) — also used, unscoped, by the print-file fallback */
-  var PCSS = '.qbp .katex-html{display:none!important}.qbp{font-family:Arial,Helvetica,"Segoe UI",sans-serif;font-size:14px;line-height:1.55;color:#000;background:#fff}' +
+  var PCSS = 'table.dt{border-collapse:collapse;margin:6px 0}table.dt td,table.dt th{border:1px solid #222;padding:3px 10px;text-align:center}table.dt th{background:#e8f0ef;font-weight:700}' + '.qbp .katex-html{display:none!important}.qbp{font-family:Arial,Helvetica,"Segoe UI",sans-serif;font-size:14px;line-height:1.55;color:#000;background:#fff}' +
     '.qbp .h1{font-size:20px;font-weight:700;margin:0}.qbp .meta{font-size:10.5px;color:#777;margin-bottom:2px}' +
     '.qbp .qt{margin-bottom:4px}.qbp .ops{display:grid;gap:2px 14px;margin-left:16px}.qbp .ops.c4{grid-template-columns:repeat(4,1fr)}.qbp .ops.c2{grid-template-columns:repeat(2,1fr)}.qbp .ops.c1{grid-template-columns:1fr}' +
     '.qbp .op{min-width:0}.qbp .ans{margin-top:3px}.qbp .keyh{font-size:17px;font-weight:700}.qbp .key{display:grid;grid-template-columns:repeat(6,1fr);gap:4px 12px}' +
@@ -757,7 +769,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     return '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(o.title || 'Physics Questions') + '</title><style>' + PCSS + (window.QB_TEMML_CSS || '') + '.blk{margin-bottom:16px;break-inside:avoid}.brk{break-after:page;min-height:1px}@page{size:A4;margin:12mm}</style></head><body class="qbp">' + body +
       '<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)})<\/script></body></html>';
   }
-  function plainText(q) { return q.question.replace(/\*\*/g, '').replace(FIG_RE, ' [figure] ') + '\n' + (q.options || []).map(function (op, j) { return '(' + LET[j] + ') ' + op; }).join('\n'); }
+  function plainText(q) { return window.__tblPlain(q.question).replace(/\*\*/g, '').replace(FIG_RE, ' [figure] ') + '\n' + (q.options || []).map(function (op, j) { return '(' + LET[j] + ') ' + op; }).join('\n'); }
 
   window.QBX = { segments: segments, optCols: optCols, buildDocx: buildDocx, buildPptx: buildPptx, buildPdf: buildPdf, printDocument: printDocument, plainText: plainText, richHtml: richHtml, texToOmml: texToOmml, boldParts: boldParts, spaceCases: spaceCases };
 })();
@@ -905,6 +917,8 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     }
     var CI = fig && fig.card && fig.card.imgs, prevRow = false;
     String(s).split('\n').forEach(function (line, i) {
+      var tm = /^\{\{tbl:([\s\S]*)\}\}$/.exec(line.trim());
+      if (tm) { var tb = el('table', 'qb-dt'); window.__tblRows(tm[1]).forEach(function (r, ri) { var trw = el('tr'); r.forEach(function (c) { var cell = el(ri ? 'td' : 'th'); renderRich(cell, c, null); trw.appendChild(cell); }); tb.appendChild(trw); }); target.appendChild(tb); prevRow = true; return; }
       var cm = CI && /^(.*?)\{\{f([1-9])\}\}\s*$/.exec(line);
       if (cm) {
         var im2 = CI[Number(cm[2]) - 1], row = el('div', 'qb-figrow');
