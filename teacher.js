@@ -156,7 +156,7 @@ function colWidth(cols) { return Math.floor((SHEET_W - 2 * PAD_X - (cols - 1) * 
 /* question label (preview and exports): class, year, paper */
 function pyqLabel(q) {
   const y = q.y ? String(q.y) : '', p = String(q.p || '');
-  return ['Class ' + q.cl, y, p].filter(x => x && x !== 'Class 0').join(' \u00b7 ');
+  return [q.cl, y, p].filter(Boolean).join(' \u00b7 ');
 }
 function tagText(q) { if (q.s !== 'P') return q.i ? '[' + q.i + ']' : '';   /* practice (non-PYQ) questions: only their question code */
   const lv = q.lvTag ? 'L' + practiceLevel(q) : ''; const ex = pyqLabel(q); return lv || ex ? '[' + [lv, ex].filter(Boolean).join(' \u00b7 ') + ']' : ''; }
@@ -887,7 +887,7 @@ const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls:
 const BUCKET_NAME = { School: 'School Level' };
 const chOrder = cc => { const c = CHMAP.get(cc); return c.cl * 100 + c.o; };
 function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P'); }
-const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.blocks.length || (c && P.blocks.includes(c.b))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
+const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
 const cwYrKey = () => ['years', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
 const cwYrSfx = () => ['cls', 'years', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
@@ -935,7 +935,7 @@ async function cwPptxData(r) {
   const topics = pc ? pc.topics.map(t => ({ name: t.name, n: t.qs.filter(inScope).length })).concat(pc.other.filter(inScope).length ? [{ name: 'Other topics', n: pc.other.filter(inScope).length }] : []) : [];
   const figs = {}; for (const q of flat) if (q.f && !figs[q.i]) { try { figs[q.i] = await figPng(q.f); } catch (e) { /* skip the picture */ } }
   let logo = null; try { const rs = await fetch('img/ankit-logo.png'); if (rs.ok) { const bl = await rs.blob(), bm = await createImageBitmap(bl), dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(bl); }); logo = { dataUrl, w: bm.width, h: bm.height }; } } catch (e) { /* no logo file: skip */ }
-  return { logo, chapter: c.n, cl: c.cl, cc, bucket, bucketName: BUCKET_NAME[bucket], bucketLabel: bucket, year: cwYrText(), count: flat.length, years, topics, qs: flat, figs, meta: await pyqMeta() };
+  return { logo, chapter: c.n, cl: c.cl, clLabel: (c.cls || [''])[0].toUpperCase(), cc, bucket, bucketName: BUCKET_NAME[bucket], bucketLabel: bucket, year: cwYrText(), count: flat.length, years, topics, qs: flat, figs, meta: await pyqMeta() };
 }
 async function exportCwPptx(r) {
   if (!need('pptx')) return;
@@ -968,7 +968,7 @@ function qbCompact(r, withKcet) {
   const e = QB_EXAM[r.exam] || 'School';
   const P = true;
   let o = r.options || []; if (typeof o === 'string') { try { o = JSON.parse(o); } catch (x) { o = []; } }
-  const q = { i: String(r.id), s: P ? 'P' : 'N', e, cl: Number(r.class) || 0, y: P && r.year != null && r.year !== '' ? Number(r.year) : null, p: r.paper, t: r.type, cc: r.chapter_code, tc: String(r.topic_code || '').replace(/^JM-/, ''), tp: r.topic || '', d: r.difficulty, q: r.question || '', o, a: r.answer == null ? '' : String(r.answer) };
+  const q = { i: String(r.id), s: P ? 'P' : 'N', e, cl: String(r.class || ''), y: P && r.year != null && r.year !== '' ? Number(r.year) : null, p: r.paper, t: r.type, cc: r.chapter_code, tc: String(r.topic_code || '').replace(/^JM-/, ''), tp: r.topic || '', d: r.difficulty, q: r.question || '', o, a: r.answer == null ? '' : String(r.answer) };
   if (!P) { q.pb = r.publisher || 'Practice'; q.sec = r.section || ''; if (r.pyq) q.pq = r.pyq_ref || ''; }
   if (r.oos) q.oo = 1;
   if (r.figure && r.figure.svg) q.f = r.figure;
@@ -997,7 +997,7 @@ window.__qbCwPptx = async function (ids, explain) {
   let xtra = null; if (ids.some(i => !BYID.has(i))) { xtra = new Map(); (await qbJson('pyq')).forEach(r => { if (r.exam === 'KCET' || r.exam === 'IAT' || r.exam === 'NDA') { const q = qbCompact(r, true); if (q) xtra.set(q.i, q); } }); }
   const qs = ids.map(i => BYID.get(i) || (xtra && xtra.get(String(i)))).filter(Boolean); if (!qs.length) throw new Error('no questions found');
   const ccs = [...new Set(qs.map(q => q.cc))].sort((a, b) => chOrder(a) - chOrder(b)), one = ccs.length === 1, c0 = CHMAP.get(ccs[0]);
-  const cls = [...new Set(ccs.map(cc => CHMAP.get(cc).cl))].sort();
+  const cls = [...new Set(ccs.map(cc => (CHMAP.get(cc).cls || [''])[0]))];
   const synIdx = (cc, tp) => { const s = (BANK.syl || {})[cc] || []; const k = s.findIndex(t => norm(t[1]) === norm(tp)); return k < 0 ? 999 : k; };
   const tname = q => (one ? '' : CHMAP.get(q.cc).n + ' · ') + (/^UNMAPPED/.test(q.tc || '') || !q.tp || q.tp === 'Unmapped' ? 'Other topics' : q.tp);
   const flat = qs.map(q => Object.assign({}, q, { _t: tname(q), _lab: q.s === 'P' ? pyqLabel(q) : '' }));
@@ -1009,7 +1009,7 @@ window.__qbCwPptx = async function (ids, explain) {
   const figs = {}; for (const q of flat) if (q.f && !figs[q.i]) { try { figs[q.i] = await figPng(q.f); } catch (e) { /* skip the picture */ } }
   let logo = null; try { const rs = await fetch('img/ankit-logo.png'); if (rs.ok) { const bl = await rs.blob(), bm = await createImageBitmap(bl), dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(bl); }); logo = { dataUrl, w: bm.width, h: bm.height }; } } catch (e) { /* no logo file: skip */ }
   const yl = Object.keys(years).map(Number).sort((a, b) => a - b);
-  const d = { logo, chapter: one ? c0.n : 'Selected Questions', cl: cls[0], cc: one ? ccs[0] : '', clLabel: 'CLASS ' + cls.join(' & '), chLabel: one ? 'CHAPTER ' + ccs[0].split('M')[1] : ccs.length + ' CHAPTERS',
+  const d = { logo, chapter: one ? c0.n : 'Selected Questions', cl: cls[0], cc: one ? ccs[0] : '', clLabel: cls.join(' & ').toUpperCase(), chLabel: one ? 'CHAPTER ' + ccs[0].split('M')[1] : ccs.length + ' CHAPTERS',
     bucket: ex.length === 1 ? ex[0] : 'Main', bucketName: kindLabel, kindLabel, perQ: true, noFront: true, noTopic: true, year: yl.length ? (yl.length === 1 ? String(yl[0]) : 'all') : '\u2014', count: flat.length, years, topics, qs: flat, figs, meta: await pyqMeta() };
   await Promise.all([loadScript('mathdoc.b3.js'), loadScript('office.b9.js'), loadScript(CDN.zip), loadScript(CDN.pptx)]);
   if (explain) d.expl = await explForQs(qs);
@@ -1027,7 +1027,6 @@ function renderPdfTab(T) {
         h('div', { class: 'tglrow' }, keySwitch(T + 'Key', 'pdfkey', { 'data-t': T }), expSwitch(T + 'Expl', 'pdfexp', { 'data-t': T })),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), msel('cwYr', 'years')),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), msel('cwCl', 'classes')),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Block' }), msel('cwBk', 'blocks')),
         h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapter' }), ssel(T + 'Pick', 'a chapter'))),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')))),
@@ -1042,9 +1041,7 @@ function renderPdfTab(T) {
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
     P.years = P.years.filter(y => ys.includes(+y));
     mfill('cwYr', ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
-    mfill('cwCl', ['9', '10', '11', '12'].map(c => [c, 'Class ' + c + ' (' + all.filter(q => String(q.cl) === c).length + ')']), P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
-    const blocks = [...new Set(BANK.chapters.map(c => c.b).filter(Boolean))];
-    mfill('cwBk', blocks.map(b => [b, b]), P.blocks, v => { P.blocks = v; refresh(); }, 'blocks', { none: 'All blocks' });
+    mfill('cwCl', ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']), P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
     mfill('cwLv', ['L1', 'L2', 'L3'].map(l => [l, l + ' (' + all.filter(q => q.d === l).length + ')']), P.lv, v => { P.lv = v; refresh(); }, 'levels', { none: 'All levels' });
     mfill('cwTy', ['MCQ', 'Subjective'].map(t => [t, t + ' (' + all.filter(q => q.t === t).length + ')']), P.types, v => { P.types = v; refresh(); }, 'question types', { none: 'All question types' });
     rows = pdfRows(T);
@@ -1375,7 +1372,7 @@ function buildShell() {
   root.append(
     h('div', { class: 'shell' },
       h('header', { class: 'topbar' },
-        h('div', { class: 'tb-head' }, h('img', { class: 'tb-logo', src: 'img/ankit-logo.png', alt: 'PhyNik', width: 145, height: 51 }), h('h1', { class: 'tb-title', text: 'Physics Dashboard' }), h('span', { class: 'tb-sub', text: 'Cambridge Board \u00b7 Classes 9 to 12' })),
+        h('div', { class: 'tb-head' }, h('img', { class: 'tb-logo', src: 'img/ankit-logo.png', alt: 'PhyNik', width: 145, height: 51 }), h('h1', { class: 'tb-title', text: 'Physics Dashboard' }), null),
         h('button', { type: 'button', class: 'tb-theme', id: 'themeBtn', 'data-act': 'theme', 'aria-pressed': 'false' }),
         h('button', { type: 'button', class: 'tb-theme tb-guide', id: 'guideBtn', 'data-act': 'guide', title: 'Guide: what is in this site', 'aria-label': 'Guide: what is in this site', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>' }),
         h('button', { type: 'button', class: 'tb-theme tb-info', id: 'qbInfoBtn', 'data-act': 'qbinfo', 'aria-haspopup': 'true', 'aria-expanded': 'false', title: 'Question Bank overview', 'aria-label': 'Question Bank overview', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' }),

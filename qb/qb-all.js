@@ -774,7 +774,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     description: 'Number of questions in the bank, in total and per class.',
     fn: function (pyq, nonpyq) {
       var all = pyq.concat(nonpyq), out = [{ group: 'all', n: all.length }];
-      [9, 10, 11, 12].forEach(function (k) { out.push({ group: 'class_' + k, n: all.filter(function (q) { return Number(q.class) === k; }).length }); });
+      ['IGCSE', 'AS & A Level'].forEach(function (k) { out.push({ group: 'class_' + k, n: all.filter(function (q) { return q.class === k; }).length }); });
       return out;
     }
   });
@@ -803,7 +803,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
   function toRows(pyqArr, npArr) {
     return pyqArr.map(function (q) { return Object.assign({ source: 'PYQ' }, q); }).concat(npArr.map(function (q) { return Object.assign({}, q, { source: 'Non-PYQ' }); })).map(function (q) {
         var o = q.options; if (typeof o === 'string') { try { o = JSON.parse(o); } catch (e) { o = []; } }
-        return { id: String(q.id), pyq: !!q.pyq, pyq_ref: q.pyq_ref ? String(q.pyq_ref) : '', pyq_exam: q.pyq_exam ? String(q.pyq_exam) : '', pyq_year: q.pyq_year ? Number(q.pyq_year) : null, pyq_paper: q.pyq_paper ? String(q.pyq_paper) : '', source: q.source, publisher: q.publisher ? String(q.publisher) : '', part: q.part ? String(q.part) : '', ref_year: q.ref_year ? Number(q.ref_year) : null, note: q.note ? String(q.note) : '', oos: !!q.oos, exam: q.exam, year: q.year ? Number(q.year) : null, session: q.session, paper: q.paper, qno: Number(q.qno) || 0, type: q.type, class: Number(q.class), chapter_code: q.chapter_code, chapter: q.chapter, topic_code: q.topic_code || '', topic: q.topic || '', sort_date: q.sort_date || '', difficulty: q.difficulty, attention: q.attention && QBP('attention') ? String(q.attention) : '', figure: normFig(q.figure || (FIGS && FIGS[String(q.id)])), question: q.question || '', options: o || [], answer: q.answer == null ? '' : String(q.answer), source_url: q.source_url || '', solution: q.solution ? String(q.solution) : '' };
+        return { id: String(q.id), pyq: !!q.pyq, pyq_ref: q.pyq_ref ? String(q.pyq_ref) : '', pyq_exam: q.pyq_exam ? String(q.pyq_exam) : '', pyq_year: q.pyq_year ? Number(q.pyq_year) : null, pyq_paper: q.pyq_paper ? String(q.pyq_paper) : '', source: q.source, publisher: q.publisher ? String(q.publisher) : '', part: q.part ? String(q.part) : '', ref_year: q.ref_year ? Number(q.ref_year) : null, note: q.note ? String(q.note) : '', oos: !!q.oos, exam: q.exam, year: q.year ? Number(q.year) : null, session: q.session, paper: q.paper, qno: Number(q.qno) || 0, type: q.type, class: String(q.class || ''), chapter_code: q.chapter_code, chapter: q.chapter, topic_code: q.topic_code || '', topic: q.topic || '', sort_date: q.sort_date || '', difficulty: q.difficulty, attention: q.attention && QBP('attention') ? String(q.attention) : '', figure: normFig(q.figure || (FIGS && FIGS[String(q.id)])), question: q.question || '', options: o || [], answer: q.answer == null ? '' : String(q.answer), source_url: q.source_url || '', solution: q.solution ? String(q.solution) : '' };
       }
     );
   }
@@ -1009,8 +1009,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
       if (q.pyq) { var pt = el('span', 'qb-tag ex-main', 'PYQ'); pt.title = 'This question is also a previous-year question' + (q.pyq_ref ? ' (' + q.pyq_ref + ')' : ''); meta.appendChild(pt); meta.appendChild(el('span', 'qb-date', q.pyq_paper + (q.pyq_exam === 'JEE Main' || !q.pyq_year ? '' : ' · ' + q.pyq_year))); }
       if (q.ref_year) meta.appendChild(el('span', 'qb-tag', '[' + q.ref_year + ']'));
     } else {
-      meta.appendChild(el('span', 'qb-tag ex-main', 'Class ' + q.class));
-      if (q.paper) { var pn = String(q.paper).split('/')[1], pcol = ['21', '22', '23'].indexOf(pn) >= 0 ? 'pc-blue' : ['41', '42', '43'].indexOf(pn) >= 0 ? 'pc-red' : 'pc-other'; var pcode = el('span', 'qb-tag pcode ' + pcol, q.paper); pcode.title = 'Paper code'; meta.appendChild(pcode); }
+      if (q.paper) { var pn = String(q.paper).split('/')[1], pcol = ['21', '22', '23'].indexOf(pn) >= 0 ? 'pc-blue' : ['41', '42', '43'].indexOf(pn) >= 0 ? 'pc-red' : 'pc-other'; var pcode = el('span', 'qb-tag pcode ' + pcol, q.id); pcode.title = 'Question ID'; meta.appendChild(pcode); }
     }
     var bTop = null, bTyp = icoBtn('list', q.type, true);
     bTop = icoBtn('tag', q.chapter, true);
@@ -1180,7 +1179,6 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
   function matches(q, skip) {
     if (skip !== 'year' && S.year.size && !S.year.has(String(q.year))) return false;
     if (skip !== 'cls' && S.cls.size && !S.cls.has(String(q.class))) return false;
-    if (skip !== 'blk' && S.blk.size && !S.blk.has(q.block)) return false;
     if (skip !== 'diff' && S.diff.size && !S.diff.has(q.difficulty)) return false;
     if (skip !== 'type' && S.type.size && !S.type.has(q.type)) return false;
     if (skip !== 'ch' && S.ch.size && !S.ch.has(q.chapter_code)) return false;
@@ -1206,15 +1204,14 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     }
     var rows = VR(), r = document.createElement('div'); r.className = 'qb-trow h-all';
     r.appendChild(tile('qb-tile all', 'All questions', rows.length));
-    [9, 10, 11, 12].forEach(function (k) { r.appendChild(tile('qb-tile', 'Class ' + k, rows.filter(function (q) { return Number(q.class) === k; }).length)); });
+    ['IGCSE', 'AS & A Level'].forEach(function (k) { r.appendChild(tile('qb-tile', k, rows.filter(function (q) { return q.class === k; }).length)); });
     host.appendChild(r);
   }
   function buildChips() {
     buildYearTiles();
     var defs = {
       year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(function (a, b) { return Number(b) - Number(a); }), label: function (v) { return v; } },
-      cls: { vals: ['9', '10', '11', '12'], label: function (v) { return 'Class ' + v; } },
-      blk: { vals: BLOCKS.slice(), label: function (v) { return v; } },
+      cls: { vals: ['IGCSE', 'AS & A Level'], label: function (v) { return v; } },
       diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } },
       type: { vals: ['MCQ', 'Subjective'], label: function (v) { return v; } }
     };
@@ -1282,7 +1279,6 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
   $('.qb-ms-none', ms).addEventListener('click', function () { S.ch.clear(); apply(); });
   function chapterOk(c) {
     if (S.cls.size && !(c.classes || []).some(function (k) { return S.cls.has(String(k)); })) return false;
-    if (S.blk.size && !S.blk.has(c.block)) return false;
     return true;
   }
   function visibleChapters() {
@@ -1294,10 +1290,10 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     var counts = {};
     ROWS.forEach(function (q) { if (matches(q, 'ch')) counts[q.chapter_code] = (counts[q.chapter_code] || 0) + 1; });
     msList.replaceChildren();
-    BLOCKS.forEach(function (blk) {
-      var list = visibleChapters().filter(function (c) { return c.block === blk; });
+    ['IGCSE', 'AS & A Level'].forEach(function (grp) {
+      var list = visibleChapters().filter(function (c) { return c.class === grp; });
       if (!list.length) return;
-      msList.appendChild(el('div', 'qb-ms-grp', blk));
+      msList.appendChild(el('div', 'qb-ms-grp', grp));
       list.forEach(function (c) {
         var lab = el('label', 'qb-ms-item' + (counts[c.chapter_code] ? '' : ' zero'));
         var cb = el('input'); cb.type = 'checkbox'; cb.checked = S.ch.has(c.chapter_code);
@@ -1711,7 +1707,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     }
     if (chBuiltFrom !== c.data) {
       chBuiltFrom = c.data;
-      CHAPTERS = c.data.map(function (r) { return { chapter_code: r.chapter_code, chapter: r.chapter, block: r.block || '', classes: r.classes || [], class: Number((r.classes || [0])[0]), order: Number(r.order) }; });
+      CHAPTERS = c.data.map(function (r) { return { chapter_code: r.chapter_code, chapter: r.chapter, block: r.block || '', classes: r.classes || [], class: (r.classes || [''])[0], order: Number(r.order) }; });
       BLOCKS = uniq(CHAPTERS.map(function (r) { return r.block; }));
       CHMAP = {}; CHAPTERS.forEach(function (r) { CHMAP[r.chapter_code] = r; });
     }
