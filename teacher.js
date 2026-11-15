@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '27';   /* website version: matches the published version number */
+const SITE_VERSION = '28';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -1033,7 +1033,7 @@ function renderPdfTab(T) {
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Session' }), T === 'cw' ? msel(T + 'Se', 'sessions') : ssel(T + 'Se', 'a session')),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), T === 'cw' ? msel(T + 'Cl', 'classes') : ssel(T + 'Cl', 'a class')),
         T === 'sw' ? h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question paper (code)' }), ssel(T + 'Pick', 'a paper'))) : null,
-        T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')) : null,
+        T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question Level' }), msel('cwLv', 'levels')) : null,
         T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')) : null)),
       h('div', { class: 'stage' }, h('div', { class: 'statbar' }, h('div', { class: 'msg', id: T + 'Msg', 'aria-live': 'polite' }), h('div', { class: 'pgbtns', id: T + 'Pages', hidden: true }), h('div', { class: 'rowbtns', id: T + 'Exp', hidden: true }, ...[['docx', 'Word (editable)'], ['pdf', 'PDF'], ['pptx', 'PowerPoint (editable)']].map(([f, nm]) => h('button', { type: 'button', class: 'btn ibtn', 'data-act': 'pdfdl', 'data-t': T, 'data-k': '', 'data-f': f, title: 'Download ' + nm, 'aria-label': 'Download ' + nm, html: FIMG[f] })), ...['xprint', 'xshare'].map(a => { const b = a === 'xprint' ? prtBtn('pyq') : shrBtn('pyq'); b.dataset.t = T; b.dataset.k = ''; return b; }), wsRow(T)), h('button', { type: 'button', class: 'btn ibtn maxbtn', 'data-act': 'max', 'aria-pressed': 'false', title: 'Maximize', 'aria-label': 'Maximize', html: ICO.max })), h('div', { class: 'pgwrap', id: T + 'Prev' })));
     if (window.ResizeObserver) new ResizeObserver(rescale).observe($('#' + T + 'Prev'));
@@ -1340,8 +1340,8 @@ const GUIDE_HTML = () => `
 <h3 id="gd-qb">1. Dashboard</h3>
 <p>All questions in one list, grouped by chapter. Use <b>Find questions</b> to narrow the list. The filters work in this order:</p>
 <ul>
-<li><b>Year</b>, then <b>Session</b> (March, May/June, October/November), then <b>Class</b> (IGCSE or AS &amp; A Level).</li>
-<li><b>Chapters</b> (pick one or more), then <b>Level</b> (L1 easy, L2 medium, L3 hard), then <b>Question type</b> (MCQ or Subjective).</li>
+<li><b>Chapters</b> first (pick one or more), then <b>Year</b>, <b>Session</b> (March, May/June, October/November) and <b>Class</b> (IGCSE or AS &amp; A Level).</li>
+<li>Then <b>Question Level</b> (L1 easy, L2 medium, L3 hard) and <b>Question type</b> (MCQ or Subjective).</li>
 <li>You can also search by words or by question ID, for example <b>0625/21/M/J/25-3</b>. <b>Reset filters</b> clears everything.</li>
 <li><b>Show all answers</b> and <b>Hide options</b> change how the whole page looks. <b>Attention</b> shows only the questions that carry an attention note.</li>
 </ul>
