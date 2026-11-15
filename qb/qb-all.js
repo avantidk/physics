@@ -1010,10 +1010,10 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
       if (q.ref_year) meta.appendChild(el('span', 'qb-tag', '[' + q.ref_year + ']'));
     } else {
       meta.appendChild(el('span', 'qb-tag ex-main', 'Class ' + q.class));
-      meta.appendChild(el('span', 'qb-date', (q.year ? q.year : '') + (q.paper ? (q.year ? ' \u00b7 ' : '') + q.paper : '')));
+      if (q.paper) { var pn = String(q.paper).split('/')[1], pcol = ['21', '22', '23'].indexOf(pn) >= 0 ? 'pc-blue' : ['41', '42', '43'].indexOf(pn) >= 0 ? 'pc-red' : 'pc-other'; var pcode = el('span', 'qb-tag pcode ' + pcol, q.paper); pcode.title = 'Paper code'; meta.appendChild(pcode); }
     }
     var bTop = null, bTyp = icoBtn('list', q.type, true);
-    if (q.topic) { bTop = icoBtn('tag', (q.topic_code && !/^UNMAPPED/.test(q.topic_code) ? q.topic_code.replace(/^JM-/, '') + ' · ' : '') + q.topic, true); }
+    bTop = icoBtn('tag', q.chapter, true);
     var bId = icoBtn('hash', 'ID: ' + q.id, true); bId.classList.add('idg'); bId.title = 'Tap to copy the question ID';
     bId.addEventListener('click', function () {
       var t = q.id, tip = 'ID: ' + t, ok = function () { flash(bId, 'Copied ' + t); };
@@ -1025,7 +1025,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     if (q.attention) meta.appendChild(el('span', 'qb-tag attn', 'Attention'));
     if (q.note && !isSame(q)) meta.appendChild(el('span', 'qb-tag rev', 'Review'));
     if (q.note && isSame(q)) { var sameTag = el('span', 'qb-same', q.note); sameTag.style.cssText = 'font-size:12.5px;color:inherit;background:none;border:0;padding:0 2px;font-weight:400'; meta.appendChild(sameTag); }
-    if (q.difficulty) meta.appendChild(el('span', 'qb-tag diff', q.difficulty));
+    if (q.difficulty) meta.appendChild(el('span', 'qb-tag diff lv-' + q.difficulty, q.difficulty));
     main.appendChild(meta);
     if (q.attention) main.appendChild(el('div', 'qb-attn', q.attention));
     if (q.note && !isSame(q)) main.appendChild(el('div', 'qb-note', q.note));
@@ -1182,6 +1182,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     if (skip !== 'cls' && S.cls.size && !S.cls.has(String(q.class))) return false;
     if (skip !== 'blk' && S.blk.size && !S.blk.has(q.block)) return false;
     if (skip !== 'diff' && S.diff.size && !S.diff.has(q.difficulty)) return false;
+    if (skip !== 'type' && S.type.size && !S.type.has(q.type)) return false;
     if (skip !== 'ch' && S.ch.size && !S.ch.has(q.chapter_code)) return false;
     if (S.onlySel && !S.sel.has(q.id)) return false;
     if (S.flag && !isFlagged(q)) return false;
@@ -1214,9 +1215,10 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
       year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(function (a, b) { return Number(b) - Number(a); }), label: function (v) { return v; } },
       cls: { vals: ['9', '10', '11', '12'], label: function (v) { return 'Class ' + v; } },
       blk: { vals: BLOCKS.slice(), label: function (v) { return v; } },
-      diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } }
+      diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } },
+      type: { vals: ['MCQ', 'Subjective'], label: function (v) { return v; } }
     };
-    var DD = { year: 'All years', cls: 'All classes', blk: 'All blocks', diff: 'All levels' };
+    var DD = { year: 'All years', cls: 'All classes', blk: 'All blocks', diff: 'All levels', type: 'All question types' };
     DDS = [];
     $$('.qb-dd[data-f]').forEach(function (box) {
       var f = box.dataset.f, d = defs[f];
@@ -1254,7 +1256,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     });
     DDS.push(function () {
       var counts = {};
-      ROWS.forEach(function (q) { if (matches(q, f)) { var k = f === 'year' ? String(q.year) : f === 'cls' ? String(q.class) : f === 'blk' ? q.block : q.difficulty; counts[k] = (counts[k] || 0) + 1; } });
+      ROWS.forEach(function (q) { if (matches(q, f)) { var k = f === 'year' ? String(q.year) : f === 'cls' ? String(q.class) : f === 'blk' ? q.block : f === 'type' ? q.type : q.difficulty; counts[k] = (counts[k] || 0) + 1; } });
       d.vals.forEach(function (v) { var b = boxes[v]; b.cb.checked = S[f].has(v); b.n.textContent = String(counts[v] || 0); b.lab.classList.toggle('zero', !counts[v]); });
       var sel = d.vals.filter(function (v) { return S[f].has(v); });
       btn.textContent = sel.length === 0 ? allLabel : sel.length <= 2 ? sel.map(d.label).join(', ') : sel.length + ' selected';
@@ -1382,7 +1384,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
   $('.qb-hideopts').addEventListener('click', function () { var b = $('.qb-hideopts'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Show options' : 'Hide options'; $('#questions').classList.toggle('hide-opts', on); });
   $('.qb-revall').addEventListener('click', function () { var b = $('.qb-revall'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); $('#questions').classList.toggle('rev-all', on); });
   $('.qb-reset').addEventListener('click', function () {
-    ['year', 'cls', 'blk', 'diff', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
+    ['year', 'cls', 'blk', 'diff', 'type', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
     S.q = ''; S.onlySel = false; S.flag = false; S.attn = false; S.oos = false; $('.qb-search').value = ''; apply();
   });
 
@@ -1500,7 +1502,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCy0lEQVR42ux9
     updateSelUI();
   }
   function filterKey() {
-    return ['year', 'cls', 'blk', 'diff', 'ch'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
+    return ['year', 'cls', 'blk', 'diff', 'type', 'ch'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
   }
   function pager(pages, start, n, total) {
     var nav = el('nav', 'qb-pager'); nav.setAttribute('aria-label', 'Pages');

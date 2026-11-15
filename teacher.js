@@ -883,12 +883,12 @@ function exportLib(kind) {
   doExport(kind, { pages, file: pages[0].file });
 }
 /* ---------- "PYQ ChapterWise PDF" and "Shift Wise PDF" tabs ---------- */
-const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, year: 'all', key: false } };
+const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], types: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, year: 'all', key: false } };
 const BUCKET_NAME = { School: 'School Level' };
 const chOrder = cc => { const c = CHMAP.get(cc); return c.cl * 100 + c.o; };
 function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P'); }
-const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.blocks.length || (c && P.blocks.includes(c.b))) && (!P.lv.length || P.lv.includes(q.d)); };
-const cwYrKey = () => ['years', 'cls', 'blocks', 'lv'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
+const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.blocks.length || (c && P.blocks.includes(c.b))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
+const cwYrKey = () => ['years', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
 const cwYrSfx = () => ['cls', 'years', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
 function pdfRows(T) {
@@ -1029,7 +1029,8 @@ function renderPdfTab(T) {
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), msel('cwCl', 'classes')),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Block' }), msel('cwBk', 'blocks')),
         h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapter' }), ssel(T + 'Pick', 'a chapter'))),
-        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')))),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question type' }), msel('cwTy', 'question types')))),
       h('div', { class: 'stage' }, h('div', { class: 'statbar' }, h('div', { class: 'msg', id: T + 'Msg', 'aria-live': 'polite' }), h('div', { class: 'pgbtns', id: T + 'Pages', hidden: true }), h('div', { class: 'rowbtns', id: T + 'Exp', hidden: true }, ...[['docx', 'Word (editable)'], ['pdf', 'PDF'], ['pptx', 'PowerPoint (editable)']].map(([f, nm]) => h('button', { type: 'button', class: 'btn ibtn', 'data-act': 'pdfdl', 'data-t': T, 'data-k': '', 'data-f': f, title: 'Download ' + nm, 'aria-label': 'Download ' + nm, html: FIMG[f] })), ...['xprint', 'xshare'].map(a => { const b = a === 'xprint' ? prtBtn('pyq') : shrBtn('pyq'); b.dataset.t = T; b.dataset.k = ''; return b; }), wsRow(T)), h('button', { type: 'button', class: 'btn ibtn maxbtn', 'data-act': 'max', 'aria-pressed': 'false', title: 'Maximize', 'aria-label': 'Maximize', html: ICO.max })), h('div', { class: 'pgwrap', id: T + 'Prev' })));
     if (window.ResizeObserver) new ResizeObserver(rescale).observe($('#' + T + 'Prev'));
   }
@@ -1045,6 +1046,7 @@ function renderPdfTab(T) {
     const blocks = [...new Set(BANK.chapters.map(c => c.b).filter(Boolean))];
     mfill('cwBk', blocks.map(b => [b, b]), P.blocks, v => { P.blocks = v; refresh(); }, 'blocks', { none: 'All blocks' });
     mfill('cwLv', ['L1', 'L2', 'L3'].map(l => [l, l + ' (' + all.filter(q => q.d === l).length + ')']), P.lv, v => { P.lv = v; refresh(); }, 'levels', { none: 'All levels' });
+    mfill('cwTy', ['MCQ', 'Subjective'].map(t => [t, t + ' (' + all.filter(q => q.t === t).length + ')']), P.types, v => { P.types = v; refresh(); }, 'question types', { none: 'All question types' });
     rows = pdfRows(T);
   }
   if (T === 'sw') {

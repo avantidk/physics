@@ -12,6 +12,19 @@
 .qbhost .dash-skeleton{color:transparent!important;background:linear-gradient(90deg,var(--color-border-line),transparent,var(--color-border-line));background-size:200% 100%;border-radius:6px;min-height:1em}
 @media (prefers-reduced-motion:no-preference){.qbhost .dash-skeleton{animation:qbsk 1.4s linear infinite}}
 @keyframes qbsk{to{background-position:-200% 0}}
+.qb-tag.pcode{font-weight:600;letter-spacing:.01em}
+.qb-tag.pcode.pc-blue{background:color-mix(in srgb,#1f5fd1 12%,transparent);border-color:color-mix(in srgb,#1f5fd1 35%,transparent);color:#1f5fd1}
+.qb-tag.pcode.pc-red{background:color-mix(in srgb,#d93025 11%,transparent);border-color:color-mix(in srgb,#d93025 35%,transparent);color:#d93025}
+.qb-tag.pcode.pc-other{background:color-mix(in srgb,#6b7a99 12%,transparent);border-color:color-mix(in srgb,#6b7a99 30%,transparent);color:var(--color-fg)}
+.qb-tag.diff.lv-L1{background:color-mix(in srgb,#1f9d55 12%,transparent);border-color:color-mix(in srgb,#1f9d55 38%,transparent);color:#1f9d55}
+.qb-tag.diff.lv-L2{background:color-mix(in srgb,#e8890c 13%,transparent);border-color:color-mix(in srgb,#e8890c 40%,transparent);color:#c46f00}
+.qb-tag.diff.lv-L3{background:color-mix(in srgb,#d93025 11%,transparent);border-color:color-mix(in srgb,#d93025 35%,transparent);color:#d93025}
+/* quick-filter toolbar: 4 buttons on the first row, 3 on the second */
+.qb-tools .qb-revall,.qb-tools .qb-hideopts,.qb-tools .qb-onlysel,.qb-tools .qb-attnf{grid-column:span 3!important}
+.qb-tools .qb-reset,.qb-tools .qb-selall,.qb-tools .qb-clear{grid-column:span 4!important}
+.qb-tools .qb-flagf{display:none!important}
+.qb-tools>*{white-space:normal!important;text-overflow:clip!important;line-height:1.15!important}
+@media (max-width:640px){.qb-tools .qb-revall,.qb-tools .qb-hideopts,.qb-tools .qb-onlysel,.qb-tools .qb-attnf,.qb-tools .qb-reset,.qb-tools .qb-selall,.qb-tools .qb-clear{grid-column:span 1!important}}
 </style>
 <style>
 #dash-root{--dash-gutter:clamp(12px,3vw,32px)}
@@ -477,6 +490,7 @@
         </div>
       </div>
       <div class="qb-fgroup"><span class="cap">Level (L1 easy, L2 medium, L3 hard)</span><div class="qb-dd" data-f="diff"></div></div>
+      <div class="qb-fgroup"><span class="cap">Question type</span><div class="qb-dd" data-f="type"></div></div>
       <div style="display:none"><div class="qb-fgroup qb-ms" id="topic-filter" hidden>
         <span class="cap">Topics (pick one or more)</span>
         <button class="qb-ms-btn" type="button" aria-haspopup="true" aria-expanded="false">All topics</button>
