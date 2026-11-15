@@ -3,6 +3,44 @@
 window.__tblRows = function (s) { return String(s).split('\x1e').map(function (r) { return r.split('\x1f'); }); };
 window.__tblPlain = function (s) { return String(s).replace(/(^|\n)\{\{tbl:([^\n]*)\}\}/g, function (m, a, t) { return a + window.__tblRows(t).map(function (r) { return r.join(' | '); }).join('\n'); }); };
 function QBP(k) { var p = window.AvantiAuth && window.AvantiAuth.perm; return !!(p && p[k] === true); }
+/* figure SVG from the data files is put into the page as markup: drop anything that could run code (scripts, foreignObject, on* handlers, javascript: links); data:image pictures stay */
+window.__qbSafeSvg = (function () {
+  var cache = {}, n = 0, BAD = { script: 1, foreignobject: 1, iframe: 1, object: 1, embed: 1, handler: 1, listener: 1 };
+  function badUrl(v) { var t = String(v).replace(/[\u0000- \u007f- ]+/g, '').toLowerCase(); return /^(javascript|vbscript):/.test(t) || (/^data:/.test(t) && !/^data:image\//.test(t)); }
+  function clean(node) {
+    var kids = Array.prototype.slice.call(node.children || []);
+    for (var i = 0; i < kids.length; i++) {
+      var e = kids[i], name = String(e.localName || '').toLowerCase();
+      var an = String(e.getAttribute('attributeName') || '').toLowerCase();
+      if (BAD[name] || ((name === 'set' || name === 'animate') && /(^|:)href$|^on/.test(an))) { e.remove(); continue; }
+      Array.prototype.slice.call(e.attributes).forEach(function (a) {
+        var k = a.name.toLowerCase();
+        if (/^on/.test(k) || (/(^|:)(href|src|action|formaction)$/.test(k) && badUrl(a.value)) || /^\s*javascript:/i.test(a.value)) e.removeAttribute(a.name);
+      });
+      clean(e);
+    }
+  }
+  return function (svg) {
+    var s = String(svg == null ? '' : svg);
+    if (Object.prototype.hasOwnProperty.call(cache, s)) return cache[s];
+    var t = document.createElement('template'); t.innerHTML = s; clean(t.content);
+    var out = t.innerHTML;
+    if (n++ > 500) { cache = {}; n = 0; }
+    cache[s] = out; return out;
+  };
+})();
+/* The page may inject this file more than once (teacher.js tries again when loading fails): every listener or observer on document / window
+   is registered here, and a new copy first removes the previous copy's ones, so panels and dropdowns do not react twice. */
+window.__qbG = (function () {
+  if (window.__qbG && window.__qbG.teardown) { try { window.__qbG.teardown(); } catch (e) { /* old copy */ } }
+  var offs = [];
+  function add(off) { offs.push(off); return function () { var i = offs.indexOf(off); if (i >= 0) offs.splice(i, 1); off(); }; }
+  return {
+    on: function (t, ev, fn, opt) { t.addEventListener(ev, fn, opt); return add(function () { t.removeEventListener(ev, fn, opt); }); },
+    add: add,
+    teardown: function () { offs.splice(0).forEach(function (f) { try { f(); } catch (e) { /* already gone */ } }); }
+  };
+})();
 /* Runs the question bank's own code (written for a dashboard page) inside this page. */
 (function () {
   var D = {}, calcs = [], fns = [];
@@ -26,30 +64,16 @@ function QBP(k) { var p = window.AvantiAuth && window.AvantiAuth.perm; return !!
         var p = k === 0 ? Promise.resolve().then(function () { return get(n); }) : fetch('qb/data/' + n + '.json?r=' + Date.now() + k).then(function (r) { if (!r.ok) throw new Error(n); return r.json(); });
         return p.catch(function (e) {
           if (k >= 6) throw e;
-          try { var nt = document.querySelector('.qb-loadnote'); if (nt) nt.textContent = 'Connection problem, trying again\u2026'; } catch (x) { /* note only */ }
+          try { var nt = document.querySelector('.qb-loadnote'), ql = document.getElementById('questions'); if (!nt && ql && !ql.querySelector('.qb-card')) { nt = document.createElement('p'); nt.className = 'qb-loadnote'; nt.setAttribute('role', 'status'); ql.prepend(nt); } if (nt) nt.textContent = 'Connection problem, trying again\u2026'; } catch (x) { /* note only */ }
           return new Promise(function (ok) { setTimeout(ok, 1500 * (k + 1)); }).then(function () { return tryN(k + 1); });
         });
       };
       return tryN(0);
     };
     var fullP = Promise.all([getR('pyq'), getR('nonpyq')]);
-    var firstP = (pre.first || fetch('qb/data/first.json').then(function (r) { if (!r.ok) throw new Error('first'); return r.json(); })).catch(function () { return null; });
-    var win = { full: await fullP }; /* lite: no first-screen file */
-    if (win.first && window.__qbPartialStart) {
-      /* first screen: first cards + counts from the small file, everything else locked until the full data is in */
-      var f = win.first, sp = [], sn = [];
-      f.sp.forEach(function (t) { for (var k = 0; k < t[7]; k++) sp.push({ id: '', exam: t[0], year: t[1] || null, oos: !!t[2], 'class': t[3], difficulty: t[4], type: t[5], chapter_code: t[6], options: [] }); });
-      f.sn.forEach(function (t) { for (var k = 0; k < t[9]; k++) sn.push({ id: '', publisher: t[0], exam: t[1], year: t[2] || null, oos: !!t[3], 'class': t[4], difficulty: t[5], type: t[6], chapter_code: t[7], pyq: !!t[8], options: [] }); });
-      D.pyq = mk('ok', f.pyq); D.nonpyq = mk('ok', f.nonpyq);
-      calcs.forEach(function (c) { D[c[0]] = mk('ok', c[1].fn.apply(null, c[1].inputs.map(function (i) { return i === 'pyq' ? sp : i === 'nonpyq' ? sn : D[i].data; }))); });
-      window.__qbPartialStart({ n: f.n, shown: f.shown, sp: sp, sn: sn, figs: f.figs });
-      fns.forEach(function (fn) { fn(); });
-      win = { full: await fullP };
-    }
-    var res = win.full;
+    var res = await fullP;
     D.pyq = mk('ok', res[0]); D.nonpyq = mk('ok', res[1]);
     calcs.forEach(function (c) { D[c[0]] = mk('ok', c[1].fn.apply(null, c[1].inputs.map(function (i) { return D[i].data; }))); });
-    if (window.__qbPartialEnd) window.__qbPartialEnd();
     fns.forEach(function (fn) { fn(); });
   };
 })();
@@ -641,7 +665,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     return String(fig ? figLines(s) : s).split('\n').map(function (line) {
       var tm = /^\{\{tbl:([\s\S]*)\}\}$/.exec(line.trim());
       if (tm) return '<table class="dt">' + window.__tblRows(tm[1]).map(function (r, ri) { return '<tr>' + r.map(function (c) { var t = ri ? 'td' : 'th'; return '<' + t + '>' + richHtml(c) + '</' + t + '>'; }).join('') + '</tr>'; }).join('') + '</table>';
-      if (line.trim() === '{{figure}}') return fig && fig.svg ? '<div class="fig" style="margin:6px 0">' + String(fig.svg).replace(/<svg /, '<svg style="width:' + fig.w + 'px;height:' + fig.h + 'px" ') + '</div>' : '';
+      if (line.trim() === '{{figure}}') return fig && fig.svg ? '<div class="fig" style="margin:6px 0">' + window.__qbSafeSvg(fig.svg).replace(/<svg /, '<svg style="width:' + (Number(fig.w) || 160) + 'px;height:' + (Number(fig.h) || 120) + 'px" ') + '</div>' : '';
       return segments(line).map(function (sg) {
         if (sg.t === 'text') return boldParts(sg.v).map(function (bp) { return bp.b ? '<b>' + esc(bp.s) + '</b>' : esc(bp.s); }).join('');
         try { return window.__mh(sg.v, sg.display); } catch (e) { return esc(sg.v); }
@@ -811,8 +835,6 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   var PER_PAGE = 20, page = 0, lastKey = null;
   var S = { exam: new Set(), year: new Set(), sess: new Set(), cls: new Set(), blk: new Set(), diff: new Set(), type: new Set(), ch: new Set(), tp: new Set(), src: new Set(), q: '', onlySel: false, flag: false, attn: false, oos: false, oosx: false, sel: new Set() };
   S.oosx = false; /* out of syllabus questions are included by default */
-  /* Question Bank opens first from qb/data/first.json (first cards + counts) while the full data downloads: PARTIAL holds the stub rows used for the header numbers and filter lists */
-  var PARTIAL = null;
   function toRows(pyqArr, npArr) {
     return pyqArr.map(function (q) { return Object.assign({ source: 'PYQ' }, q); }).concat(npArr.map(function (q) { return Object.assign({}, q, { source: 'Non-PYQ' }); })).map(function (q) {
         var o = q.options; if (typeof o === 'string') { try { o = JSON.parse(o); } catch (e) { o = []; } }
@@ -820,32 +842,37 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
       }
     );
   }
-  window.__qbPartialStart = function (p) {
-    if (p.figs) FIGS = p.figs;
-    PARTIAL = { n: p.n, shown: p.shown, rows: toRows(p.sp, p.sn) };
-    root.classList.add('qb-partial');
-  };
-  window.__qbPartialEnd = function () { PARTIAL = null; root.classList.remove('qb-partial'); lastKey = null; };
   var FIGS = null, figReady = Promise.resolve(), figStarted = false;
   function normFig(f) { if (typeof f === 'string') { try { f = JSON.parse(f); } catch (e) { f = null; } } return f && f.svg ? { svg: String(f.svg), w: Number(f.w) || 160, h: Number(f.h) || 120, card: f.card && (f.card.imgs || f.card.opts) ? f.card : null } : null; }
-  /* pictures live in qb/data/figures.json and arrive after the first screen: fill them into the rows and redraw only the cards that have one */
+  /* pictures live in qb/data/figures.json and arrive after the first screen: fill them into the rows and redraw only the question body of the cards
+     that have one (the card itself stays, so a revealed answer, an open explanation, menu or flag box stay as they are) */
   function attachFigures(figs) {
     FIGS = figs || {};
     Object.keys(FIGS).forEach(function (id) {
       var q = BYID[id]; if (!q) return;
       q.figure = normFig(FIGS[id]);
       var old = CARDS[id]; if (!old) return;
-      var nu = buildCard(q); var num = old.querySelector('.qb-num'); if (num) nu.querySelector('.qb-num').textContent = num.textContent;
+      var nu = buildCard(q), ob = old.querySelector('.qb-body'), nb = nu.querySelector('.qb-body');
+      if (ob && nb) { ob.replaceChildren.apply(ob, Array.prototype.slice.call(nb.childNodes)); return; }
+      var num = old.querySelector('.qb-num'); if (num) nu.querySelector('.qb-num').textContent = num.textContent;
       CARDS[id] = nu; if (old.parentNode) old.parentNode.replaceChild(nu, old);
     });
     updateSelUI();
   }
+  /* a failed figures.json download is tried again later (growing pause), and also on the next redraw once that pause is over */
+  var figTries = 0, figNext = 0, figTimer = 0;
   function startFigures() {
-    if (figStarted) return; figStarted = true;
-    var load = window.__getFigs ? window.__getFigs() : fetch('qb/data/figures.json').then(function (r) { if (!r.ok) throw new Error('figures'); return r.json(); });
-    figReady = load.then(attachFigures).catch(function () { figStarted = false; });
+    if (figStarted || FIGS) return;
+    if (Date.now() < figNext) return;
+    figStarted = true; clearTimeout(figTimer);
+    var load = window.__getFigs ? window.__getFigs() : fetch('qb/data/figures.json' + (figTries ? '?r=' + Date.now() : '')).then(function (r) { if (!r.ok) throw new Error('figures'); return r.json(); });
+    figReady = Promise.resolve(load).then(function (f) { figStarted = false; attachFigures(f); }).catch(function () {
+      figStarted = false; figTries++;
+      var wait = Math.min(60000, 2000 * Math.pow(2, figTries - 1)); figNext = Date.now() + wait;
+      if (figTries < 8) figTimer = setTimeout(startFigures, wait + 50);
+    });
   }
-  function VR() { return PARTIAL ? PARTIAL.rows : ROWS; } /* overview numbers (counts, chapter-wise, weightage) never depend on any filter */
+  function VR() { return ROWS; } /* overview numbers (counts, chapter-wise, weightage) never depend on any filter */
   var ROWS = [], BYID = {}, CHAPTERS = [], CHMAP = {}, TOPICS = [], tpBuiltFrom = null, CARDS = {}, builtFrom = null, npFrom = null, chBuiltFrom = null;
   var SESSION = {};
   var DIFF_ORDER = ['L1', 'L2', 'L3'];
@@ -1090,11 +1117,14 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     solBox.appendChild(sb);
     bSol.addEventListener('click', function () {
       solBox.hidden = !solBox.hidden; setIco(bSol, 'book', solBox.hidden ? 'Full explanation' : 'Hide explanation'); bSol.classList.toggle('on', !solBox.hidden);
-      if (!solBox.hidden && !q.solution && !sb.dataset.saved) {
-        sb.dataset.saved = '1';
-        /* solutions live in their own file (qb/data/sol.json), fetched the first time an explanation is opened */
+      if (!solBox.hidden && !q.solution && !sb.dataset.saved && !sb.dataset.loading) {
+        sb.dataset.loading = '1';
+        /* solutions live in their own file (qb/data/sol.json), fetched the first time an explanation is opened; a failed download is tried again on the next open */
         if (!SOLM) { sb.className = 'qb-sol-b'; sb.textContent = 'Loading\u2026'; }
         loadSol().then(function (m) {
+          delete sb.dataset.loading;
+          if (!SOLM) { sb.className = 'qb-sol-b qb-sol-none'; sb.textContent = 'Could not load the explanation. Check the connection and open it again.'; return; }
+          sb.dataset.saved = '1';
           if (m && m[q.id]) { var sv = m[q.id]; q.solution = typeof sv === 'string' ? sv : sv.t; sb.className = 'qb-sol-b'; sb.textContent = ''; renderRich(sb, q.solution, typeof sv === 'string' ? null : sv.f); return; }
           sb.className = 'qb-sol-b qb-sol-none'; sb.textContent = 'Full explanation not added yet.';
           if (window.__qbSavedSolution) window.__qbSavedSolution(q.id).then(function (text) { if (text) { sb.className = 'qb-sol-b'; sb.textContent = ''; renderRich(sb, text); } });
@@ -1257,7 +1287,8 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var list = el('div', 'qb-ms-list'); panel.appendChild(list); box.appendChild(btn); box.appendChild(panel);
     function open(o) { panel.hidden = !o; btn.setAttribute('aria-expanded', String(o)); }
     btn.addEventListener('click', function () { open(panel.hidden); });
-    document.addEventListener('click', function (e) { if (!panel.hidden && e.target.isConnected && !box.contains(e.target)) open(false); });
+    if (box.__qbOff) box.__qbOff(); /* dropdowns are rebuilt with the data: one document listener per box */
+    box.__qbOff = window.__qbG.on(document, 'click', function (e) { if (!panel.hidden && e.target.isConnected && !box.contains(e.target)) open(false); });
     box.addEventListener('keydown', function (e) { if (e.key === 'Escape') { open(false); btn.focus(); } });
     bAll.addEventListener('click', function () { d.vals.forEach(function (v) { S[f].add(v); }); apply(); });
     bNone.addEventListener('click', function () { S[f].clear(); apply(); });
@@ -1289,7 +1320,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     msPanel.hidden = !open; msBtn.setAttribute('aria-expanded', String(open)); if (open) { msSearch.value = ''; drawMsList(); msSearch.focus(); }
   }
   msBtn.addEventListener('click', function () { openMs(msPanel.hidden); });
-  document.addEventListener('click', function (e) { if (!msPanel.hidden && e.target.isConnected && !ms.contains(e.target)) openMs(false); });
+  window.__qbG.on(document, 'click', function (e) { if (!msPanel.hidden && e.target.isConnected && !ms.contains(e.target)) openMs(false); });
   ms.addEventListener('keydown', function (e) { if (e.key === 'Escape') { openMs(false); msBtn.focus(); } });
   msSearch.addEventListener('input', drawMsList);
   $('.qb-ms-all', ms).addEventListener('click', function () { visibleChapters().forEach(function (c) { S.ch.add(c.chapter_code); }); apply(); });
@@ -1326,7 +1357,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   var tf = $('#topic-filter'), tpBtn = $('.qb-ms-btn', tf), tpPanel = $('.qb-ms-panel', tf), tpList = $('.qb-ms-list', tf), tpSearch = $('.qb-ms-search', tf);
   function openTp(open) { return; tpPanel.hidden = !open; tpBtn.setAttribute('aria-expanded', String(open)); if (open) { tpSearch.value = ''; drawTpList(); tpSearch.focus(); tf.classList.remove('ask'); } }
   tpBtn.addEventListener('click', function () { openTp(tpPanel.hidden); });
-  document.addEventListener('click', function (e) { if (!tpPanel.hidden && e.target.isConnected && !tf.contains(e.target) && !ms.contains(e.target)) openTp(false); });
+  window.__qbG.on(document, 'click', function (e) { if (!tpPanel.hidden && e.target.isConnected && !tf.contains(e.target) && !ms.contains(e.target)) openTp(false); });
   tf.addEventListener('keydown', function (e) { if (e.key === 'Escape') { openTp(false); tpBtn.focus(); } });
   tpSearch.addEventListener('input', drawTpList);
   $('.qb-ms-all', tf).addEventListener('click', function () { visibleTopics().forEach(function (t) { S.tp.add(t.topic_code); }); apply(); });
@@ -1361,7 +1392,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   $('.qb-attnf').addEventListener('click', function () { S.attn = !S.attn; apply(); });
   /* wide display equations: break them over lines at a top-level = (or + / -) so each line fits the card; a piece that is still too wide shrinks (down to 55 percent) and then scrolls */
   (function () {
-    var qs = $('#questions'), raf = 0, mo = null;
+    var qs = $('#questions'), raf = 0, mo = null, dead = false;
     var cuts = window.__texCuts, pieces = window.__texPieces;
     function mk(tex) { var d = document.createElement('div'); d.className = 'ml'; try { d.innerHTML = window.__mh(tex, true); } catch (e) { d.textContent = tex; } return d; }
     /* how wide the equation really is, whatever the engine does with the width of the math element itself */
@@ -1384,14 +1415,16 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
       raf = 0; if (mo) mo.disconnect();
       try { document.querySelectorAll('.mx.mxw').forEach(function (wr) { var w = wr.clientWidth; if (w <= 0) return; var pcs = Array.prototype.filter.call(wr.children, function (c) { return c.classList.contains('mxp'); }), sc = 1; pcs.forEach(function (pc) { pc.style.fontSize = ''; }); pcs.forEach(function (pc) { var k = pc.firstElementChild, nw = Math.max(pc.scrollWidth, k ? k.getBoundingClientRect().width : 0); if (nw > w + 1) sc = Math.min(sc, Math.max(0.42, (w / nw) * 0.97)); }); /* one size for every line of the same equation */ if (sc < 1) pcs.forEach(function (pc) { pc.style.fontSize = sc * 100 + '%'; }); }); } catch (e) { /* keep the page working */ }
       try { document.querySelectorAll('.qb-qt .mx.mxd').forEach(function (sp) { if (sp.dataset.fw !== String(sp.clientWidth) && sp.clientWidth > 0) layout(sp); }); } catch (e) { /* keep the page working */ }
-      if (mo) mo.observe(document.body, { childList: true, subtree: true });
+      if (mo && !dead) mo.observe(document.body, { childList: true, subtree: true });
     }
-    function sched() { if (!raf) { raf = requestAnimationFrame(fit); setTimeout(function () { if (raf) fit(); }, 250); } }
+    function sched() { if (dead) return; if (!raf) { raf = requestAnimationFrame(fit); setTimeout(function () { if (raf) fit(); }, 250); } }
     if (window.MutationObserver) { mo = new MutationObserver(sched); mo.observe(document.body, { childList: true, subtree: true }); }
-    if (window.ResizeObserver) new ResizeObserver(sched).observe(qs); window.addEventListener('resize', sched);
-    try { if (document.fonts) { document.fonts.addEventListener('loadingdone', function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); }); document.fonts.ready.then(function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); }); } } catch (e) { /* ignore */ }
+    var rso = window.ResizeObserver ? new ResizeObserver(sched) : null; if (rso) rso.observe(qs);
+    window.__qbG.add(function () { dead = true; if (mo) mo.disconnect(); mo = null; if (rso) rso.disconnect(); if (raf) cancelAnimationFrame(raf); raf = 0; });
+    window.__qbG.on(window, 'resize', sched);
+    try { if (document.fonts) { window.__qbG.on(document.fonts, 'loadingdone', function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); }); document.fonts.ready.then(function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); }); } } catch (e) { /* ignore */ }
     [600, 1500, 3000, 6000].forEach(function (ms) { setTimeout(function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); }, ms); });
-    window.addEventListener('load', function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); });
+    window.__qbG.on(window, 'load', function () { document.querySelectorAll('.mxd').forEach(function (s) { delete s.dataset.fw; }); sched(); });
     sched();
   })();
   $('.qb-hideopts').addEventListener('click', function () { var b = $('.qb-hideopts'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Show options' : 'Hide options'; $('#questions').classList.toggle('hide-opts', on); });
@@ -1478,17 +1511,17 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
 
     var list = $('#questions');
     var rows = shown();
-    $('.qb-nshow').textContent = String(PARTIAL ? PARTIAL.shown : rows.length);
+    $('.qb-nshow').textContent = String(rows.length);
     var key = filterKey();
     if (key !== lastKey) { lastKey = key; page = 0; }
     var pages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
     if (page >= pages) page = pages - 1;
     list.replaceChildren();
-    if (!rows.length) { list.appendChild(el('div', 'qb-empty', ROWS.length ? 'No questions match these filters.' : '')); updateSelUI(); return; }
+    if (!rows.length) { list.appendChild(el('div', 'qb-empty', ROWS.length ? 'No questions match these filters.' : 'No questions are available yet.')); updateSelUI(); return; }
     var byChapter = {};
     rows.forEach(function (q) { (byChapter[q.chapter_code] = byChapter[q.chapter_code] || []).push(q); });
     var start = page * PER_PAGE, slice = rows.slice(start, start + PER_PAGE);
-    if (pages > 1 && !PARTIAL) list.appendChild(pager(pages, start, slice.length, rows.length));
+    if (pages > 1) list.appendChild(pager(pages, start, slice.length, rows.length));
     var cur = null;
     slice.forEach(function (q, k) {
       if (cur !== q.chapter_code) {
@@ -1509,9 +1542,9 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
       CARDS[q.id].querySelector('.qb-num').textContent = String(start + k + 1);
       list.appendChild(CARDS[q.id]);
     });
-    if (PARTIAL) list.appendChild(el('div', 'qb-loadnote', 'Loading all ' + Number(PARTIAL.n).toLocaleString('en-US') + ' questions\u2026'));
-    else if (pages > 1) list.appendChild(pager(pages, start, slice.length, rows.length));
+    if (pages > 1) list.appendChild(pager(pages, start, slice.length, rows.length));
     updateSelUI();
+    if (!FIGS && !figStarted && figTries) startFigures();
   }
   function filterKey() {
     return ['year', 'sess', 'cls', 'blk', 'diff', 'type', 'ch'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
@@ -1539,13 +1572,14 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   function chapterAttnCounts() {
     var m = {}; ROWS.forEach(function (q) { if (q.attention) m[q.chapter_code] = (m[q.chapter_code] || 0) + 1; }); return m;
   }
+  /* only cells marked as flag / attention columns are written (the Chapter-wise Count table has none: Code | Chapter | Class | L1 | L2 | L3 | Total) */
   function updateFlagCol() {
+    if (!root.querySelector('#overview td[data-col=flag],#overview td[data-col=attn]')) return;
     var m = chapterFlagCounts(), a = chapterAttnCounts();
     $$('#overview tbody tr').forEach(function (tr) {
-      var td = tr.lastChild; if (!td) return; var n = m[tr.dataset.key] || 0;
-      td.textContent = String(n); td.className = n === 0 ? 'z' : '';
-      var ta = td.previousSibling; if (!ta) return; var k = a[tr.dataset.key] || 0;
-      ta.textContent = String(k); ta.className = k === 0 ? 'z' : '';
+      var td = tr.querySelector('td[data-col=flag]'), ta = tr.querySelector('td[data-col=attn]');
+      if (td) { var n = m[tr.dataset.key] || 0; td.textContent = String(n); td.className = n === 0 ? 'z' : ''; }
+      if (ta) { var k = a[tr.dataset.key] || 0; ta.textContent = String(k); ta.className = k === 0 ? 'z' : ''; }
     });
   }
   /* ---------- chapter weightage graph ---------- */
@@ -1593,11 +1627,11 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var ans = $('.qb-o-ans').checked;
     return { answers: ans || $('.qb-o-key').checked, answerKey: $('.qb-o-key').checked, explain: !!($('.qb-o-exp') && $('.qb-o-exp').checked), pptLayout: $('.qb-o-ppt').checked };
   }
-  function save(filename, data) {
+  function save(filename, data, note) {
     var ext = String(filename).split('.').pop().toLowerCase();
     if (!QBP(ext === 'pdf' ? 'pdf' : ext === 'pptx' ? 'pptx' : 'docx')) { msg(QBP('pdf') ? 'Your plan includes PDF downloads only.' : 'Downloads need a Premium membership.', true); return Promise.resolve(false); }
     if (!dl) { msg('Downloads are not available in this view. Open the dashboard on claude.ai to export.', true); return Promise.resolve(false); }
-    return dl.save({ filename: filename, data: data }).then(function () { msg('Saved ' + filename); return true; }, function (e) {
+    return dl.save({ filename: filename, data: data }).then(function () { msg('Saved ' + filename + (note ? '. ' + note : '')); return true; }, function (e) {
       var code = e && e.code;
       if (code === 'declined') msg('Download cancelled.');
       else if (code === 'rate_limited') msg('A download prompt is already open.', true);
@@ -1616,34 +1650,47 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
         var f = sv && typeof sv !== 'string' ? sv.f : null;
         o.expl.push({ n: i + 1, q: Object.assign({}, q, { id: q.id + '#sol', question: String(t), options: [], figure: f || null, answer: '' }) });
       });
-      if (!o.expl.length) msg('None of the selected questions has an explanation yet.');
+      if (!o.expl.length) { o.note = 'None of the selected questions has an explanation yet.'; msg(o.note); }
     });
   }
   var busy = false;
   function setBusy(on) { busy = on; ['.qb-docx', '.qb-pdf', '.qb-ppt', '.qb-print', '.qb-share', '.qb-expbtn'].forEach(function (k) { var b = $(k); if (b) b.disabled = on || !S.sel.size; }); }
   function exportWith(ext, build) {
-    var qs = selected(); if (!qs.length || busy) return;
+    var qs = selected(); if (busy) return;
+    if (!qs.length) { msg('Tick questions to export them.', true); return; }
     if (!QBP(ext === 'pptx' ? 'pptx' : 'docx')) { msg(QBP('pdf') ? 'Your plan includes PDF downloads only.' : 'Downloads need a Premium membership.', true); return; }
     var name = exportName(qs), o = opts(); o.title = name;
     setBusy(true); msg('Building ' + ext.toUpperCase() + ' (' + qs.length + ' questions)…');
     setTimeout(function () {
       Promise.resolve(figReady).then(function () { return attachExplain(qs, o); }).then(function () { return build(qs, o); })
-        .then(function (bytes) { return save(name + '.' + ext, new Blob([bytes])); })
+        .then(function (bytes) { return save(name + '.' + ext, new Blob([bytes]), o.note); })
         .catch(function (e) { msg('Could not build the ' + ext.toUpperCase() + ' file: ' + (e && e.message || e), true); })
         .then(function () { setBusy(false); });
     }, 30);
   }
   $('.qb-docx').addEventListener('click', function () { exportWith('docx', function (qs, o) { return QBX.buildDocx(qs, o); }); });
-  $('.qb-ppt').addEventListener('click', function () { exportWith('pptx', function (qs, o) { return window.__qbCwPptx ? window.__qbCwPptx(qs.map(function (x) { return x.id; }), o.explain) : QBX.buildPptx(qs, o); }); });
+  $('.qb-ppt').addEventListener('click', function () { exportWith('pptx', function (qs, o) { return window.__qbCwPptx ? window.__qbCwPptx(qs.map(function (x) { return x.id; }), o.explain, o.answerKey) : QBX.buildPptx(qs, o); }); });
   function qbPdfBlob() {
     var qs = selected(), name = exportName(qs), o = opts(); o.title = name;
     setBusy(true); msg('Building PDF…');
     return Promise.resolve(figReady).then(function () { return attachExplain(qs, o); }).then(function () { return QBX.buildPdf(qs, o, function (i, n) { msg('Building PDF: page ' + i + ' of ' + n + '…'); }); })
-      .then(function (bytes) { setBusy(false); msg(''); return { blob: new Blob([bytes], { type: 'application/pdf' }), file: name + '.pdf' }; })
+      .then(function (bytes) { setBusy(false); msg(o.note || ''); return { blob: new Blob([bytes], { type: 'application/pdf' }), file: name + '.pdf' }; })
       .catch(function (e) { setBusy(false); msg('Could not build the PDF: ' + (e && e.message || e), true); throw e; });
   }
-  $('.qb-print').addEventListener('click', function () { if (!QBP('print') || !selected().length || busy || !window.__pdfPrint) return; window.__pdfPrint(qbPdfBlob); });
-  $('.qb-share').addEventListener('click', function (e) { if (!QBP('share') || !selected().length || busy || !window.__pdfShare) return; window.__pdfShare(e.currentTarget, exportName(selected()), qbPdfBlob); });
+  $('.qb-print').addEventListener('click', function () {
+    if (busy) return;
+    if (!selected().length) { msg('Tick questions to print them.', true); return; }
+    if (!QBP('print')) { msg('Printing is not included in your plan.', true); return; }
+    if (!window.__pdfPrint) { msg('Printing is not available in this view.', true); return; }
+    window.__pdfPrint(qbPdfBlob);
+  });
+  $('.qb-share').addEventListener('click', function (e) {
+    if (busy) return;
+    if (!selected().length) { msg('Tick questions to share them.', true); return; }
+    if (!QBP('share')) { msg('Sharing is not included in your plan.', true); return; }
+    if (!window.__pdfShare) { msg('Sharing is not available in this view.', true); return; }
+    window.__pdfShare(e.currentTarget, exportName(selected()), qbPdfBlob);
+  });
   /* One row under the Answer Key / Explanation switches: Save as worksheet, Create test (teachers) and one Export menu
      (Word, PDF, PowerPoint, Print, Share). The old icon buttons stay hidden in .qb-exp and do the actual work. */
   (function () {
@@ -1654,8 +1701,8 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     var row = document.createElement('div'); row.className = 'qb-wsrow wsrow';
     function mk(cls, ico, label, title, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'btn wsbtn ' + cls; b.title = title; b.innerHTML = ico + '<span>' + label + '</span>'; b.disabled = !S.sel.size; b.addEventListener('click', fn); row.appendChild(b); return b; }
     var ids = function () { return selected().map(function (q) { return q.id; }); };
-    if (QBP('createTests') && QBP('worksheets')) mk('qb-savews', ICO.save, 'Save as worksheet', 'Keep the ticked questions in Saved worksheets', function () { if (S.sel.size && window.AvantiPortal) window.AvantiPortal.saveWorksheet(ids(), exportName(selected())); });
-    if (QBP('createTests')) mk('qb-mktest', ICO.test, 'Create test', 'Make an online test from the ticked questions', function () { if (S.sel.size && window.AvantiPortal) window.AvantiPortal.createTestFrom(ids(), exportName(selected())); });
+    if (QBP('createTests') && QBP('worksheets')) mk('qb-savews', ICO.save, 'Save as worksheet', 'Keep the ticked questions in Saved worksheets', function () { if (!S.sel.size) { msg('Tick questions first.', true); return; } if (!window.AvantiPortal) { msg('Saved worksheets are not available in this view.', true); return; } window.AvantiPortal.saveWorksheet(ids(), exportName(selected())); });
+    if (QBP('createTests')) mk('qb-mktest', ICO.test, 'Create test', 'Make an online test from the ticked questions', function () { if (!S.sel.size) { msg('Tick questions first.', true); return; } if (!window.AvantiPortal) { msg('Creating tests is not available in this view.', true); return; } window.AvantiPortal.createTestFrom(ids(), exportName(selected())); });
     if (false) {   /* the four icon buttons (PDF, Word, PowerPoint, Share) sit in the export box instead of one Export menu */
       var eb = mk('qb-expbtn', ICO.down, 'Export', 'Download, print or share the ticked questions', function (e) {
         var P = window.AvantiPortal, IC = P && P.icons; if (!P || !P.dropMenu || !S.sel.size) return;
@@ -1676,15 +1723,16 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     exp.parentNode.insertBefore(row, exp.nextSibling);
   })();
   $('.qb-pdf').addEventListener('click', function () {
-    var qs = selected(); if (!qs.length || busy) return;
+    var qs = selected(); if (busy) return;
+    if (!qs.length) { msg('Tick questions to export them.', true); return; }
     if (!QBP('pdf')) { msg('Downloads need a Premium membership.', true); return; }
     var name = exportName(qs), o = opts(); o.title = name;
     setBusy(true); msg('Building PDF…');
     Promise.resolve(figReady).then(function () { return attachExplain(qs, o); }).then(function () { return QBX.buildPdf(qs, o, function (i, n) { msg('Building PDF: page ' + i + ' of ' + n + '…'); }); })
-      .then(function (bytes) { return save(name + '.pdf', new Blob([bytes])); })
+      .then(function (bytes) { return save(name + '.pdf', new Blob([bytes]), o.note); })
       .catch(function (e) {
         msg('This browser would not draw the PDF pages (' + (e && e.message || 'blocked') + '), so a print-ready page is being saved instead: open it and choose "Save as PDF".', true);
-        return save(name + ' (print to PDF).html', QBX.printDocument(qs, o));
+        return save(name + ' (print to PDF).html', QBX.printDocument(qs, o), o.note);
       })
       .then(function () { setBusy(false); });
   });
@@ -1740,7 +1788,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
       Array.from(S.sel).forEach(function (id) { if (!BYID[id]) S.sel.delete(id); });
       buildChips();
       apply();
-      if (!PARTIAL) setTimeout(startFigures, 0);
+      setTimeout(startFigures, 0);
       if (!loadFlags.done) { loadFlags.done = true; loadFlags(); }
     }
     if (byc.status === 'ok') drawOverview(byc.data);
@@ -1750,7 +1798,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
 
 /* Overview panels: one tab bar, click a tab to show its panel, click again to hide it */
 (function () {
-  document.addEventListener('click', function (e) {
+  window.__qbG.on(document, 'click', function (e) {
     var b = e.target.closest && e.target.closest('[data-qbpanel]'); if (!b) return;
     var id = b.getAttribute('data-qbpanel'), was = b.getAttribute('aria-selected') === 'true';
     var all = document.querySelectorAll('[data-qbpanel]');

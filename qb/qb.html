@@ -140,13 +140,13 @@
   .qb-sbar .qb-frow.qb-toggles>.qb-reset{grid-column:1/-1;background:#1f5f5a;border-color:#1f5f5a;color:#fff;font-weight:600}
   .qb-sbar .qb-frow.qb-toggles>.qb-reset:hover{background:#2a7c76;border-color:#2a7c76}
   .qb-sbar .qb-pills{margin-top:6px}
-  /* phone: paired rows in this order: Source | Question type, Exam | Year, Class | Level */
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-chips[data-f=src]){order:1}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-chips[data-f=type]){order:2}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-chips[data-f=exam]){order:3}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-chips[data-f=year]){order:4}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-chips[data-f=cls]){order:5}
-  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-chips[data-f=diff]){order:6}
+  /* phone: after the chapter picker, Question type on its own line, then paired rows Year | Session and Class | Level
+     (buildDropdown in qb-all.js turns each [data-f] box into a .qb-dd dropdown) */
+  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=type]){order:1;grid-column:1/-1}
+  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=year]){order:2}
+  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=sess]){order:3}
+  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=cls]){order:4}
+  .qb-sbar .qb-frow>.qb-fgroup:has(>.qb-dd[data-f=diff]){order:5}
 }
 .qb-dd{min-width:min(100%,12rem);max-width:100%}.qb-dd .qb-ms-panel{width:min(18rem,calc(100vw - 48px))}
 .qb-input{font:inherit;font-size:var(--cds-font-size-body);padding:7px 12px;border:1px solid var(--qb-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg)}
@@ -232,8 +232,6 @@
 .qb-opts.c4{grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr))}
 .qb-opts.c2{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:560px){.qb-opts.c2,.qb-opts.c4{grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr))}.qb-opts.c2{grid-template-columns:1fr}}
 .qb-opts.c1{grid-template-columns:1fr}
-.qb-partial #tiles,.qb-partial .qb-sbar,.qb-partial #qbtools{pointer-events:none}
-.qb-partial .qb-sbar,.qb-partial #qbtools{opacity:.6}
 .qb-loadnote{padding:18px 8px;text-align:center;color:var(--color-fg-muted);font-size:13px}
 .qb-opts.m1{grid-template-columns:1fr}.qb-opts.m2{grid-template-columns:repeat(2,minmax(0,1fr))}.qb-opts.m3{grid-template-columns:repeat(3,minmax(0,1fr))}.qb-opts.m4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .qb-opts.nw .qb-opt>span{white-space:nowrap}
