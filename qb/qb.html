@@ -237,7 +237,7 @@
 .qb-opts.m1{grid-template-columns:1fr}.qb-opts.m2{grid-template-columns:repeat(2,minmax(0,1fr))}.qb-opts.m3{grid-template-columns:repeat(3,minmax(0,1fr))}.qb-opts.m4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .qb-opts.nw .qb-opt>span{white-space:nowrap}
 .qb-opt{display:flex;gap:10px;align-items:baseline;min-width:0;padding:7px 12px;border:1px solid var(--qb-line);border-radius:var(--cds-radius);background:var(--color-bg);transition:background .15s,border-color .15s}
-.qb-opt>span{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden}
+.qb-opt>span{min-width:0;max-width:100%;overflow:visible;overflow-wrap:anywhere}
 .qb-opt>b{flex:none;display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--qb-soft);color:var(--qb-accent);font-weight:700;font-size:12px;line-height:1;transform:translateY(-1px)}
 .qb-q.rev .qb-opt.ok,.qb-list.rev-all .qb-opt.ok{border-color:var(--color-ok);background:color-mix(in srgb,var(--color-ok) 10%,var(--color-bg))}
 .qb-q.rev .qb-opt.ok>b,.qb-list.rev-all .qb-opt.ok>b{background:var(--color-ok);color:#fff}
@@ -433,7 +433,7 @@
   <section class="qb-hero" id="header">
   <header class="qb-head">
     <div class="qb-eyebrow">Cambridge Board · IGCSE and AS &amp; A Level · Physics</div>
-    <h1>Physics Dashboard</h1>
+    <h1>Question counts</h1>
     <p>Cambridge Physics questions, tagged by class and chapter. Filter by year, class, chapter, level and question type.</p>
   </header>
   <div class="qb-tiles" id="tiles" aria-label="Question counts"></div>

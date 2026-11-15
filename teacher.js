@@ -1372,7 +1372,7 @@ function buildShell() {
   root.append(
     h('div', { class: 'shell' },
       h('header', { class: 'topbar' },
-        h('div', { class: 'tb-head' }, h('img', { class: 'tb-logo', src: 'img/ankit-logo.png', alt: 'PhyNik', width: 145, height: 51 }), h('h1', { class: 'tb-title', text: 'Physics Dashboard' }), null),
+        h('div', { class: 'tb-head' }, h('img', { class: 'tb-logo', src: 'img/ankit-logo.png', alt: 'PhyNik', width: 145, height: 51 }), h('h1', { class: 'tb-title', text: 'PhyNik', style: 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap' }), null),
         h('button', { type: 'button', class: 'tb-theme', id: 'themeBtn', 'data-act': 'theme', 'aria-pressed': 'false' }),
         h('button', { type: 'button', class: 'tb-theme tb-guide', id: 'guideBtn', 'data-act': 'guide', title: 'Guide: what is in this site', 'aria-label': 'Guide: what is in this site', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>' }),
         h('button', { type: 'button', class: 'tb-theme tb-info', id: 'qbInfoBtn', 'data-act': 'qbinfo', 'aria-haspopup': 'true', 'aria-expanded': 'false', title: 'Question Bank overview', 'aria-label': 'Question Bank overview', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' }),
