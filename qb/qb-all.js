@@ -1012,7 +1012,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
       if (q.paper) { var pn = String(q.paper).split('/')[1], pcol = ['21', '22', '23'].indexOf(pn) >= 0 ? 'pc-blue' : ['41', '42', '43'].indexOf(pn) >= 0 ? 'pc-red' : 'pc-other'; var pcode = el('span', 'qb-tag pcode ' + pcol, q.id); pcode.title = 'Question ID'; meta.appendChild(pcode); }
     }
     var bTop = null, bTyp = icoBtn('list', q.type, true);
-    bTop = icoBtn('tag', q.chapter, true);
+    bTop = icoBtn('tag', q.chapter_code + ' \u00b7 ' + q.chapter, true);
     var bId = icoBtn('hash', 'ID: ' + q.id, true); bId.classList.add('idg'); bId.title = 'Tap to copy the question ID';
     bId.addEventListener('click', function () {
       var t = q.id, tip = 'ID: ' + t, ok = function () { flash(bId, 'Copied ' + t); };
