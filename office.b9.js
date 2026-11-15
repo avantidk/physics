@@ -3,7 +3,7 @@
 (function (root) {
 'use strict';
 const M = () => root.MathDoc;
-const NAVY = '1E3A8A', GREY = '6B7280';
+const NAVY = '1E8A86', GREY = '6B807F';
 const LET = 'ABCD';
 
 /* ---------- shared bits ---------- */
@@ -76,9 +76,9 @@ async function buildDocx(D, JSZip, pages, H) {
   function arrayTable(t, popt, out) {
     const m = ARR.exec(t), rows = m[2].split(/\\\\(?:\[[^\]]*\])?/).map(r => r.replace(/\\hline/g, '').trim()).filter(Boolean).map(r => r.split(/(?<!\\)&/).map(c => c.trim()));
     const nc = Math.max(...rows.map(r => r.length)), ind = (popt.indent && popt.indent.left) || 0, tw = curW - ind, cw = Math.floor(tw / nc);
-    const bd = { style: D.BorderStyle.SINGLE, size: 4, color: '9AA3B8' }, cb = { top: bd, bottom: bd, left: bd, right: bd };
+    const bd = { style: D.BorderStyle.SINGLE, size: 4, color: '9AB8B7' }, cb = { top: bd, bottom: bd, left: bd, right: bd };
     out.push(new D.Table({ width: { size: cw * nc, type: D.WidthType.DXA }, columnWidths: Array(nc).fill(cw), layout: D.TableLayoutType.FIXED, indent: { size: ind, type: D.WidthType.DXA },
-      rows: rows.map((r, ri) => new D.TableRow({ cantSplit: true, children: Array.from({ length: nc }, (_, j) => new D.TableCell({ width: { size: cw, type: D.WidthType.DXA }, borders: cb, margins: { top: 30, bottom: 30, left: 80, right: 60 }, shading: ri === 0 && /\\textbf/.test(r.join('')) ? { type: D.ShadingType.CLEAR, fill: 'EEF1F8', color: 'auto' } : undefined,
+      rows: rows.map((r, ri) => new D.TableRow({ cantSplit: true, children: Array.from({ length: nc }, (_, j) => new D.TableCell({ width: { size: cw, type: D.WidthType.DXA }, borders: cb, margins: { top: 30, bottom: 30, left: 80, right: 60 }, shading: ri === 0 && /\\textbf/.test(r.join('')) ? { type: D.ShadingType.CLEAR, fill: 'EEF8F8', color: 'auto' } : undefined,
         children: r[j] ? blocks(cellMixed(r[j]), [], { spacing: { before: 0, after: 0 } }, ri === 0 && /\\textbf/.test(r[j]) ? { bold: true } : null) : [new D.Paragraph({ children: [] })] })) })) }));
     out.push(new D.Paragraph({ spacing: { before: 0, after: 60 }, children: [new D.TextRun({ text: '', size: 8 })] }));
   }
@@ -128,8 +128,8 @@ async function buildDocx(D, JSZip, pages, H) {
     const infoTxt = test ? ['Name: ______________________', 'Avanti ID: __________', nq + ' questions', 'Time: ' + p.mins + ' min', 'Max marks: ' + nq * p.pos + '  (+' + p.pos + ' / −' + p.neg + ')']
       : ['Name: ______________________', 'Date: ______________', nq + ' questions', 'Marks: ____ / ' + nq];
     const tabsAt = test ? [3000, 5100, 6700, 8300] : [3600, 6200, 8200];
-    const info = new D.Paragraph({ spacing: { before: 100, after: 100 }, tabStops: tabsAt.map(pos => ({ type: D.TabStopType.LEFT, position: pos })), border: { bottom: { style: D.BorderStyle.SINGLE, size: 4, color: 'CBD2E0', space: 6 } }, children: infoTxt.flatMap((t, k) => [new D.TextRun(Object.assign({ text: t }, fi))].concat(k < infoTxt.length - 1 ? [new D.TextRun(Object.assign({ text: '\t' }, fi))] : [])) });
-    const footer = new D.Footer({ children: [new D.Paragraph({ tabStops: [{ type: D.TabStopType.RIGHT, position: W }], border: { top: { style: D.BorderStyle.SINGLE, size: 4, color: 'CBD2E0', space: 4 } },
+    const info = new D.Paragraph({ spacing: { before: 100, after: 100 }, tabStops: tabsAt.map(pos => ({ type: D.TabStopType.LEFT, position: pos })), border: { bottom: { style: D.BorderStyle.SINGLE, size: 4, color: 'CBE0DF', space: 6 } }, children: infoTxt.flatMap((t, k) => [new D.TextRun(Object.assign({ text: t }, fi))].concat(k < infoTxt.length - 1 ? [new D.TextRun(Object.assign({ text: '\t' }, fi))] : [])) });
+    const footer = new D.Footer({ children: [new D.Paragraph({ tabStops: [{ type: D.TabStopType.RIGHT, position: W }], border: { top: { style: D.BorderStyle.SINGLE, size: 4, color: 'CBE0DF', space: 4 } },
       children: [new D.TextRun({ text: p.pyq ? examName + ' - ' + dateLine : p.title, size: 16, color: GREY, font: 'Calibri' }), new D.TextRun({ text: '\tPage ', size: 16, color: GREY, font: 'Calibri' }), new D.TextRun({ children: [D.PageNumber.CURRENT], size: 16, color: GREY, font: 'Calibri' })] })] });
     const two = p.cols !== 1, colW = (two ? COLW : W) - 340, wEm = LINE_EM * colW / (COLW - 340);
     curW = colW + 340;
@@ -162,8 +162,8 @@ async function buildDocx(D, JSZip, pages, H) {
       if (tail) { kids.push(new D.Paragraph({ spacing: { after: 20 }, indent: { left: 340 }, children: [new D.TextRun({ text: tail, italics: true, size: 16, color: GREY, font: 'Calibri' })], keepNext: !!q.o.length })); h += 0.8; }
       if (mt) {
         const wl = Math.max(...mt.left.map(x => M().width(x)), 2), wr = Math.max(...mt.right.map(x => M().width(x)), 2), fl = Math.min(0.7, Math.max(0.3, wl / (wl + wr)));
-        const cwL = Math.floor(colW * fl), cwR = colW - cwL, cw = Math.floor(colW / 2), bd = { style: D.BorderStyle.SINGLE, size: 4, color: '9AA3B8' }, cb = { top: bd, bottom: bd, left: bd, right: bd };
-        const cell = (text, head, right) => new D.TableCell({ width: { size: right ? cwR : cwL, type: D.WidthType.DXA }, borders: cb, margins: { top: 30, bottom: 30, left: 80, right: 60 }, shading: head ? { type: D.ShadingType.CLEAR, fill: 'EEF1F8', color: 'auto' } : undefined,
+        const cwL = Math.floor(colW * fl), cwR = colW - cwL, cw = Math.floor(colW / 2), bd = { style: D.BorderStyle.SINGLE, size: 4, color: '9AB8B7' }, cb = { top: bd, bottom: bd, left: bd, right: bd };
+        const cell = (text, head, right) => new D.TableCell({ width: { size: right ? cwR : cwL, type: D.WidthType.DXA }, borders: cb, margins: { top: 30, bottom: 30, left: 80, right: 60 }, shading: head ? { type: D.ShadingType.CLEAR, fill: 'EEF8F8', color: 'auto' } : undefined,
           children: text ? blocks(text, [], { spacing: { before: 0, after: 0 } }, head ? { bold: true } : null) : [new D.Paragraph({ children: [] })] });
         const rowsM = [new D.TableRow({ cantSplit: true, tableHeader: true, children: [cell(mt.head[0], true), cell(mt.head[1], true, true)] })];
         for (let r = 0; r < Math.max(mt.left.length, mt.right.length); r++) { rowsM.push(new D.TableRow({ cantSplit: true, children: [cell(mt.left[r] || ''), cell(mt.right[r] || '', false, true)] })); h += Math.max(textH(mt.left[r] || '', wEm / 2), textH(mt.right[r] || '', wEm / 2), 1) + 0.3; }
@@ -260,21 +260,21 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
     const mt = MP(q.q);
     paras.push(runs(mt ? mt.pre : q.q, base).concat(q.t === 'MSQ' ? [{ text: '   (one or more options correct)', options: Object.assign({}, base, { italic: true, color: GREY, fontSize: fs - 4 }) }] : []));
     if (q.o.length) {
-      if (optLayout(q) === 'row') paras.push([].concat(...q.o.map((o, k) => [{ text: (k ? '        ' : '') + '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '0070C0' }) }].concat(runs(o, base)))));
-      else q.o.forEach((o, k) => paras.push([{ text: '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '0070C0' }) }].concat(runs(o, base))));
+      if (optLayout(q) === 'row') paras.push([].concat(...q.o.map((o, k) => [{ text: (k ? '        ' : '') + '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '00C0AA' }) }].concat(runs(o, base)))));
+      else q.o.forEach((o, k) => paras.push([{ text: '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '00C0AA' }) }].concat(runs(o, base))));
     }
     // pptxgenjs wants one flat run list; paragraph ends carry breakLine
     const flat = [];
     paras.forEach((pr, k) => { pr.forEach((r, j) => { const o = Object.assign({}, r.options); if (j === pr.length - 1 && k < paras.length - 1) o.breakLine = true; o.paraSpaceAfter = 8; flat.push({ text: r.text, options: o }); }); });
     const hasFig = q.f && H.figs && H.figs[q.i];
     if (mt) {
-      const nTab = Math.max(mt.left.length, mt.right.length), bd = { type: 'solid', pt: 0.75, color: '9AA3B8' }, cellOpt = { fontFace: 'Calibri', fontSize: Math.min(fs, 16), color: '141413', border: [bd, bd, bd, bd], valign: 'middle' };
-      const row = (a, b, head) => [a, b].map(t => ({ text: runs(t || ' ', Object.assign({}, cellOpt, head ? { bold: true } : {})), options: Object.assign({}, cellOpt, head ? { bold: true, fill: { color: 'EEF1F8' } } : {}) }));
+      const nTab = Math.max(mt.left.length, mt.right.length), bd = { type: 'solid', pt: 0.75, color: '9AB8B7' }, cellOpt = { fontFace: 'Calibri', fontSize: Math.min(fs, 16), color: '141413', border: [bd, bd, bd, bd], valign: 'middle' };
+      const row = (a, b, head) => [a, b].map(t => ({ text: runs(t || ' ', Object.assign({}, cellOpt, head ? { bold: true } : {})), options: Object.assign({}, cellOpt, head ? { bold: true, fill: { color: 'EEF8F8' } } : {}) }));
       const rowsT = [row(mt.head[0], mt.head[1], true)]; for (let r = 0; r < nTab; r++) rowsT.push(row(mt.left[r], mt.right[r]));
       const pre = M().plainText(mt.pre).trim();
       if (pre) s.addText(runs(mt.pre, base), { x: 0.6, y: 1.1, w: 12.1, h: 1.0, valign: 'top', margin: 4, fit: 'shrink' });
       s.addTable(rowsT, { x: 0.6, y: pre ? 2.2 : 1.2, w: 12.1, colW: [6.05, 6.05] });
-      if (q.o.length) { const of = []; q.o.forEach((opt, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '0070C0' }) }].concat(runs(opt, base)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: 0.6, y: 5.3, w: 12.1, h: 1.9, valign: 'top', margin: 4, fit: 'shrink' }); }
+      if (q.o.length) { const of = []; q.o.forEach((opt, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, base, { bold: true, color: '00C0AA' }) }].concat(runs(opt, base)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: 0.6, y: 5.3, w: 12.1, h: 1.9, valign: 'top', margin: 4, fit: 'shrink' }); }
       continue;
     }
     s.addText(flat, { x: 0.6, y: 1.1, w: hasFig ? 7.6 : 12.1, h: 5.9, valign: 'top', margin: 4, fit: 'shrink' });
@@ -318,7 +318,7 @@ async function buildPptx(PptxGenJS, JSZip, pages, H) {
 
 /* ---------- PowerPoint: one PYQ chapter, black slides (c12 PYQ PPTX) ---------- */
 async function buildCwPptx(PptxGenJS, JSZip, d, H) {
-  const BLACK = '000000', NAVYC = '1B2A41', CORAL = 'E8573E', TEAL = '2A9D8F', GRAYC = '9CA3AF', LIME = '9BE15D', YEL = 'F4D35E', WHITE = 'FFFFFF', GREEN = '4ADE80', RED = 'EF4444'; const LVC = { L1: GREEN, L2: YEL, L3: RED };  /* level pill: L1 green, L2 yellow, L3 red */
+  const BLACK = '000000', NAVYC = '1B413E', CORAL = 'E8573E', TEAL = '2A9D8F', GRAYC = '9CAFAE', LIME = '9BE15D', YEL = 'F4D35E', WHITE = 'FFFFFF', GREEN = '4ADE80', RED = 'EF4444'; const LVC = { L1: GREEN, L2: YEL, L3: RED };  /* level pill: L1 green, L2 yellow, L3 red */
   const FH = 'Georgia', FB = 'Arial', FM = 'Cambria Math', FQ = 'Times New Roman';
   const QFS = 24, CARD_MAX = 5.25;
   const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE';
@@ -472,7 +472,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
     const QT = q.q.split(/(\\\([\s\S]*?\\\))/).map((seg, i) => i % 2 ? seg : seg.replace(/\s*(\((?:I{1,3}|IV|V|VI)\)|\([1-9]\))(?=\s)/g, (m, lab, off) => (off === 0 && i === 0) ? m : '\n' + lab)).join('');
     const mtc = MP(q.q);
     if (mtc) {
-      const bdc = { type: 'solid', pt: 1, color: '9CA3AF' }, colW = (blockW - 0.0) / 2, nT = Math.max(mtc.left.length, mtc.right.length);
+      const bdc = { type: 'solid', pt: 1, color: '9CAFAE' }, colW = (blockW - 0.0) / 2, nT = Math.max(mtc.left.length, mtc.right.length);
       const mk = (fs) => {
         const fsT = Math.max(14, fs - 2), rowH = [], rowsT = [];
         const hH = textH(mtc.head[0] + ' ' + mtc.head[1], fsT, colW - 0.25) + 0.16; let th = hH;
@@ -489,7 +489,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
       s.addShape(pptx.ShapeType.rect, { x: 0.5, y: TOP, w: 6 / 72, h: G.tot, fill: { color: CORAL }, line: { type: 'none' } });
       if (mtc.pre) { s.addText(qRuns(mtc.pre, baseQ), { x: blockX, y: yy, w: blockW, h: G.preT, valign: 'top', margin: 0 }); yy += G.preT; }
       s.addTable(rowsT, { x: blockX, y: yy, w: colW * 2, colW: [colW, colW], rowH: [G.hH].concat(G.rowH) }); yy += G.th + 0.15;
-      if (q.o && q.o.length) { const of = []; q.o.forEach((o, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, baseQ, { bold: true, color: '3B9EFF' }) }].concat(runs(o, baseQ, WHITE)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; ro.paraSpaceAfter = 6; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: blockX, y: yy, w: blockW, h: G.opH + 0.1, valign: 'top', margin: 0 }); }
+      if (q.o && q.o.length) { const of = []; q.o.forEach((o, k) => { const pr = [{ text: '(' + LET[k] + ') ', options: Object.assign({}, baseQ, { bold: true, color: '3BFFEC' }) }].concat(runs(o, baseQ, WHITE)); pr.forEach((r, j) => { const ro = Object.assign({}, r.options); if (j === pr.length - 1 && k < q.o.length - 1) ro.breakLine = true; ro.paraSpaceAfter = 6; of.push({ text: r.text, options: ro }); }); }); s.addText(of, { x: blockX, y: yy, w: blockW, h: G.opH + 0.1, valign: 'top', margin: 0 }); }
       if (hasFig) { const f = H.figs[q.i], w = 3.7, h = w * f.h / f.w; s.addImage({ data: f.dataUrl, x: 9.1, y: TOP, w, h }); }
       s.addText([{ text: 'Ans: ', options: { bold: true, fontFace: FB, fontSize: 16, color: GRAYC } }].concat(runs(ansText(q), { fontFace: FB, fontSize: 16, color: GRAYC }, GRAYC)), { x: 0.5, y: 6.6, w: 6, h: 0.5, valign: 'middle', margin: 0 });
       blank(); return;
@@ -498,7 +498,7 @@ async function buildCwPptx(PptxGenJS, JSZip, d, H) {
       const base = { fontFace: FQ, fontSize: fs, color: WHITE }, paras = [qRuns(QT, base)];
       if (q.t === 'MSQ') paras[0] = paras[0].concat([{ text: '   (one or more options correct)', options: Object.assign({}, base, { italic: true, color: GRAYC, fontSize: Math.max(12, fs - 4) }) }]);
       const rows = (q.o || []).map((o, k) => [k]);
-      rows.forEach(ix => { const pr = [{ text: '(' + LET[ix[0]] + ') ', options: Object.assign({}, base, { bold: true, color: '3B9EFF' }) }]; pr.push(...runs(q.o[ix[0]], base, WHITE)); paras.push(pr); });
+      rows.forEach(ix => { const pr = [{ text: '(' + LET[ix[0]] + ') ', options: Object.assign({}, base, { bold: true, color: '3BFFEC' }) }]; pr.push(...runs(q.o[ix[0]], base, WHITE)); paras.push(pr); });
       const hs = [textH(QT + (q.t === 'MSQ' ? '   (one or more options correct)' : ''), fs, blockW)].concat(rows.map(ix => textH('(' + LET[ix[0]] + ') ' + q.o[ix[0]], fs, blockW)));
       return { paras, h: hs.reduce((a, b) => a + b, 0) + (paras.length - 1) * 0.083 };
     };

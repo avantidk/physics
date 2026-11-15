@@ -1,23 +1,23 @@
 /* Lite view: question list and PYQs only. */
 .app-foot #appFootVer,.app-foot #appFootLink,.app-foot #appFootSite{display:none}
 
-.pt-dmenu{position:fixed;z-index:1200;min-width:260px;max-width:calc(100vw - 16px);background:var(--color-bg,#fff);color:var(--color-fg,#0e1a33);border:1px solid var(--color-border-line,rgba(128,128,128,.3));border-radius:12px;padding:6px;box-shadow:0 18px 44px rgba(5,12,32,.28);display:flex;flex-direction:column}
+.pt-dmenu{position:fixed;z-index:1200;min-width:260px;max-width:calc(100vw - 16px);background:var(--color-bg,#fff);color:var(--color-fg,#0e3331);border:1px solid var(--color-border-line,rgba(128,128,128,.3));border-radius:12px;padding:6px;box-shadow:0 18px 44px rgba(5,32,31,.28);display:flex;flex-direction:column}
 .pt-ditem{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:9px 10px;border-radius:8px;cursor:pointer;font:inherit}
-.pt-ditem:hover,.pt-ditem:focus-visible{background:color-mix(in srgb,#1f3f95 12%,transparent);outline:none}
-.pt-dic{width:26px;display:grid;place-items:center;flex:none;color:var(--color-fg-muted,#5d6a85)}
-.pt-dtx{display:flex;flex-direction:column;gap:1px;min-width:0}.pt-dtx b{font-size:14px;font-weight:600}.pt-dtx small{font-size:12px;color:var(--color-fg-muted,#5d6a85)}
+.pt-ditem:hover,.pt-ditem:focus-visible{background:color-mix(in srgb,#1f9590 12%,transparent);outline:none}
+.pt-dic{width:26px;display:grid;place-items:center;flex:none;color:var(--color-fg-muted,#5d8583)}
+.pt-dtx{display:flex;flex-direction:column;gap:1px;min-width:0}.pt-dtx b{font-size:14px;font-weight:600}.pt-dtx small{font-size:12px;color:var(--color-fg-muted,#5d8583)}
 .pt-dsep{height:1px;background:var(--color-border-line,rgba(128,128,128,.3));margin:4px 6px}
 #selection .qb-exp{display:none!important}
 
 /* PYQ: Question Paper / Chapterwise switch */
 .pyqkind{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 16px}
-.pyqk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:12px 14px;border:2px solid transparent;border-radius:12px;background:var(--field,#eef1f8);color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+.pyqk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:12px 14px;border:2px solid transparent;border-radius:12px;background:var(--field,#eef8f8);color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
 .pyqk strong{font-size:15px;font-weight:700;line-height:1.2}
 .pyqk span{font-size:12px;line-height:1.3;opacity:.7}
-.pyqk:hover{background:color-mix(in srgb,#1f3f95 9%,var(--field,#eef1f8))}
-.pyqk:focus-visible{outline:2px solid #1f3f95;outline-offset:2px}
-.pyqk[aria-pressed=true]{background:color-mix(in srgb,#1f3f95 10%,#fff);border-color:#2b4aa0}
-.pyqk[aria-pressed=true] strong{color:#1c3a8c}
+.pyqk:hover{background:color-mix(in srgb,#1f9590 9%,var(--field,#eef8f8))}
+.pyqk:focus-visible{outline:2px solid #1f9590;outline-offset:2px}
+.pyqk[aria-pressed=true]{background:color-mix(in srgb,#1f9590 10%,#fff);border-color:#2ba09c}
+.pyqk[aria-pressed=true] strong{color:#1c8c88}
 @media (max-width:420px){.pyqkind{grid-template-columns:1fr}}
 
 /* top bar: logo, tabs and buttons all on one line */
