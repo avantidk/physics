@@ -419,9 +419,9 @@
   <section class="qb-card qb-ov qb-panel" id="heroov" role="tabpanel" aria-label="Question counts" hidden>
   <section class="qb-hero" id="header">
   <header class="qb-head">
-    <div class="qb-eyebrow">JEE Main 2026 · Mathematics</div>
+    <div class="qb-eyebrow">Cambridge Board · Classes 9 to 12 · Physics</div>
     <h1>Physics Dashboard</h1>
-    <p>100 JEE Main 2026 previous year questions, tagged by chapter. Open the PYQs tab to preview them by shift or by chapter.</p>
+    <p>School-level Physics questions, tagged by class, block and chapter. Filter by year, class, block, chapter and level.</p>
   </header>
   <div class="qb-tiles" id="tiles" aria-label="Question counts"></div>
   </section>
@@ -430,33 +430,12 @@
     <p class="note">Questions per chapter. Click a row to see only that chapter in the list.</p>
     <div class="qb-tablewrap">
       <table data-source="by_chapter" data-row-key="chapter_code">
-        <thead><tr>
-          <th data-field="chapter_code">Code</th>
-          <th data-field="chapter">Chapter</th>
-          <th data-field="main_all" title="All JEE Main PYQs, including AIEEE (the exam before 2013)">JEE Main</th>
-          <th data-field="adv_all" title="All JEE Advanced PYQs, including IIT-JEE (the exam before 2013)">JEE Adv</th>
-          <th data-field="kcet_all" title="KCET (Karnataka CET) PYQs. A separate exam, not linked with JEE Main, JEE Advanced, AIEEE or IIT-JEE">KCET</th>
-          <th data-field="iat_all" title="IAT (IISER Aptitude Test) PYQs, Maths section. A separate exam">IAT</th>
-          <th data-field="nda_all" title="NDA (National Defence Academy) PYQs, Mathematics paper. A separate exam, 120 questions, +2.5 for a correct answer and one third of that deducted for a wrong one">NDA</th>
-          <th data-field="src_BlackBook">Black Book</th>
-          <th data-field="total">Total</th>
-          <th data-field="oos" title="Previous-year questions that the source lists as out of the current syllabus">Out of syllabus</th>
-          <th data-field="attn" title="Attention (red): questions whose answer or reading is doubtful and needs checking">Attention</th>
-          <th data-field="flagged" title="Review (yellow): questions with a source note or a teacher flag to look at">Review</th>
-        </tr></thead>
+        <thead><tr><th data-field="chapter_code">Code</th><th data-field="chapter">Chapter</th><th data-field="block">Block</th><th data-field="total">Questions</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </section>
-  <section class="qb-card qb-ov qb-panel" id="wchart" role="tabpanel" aria-label="Chapter weightage" hidden>
-    <p class="qb-wc-intro" style="margin-top:4px"><b>Chapter Weightage</b>: how many previous-year questions came from each chapter, so you can see which chapters matter most. </p>
-    <div class="qb-wc-ctl">
-      <div class="qb-wc-g" data-wc="exam"><span>Exam</span><button type="button" class="qb-chip" data-v="all" aria-pressed="true">All</button><button type="button" class="qb-chip" data-v="main" aria-pressed="false">JEE Main</button><button type="button" class="qb-chip" data-v="adv" aria-pressed="false">JEE Advanced</button></div>
-      <div class="qb-wc-g" data-wc="yrs"><span>Period</span><button type="button" class="qb-chip" data-v="all" aria-pressed="true">All years</button><button type="button" class="qb-chip" data-v="2013" aria-pressed="false">Since 2013</button><button type="button" class="qb-chip" data-v="10" aria-pressed="false">Last 10 years</button><button type="button" class="qb-chip" data-v="5" aria-pressed="false">Last 5 years</button></div>
-      <div class="qb-wc-g" data-wc="sort"><span>Sort by</span><button type="button" class="qb-chip" data-v="count" aria-pressed="true">Most asked</button><button type="button" class="qb-chip" data-v="syl" aria-pressed="false">Syllabus order</button></div>
-    </div>
-    <div id="wchartBody" class="qb-wc"></div>
-  </section>
+  
 
   <div class="qb-layout">
   <aside class="qb-sbar" aria-label="Filters sidebar">
@@ -482,6 +461,9 @@
       <input class="qb-input qb-search" type="search" placeholder="Search question text or question ID" aria-label="Search question text or question ID" style="flex:1;min-width:12rem">
     </div>
     <div class="qb-frow">
+      <div class="qb-fgroup"><span class="cap">Year</span><div class="qb-dd" data-f="year"></div></div>
+      <div class="qb-fgroup"><span class="cap">Class</span><div class="qb-dd" data-f="cls"></div></div>
+      <div class="qb-fgroup"><span class="cap">Block</span><div class="qb-dd" data-f="blk"></div></div>
       <div class="qb-fgroup qb-ms" id="chapter-filter">
         <span class="cap">Chapters (pick one or more)</span>
         <button class="qb-ms-btn" type="button" aria-haspopup="true" aria-expanded="false">All chapters</button>
@@ -494,7 +476,8 @@
           <div class="qb-ms-list" data-source="chapters"></div>
         </div>
       </div>
-      <div class="qb-fgroup qb-ms" id="topic-filter" hidden>
+      <div class="qb-fgroup"><span class="cap">Level (L1 easy, L2 medium, L3 hard)</span><div class="qb-dd" data-f="diff"></div></div>
+      <div style="display:none"><div class="qb-fgroup qb-ms" id="topic-filter" hidden>
         <span class="cap">Topics (pick one or more)</span>
         <button class="qb-ms-btn" type="button" aria-haspopup="true" aria-expanded="false">All topics</button>
         <div class="qb-ms-panel" hidden>
@@ -505,14 +488,7 @@
           </div>
           <div class="qb-ms-list" data-source="topics"></div>
         </div>
-      </div>
-      <div class="qb-fgroup"><span class="cap">Source</span><div class="qb-chips" data-f="src"></div></div>
-      <div class="qb-fgroup"><span class="cap">Exam</span><div class="qb-chips" data-f="exam"></div></div>
-      <div class="qb-fgroup"><span class="cap">Year</span><div class="qb-chips" data-f="year"></div></div>
-      <div class="qb-fgroup"><span class="cap">Class</span><div class="qb-chips" data-f="cls"></div></div>
-      <div class="qb-fgroup"><span class="cap">Level (L1 easy, L2 medium, L3 hard)</span><div class="qb-chips" data-f="diff"></div></div>
-      <div class="qb-fgroup"><span class="cap">Question type</span><div class="qb-chips" data-f="type"></div></div>
-      <div class="qb-fgroup qb-oosg"><span class="cap">Out of syllabus</span><span class="qb-oosx" role="group" aria-label="Out of syllabus questions"><button type="button" data-v="in" aria-pressed="true">Include</button><button type="button" data-v="ex" aria-pressed="false">Exclude</button></span></div>
+      </div></div>
     </div>
     <div class="qb-pills" aria-label="Chosen chapters"></div>
   </section>
@@ -528,14 +504,13 @@
       <button class="qb-chip qb-onlysel" type="button" aria-pressed="false">Show selected only</button>
       <button class="qb-chip qb-attnf" type="button" aria-pressed="false">Attention</button>
       <button class="qb-chip qb-flagf" type="button" aria-pressed="false">Review</button>
-      <button class="qb-chip qb-oosonly" type="button" aria-pressed="false">Out of syllabus only</button>
       
       <button class="qb-btn qb-reset" type="button">Reset filters</button>
     <button class="qb-btn qb-selall" type="button">Select all filtered</button>
     <button class="qb-btn qb-clear" type="button">Clear selection</button>
   </div>
 
-  <div class="qb-build" style="font-size:11px;color:var(--color-fg-muted);text-align:right;padding:0 4px">Version 708</div>
+  <div class="qb-build" style="font-size:11px;color:var(--color-fg-muted);text-align:right;padding:0 4px"></div>
   <section class="qb-list" id="questions" data-source="pyq" aria-label="Questions"></section>
   </div>
   </div>

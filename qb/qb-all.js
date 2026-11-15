@@ -12,159 +12,9 @@ function QBP(k) { var p = window.AvantiAuth && window.AvantiAuth.perm; return !!
   };
   window.d3 = window.d3 || { format: function () { return function (n) { return Number(n).toLocaleString('en-US'); }; } };
   window.__qbStart = async function () {
-    try { var bl = document.querySelector('.qb-build'), fv = document.getElementById('appFootVer'); if (bl) { var vt = bl.textContent.replace(/^\s*Version/i, 'Question Bank v').replace(/v\s+/, 'v').trim(); if (fv) { fv.textContent = vt; bl.style.display = 'none'; } else bl.textContent += ' \u00b7 code 509'; } } catch (e) { /* label only */ }
-    /* Version history: click the version in the footer */
-    try {
-      var CHANGELOG = [
-        ['708', '8 Nov 2026', ['Word export rebuilt on real two-column pages: questions flow straight from the left column into the right one, so a column no longer ends with empty space when the next question would fit.', 'PowerPoint cover: logo, exam name with the date under it, and Mathematics at the top right (no more Avanti Fellows \u00b7 JEE Maths).']],
-        ['707', '8 Nov 2026', ['Word export: same header and footer as the PDF (logo, exam name 18 pt with the date at 14 pt, Mathematics top right, Exam - Date and page number in the footer).', 'Word export: figures are drawn smaller and sit where the question puts them, which removes the big blank space before figure questions.', 'PDF export: figures are drawn from the picture itself and the export waits for every picture to load, so a figure can no longer come out blank (KCET 24 Apr 2026 Q16).']],
-        ['706', '8 Nov 2026', ['Question sheets (PYQ, DPP, practice, tests): the Avanti logo replaces the words Avanti Fellows, and the line under it is removed.', 'Header: exam name 18 pt bold with the date below it at 14 pt; Mathematics at the top right.', 'Footer: Exam - Date at the bottom left and the page number at the bottom right.']],
-        ['705', '8 Nov 2026', ['IIT-JEE 2000 and 2001 clean-up: sin, cos, log and other function names set as proper maths, limits written with the limit underneath, % and triangle symbols fixed.', 'IIT-JEE 2001 Mains answers now match the Word file (Q13 tank time is 7\u03c0 \u00d7 10\u2075 / (135\u221ag) seconds; Q11b line is ax + by + c = 0).', 'Solutions added for IIT-JEE 2001 Mains Q2, Q11b and Q12b (from the Word file, false starts removed).', 'Tall | | bars around fractions fixed (2000 Screening Q31), words like for / or / and inside equations now have spaces, and Q29 triple product entries spaced out.', 'PYQ question papers: IIT-JEE papers show the date with Screening, Mains or Paper (e.g. 11 Apr 2000 \u00b7 Screening) and sort by date.', 'Sheet header: the line under Avanti Fellows now reads Mathematics (was JEE Maths).', 'PYQ papers and DPPs: page number moved from the header to the bottom right corner; the DPP header now just says DPP, and the word DPP no longer appears on PYQ papers.', 'PYQ papers, DPPs and practice sheets: the title and the line under it are both 18 pt bold.']],
-        ['704', '8 Nov 2026', ['Binomial coefficients (nCr) were drawn too small in questions and options; they now show at full size.', 'IIT-JEE 2000 Screening Q3: equation moved to its own line.', 'Three IIT-JEE 2000 and 2001 triangle questions moved to Class 12, Solution of Triangle (12M27).']],
-        ['703', '8 Nov 2026', ['IIT-JEE 2000 Screening Q11 (triangle identity) moved to Class 12, Solution of Triangle (12M27).']],
-        ['702', '8 Nov 2026', ['IIT-JEE 2000 Screening Q29: the scalar triple product is now written as three entries side by side with no commas, in the question and in the solution.']],
-        ['701', '8 Nov 2026', ['IIT-JEE 2000 and 2001: only the questions from your Word files are kept (51 and 54). Six old duplicate or wrong-year records were deleted.', 'IIT-JEE 2000 to 2012: ids now carry the real exam date, and paper labels show it (for example 11 Apr 2000 Screening, 7 May 2000 Mains).']],
-        ['700', '8 Nov 2026', ['IIT-JEE 2000 and 2001: every Mains question now says \u201cMains\u201d in its paper label (before, only Screening was written).']],
-        ['699', '8 Nov 2026', ['Version history: click the version in the footer to see what changed in each version (this window).']],
-        ['698', '8 Nov 2026', ['Dashboard renamed to “Physics Dashboard”: browser tab title, header and subheading (JEE, CET, NDA, IAT, PYQ’s, DPP’s, Handouts).', 'Menu and panel labels: “Physics Bank: Question Counts” and “Physics Bank Status”.', 'Chapter Weightage redesigned: ranked list, summary cards, colour bands for most asked / often asked / asked less, count and share shown together.', 'Footer: version and Solutions status first, “Made with ♥ by Ankit” on the last line; the code number is no longer shown.', 'Note that exams before 2000 are still being updated moved into the Guide.']],
-        ['697', '8 Nov 2026', ['IIT-JEE 2000 and 2001 Maths: 18 new questions added (7 from 2000, 11 from 2001).', 'Solutions with diagrams added to 99 questions of these two years; official question numbers set on all of them.', '10 Screening questions moved to the correct paper label.', 'Conflicting key flagged on 2000 Screening Q28; 3 solutions held back (they contained a self-correction).']],
-        ['696', '', ['NDA: out-of-syllabus judged against the NDA syllabus, not the JEE Main syllabus.']],
-        ['695', '', ['NDA 2023 added: NDA I (16 Apr) and NDA II (3 Sep), 240 questions.']],
-        ['694', '', ['NDA paper labels fixed: every paper now says NDA I or NDA II.']],
-        ['693', '', ['NDA 2025 added: NDA I and NDA II, 240 questions with solutions.']],
-        ['678', '', ['NDA added as a new exam in the Question Bank, PYQ papers and test maker.']],
-        ['596', '', ['Figures capped at 340 × 300 px; main equations shown on their own line.']],
-        ['592', '', ['Logic questions moved to Mathematical Reasoning (12M26).']],
-        ['413', '', ['One data source for every section: Question Bank, DPPs, PYQ papers and test maker now read the same question files.', 'Nine pairs of questions that shared an id were separated.']],
-        ['411', '', ['54 repeated Black Book questions removed, as requested.']],
-        ['409', '', ['14 existing figures cleaned: black and white, no watermark.']],
-        ['406', '', ['Image sizes cut by about 35% so pages load faster.']],
-        ['398', '', ['Rules for figures: black and white only, no watermark, compressed.']],
-        ['390', '', ['PYQ tag on practice questions that are also previous-year questions; 115 Black Book questions restored.']],
-        ['389', '', ['Solution of Triangle (12M27) added as a chapter.']],
-        ['373', '', ['Maths formatting cleaned across the whole bank (limits written with the variable below, tall brackets sized).']],
-        ['190', '', ['Question ID shown on every question card.']]
-      ];
-      var fv2 = document.getElementById('appFootVer');
-      if (fv2 && !fv2.dataset.cl) {
-        fv2.dataset.cl = '1'; fv2.style.cursor = 'pointer'; fv2.style.borderBottom = '1px dotted currentColor'; fv2.title = 'See what changed in each version';
-        fv2.setAttribute('role', 'button'); fv2.tabIndex = 0;
-        var openCL = function () {
-          var ov = document.createElement('div');
-          ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px';
-          var bx = document.createElement('div');
-          bx.style.cssText = 'background:var(--color-bg,#fff);color:var(--color-fg,#111);border:1px solid var(--color-border-line,#ccc);border-radius:12px;max-width:660px;width:100%;max-height:85vh;overflow:auto;padding:16px 20px 20px;font-size:13.5px;line-height:1.5;box-sizing:border-box';
-          var hd = document.createElement('div'); hd.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px';
-          var ttl = document.createElement('b'); ttl.style.fontSize = '17px'; ttl.textContent = 'What changed in each version';
-          var x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Close'); x.style.cssText = 'font-size:22px;line-height:1;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px 8px';
-          hd.appendChild(ttl); hd.appendChild(x); bx.appendChild(hd);
-          var sub = document.createElement('div'); sub.style.cssText = 'color:var(--color-fg-muted,#666);font-size:12.5px;margin-bottom:10px'; sub.textContent = 'Newest first. Older versions list only the milestones that were recorded.'; bx.appendChild(sub);
-          CHANGELOG.forEach(function (v, i) {
-            var box = document.createElement('div'); box.style.cssText = 'padding:10px 0;border-top:1px solid var(--color-border-line,rgba(128,128,128,.3))';
-            var t = document.createElement('div'); t.style.cssText = 'font-weight:700;margin-bottom:3px';
-            t.textContent = 'v' + v[0] + (v[1] ? '  ·  ' + v[1] : '') + (i === 0 ? '  (current)' : '');
-            box.appendChild(t);
-            var ul = document.createElement('ul'); ul.style.cssText = 'margin:0;padding-left:20px;display:flex;flex-direction:column;gap:3px';
-            v[2].forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ul.appendChild(li); });
-            box.appendChild(ul); bx.appendChild(box);
-          });
-          ov.appendChild(bx); document.body.appendChild(ov);
-          var close = function () { ov.remove(); document.removeEventListener('keydown', esc); };
-          var esc = function (e) { if (e.key === 'Escape') close(); };
-          document.addEventListener('keydown', esc);
-          x.addEventListener('click', close); ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
-        };
-        fv2.addEventListener('click', openCL);
-        fv2.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCL(); } });
-      }
-    } catch (e) { /* version log only */ }
+    try { var bl = document.querySelector('.qb-build'), fv = document.getElementById('appFootVer'); if (bl) { if (fv) { fv.textContent = ''; } bl.style.display = 'none'; } } catch (e) { /* label only */ }
     var pre = window.__qbPre || {}, pd = pre.data || {};
     var get = function (n) { return pd[n] || fetch('qb/data/' + n + '.json').then(function (r) { if (!r.ok) throw new Error(n); return r.json(); }); };
-    /* "Solutions status" link under the version label: popup with, for every exam and year, how many questions have a solution added, which are still missing one, and which carry a flag to check */
-    /* Black Book block of the Solutions status popup: one pill per book chapter, from first.json `bb` rows [book chapter, name, questions, with solution, flagged] */
-    var bbHtml = function (rows, esc, other) {
-      if (!rows || !rows.length) return '';
-      var tot = 0, sol = 0, flg = 0; rows.forEach(function (r) { tot += r[2]; sol += r[3]; flg += r[4]; });
-      var pill = function (r, txt) { return '<a href="#" class="qb-sstat-bb" data-bb="' + r[0] + '" title="Show these questions in the Question Bank" style="border:1px solid var(--color-border-line,#ccc);border-radius:999px;padding:2px 9px;font-size:12px;color:inherit;text-decoration:underline;cursor:pointer">' + esc(txt) + '</a>'; };
-      var blk = function (title, sub, arr, fmt) {
-        if (!arr.length) return '';
-        return '<div style="margin:12px 0 4px;font-weight:600">' + title + ' <span style="font-weight:400;color:var(--color-fg-muted)">(' + arr.length + ')</span></div><div style="color:var(--color-fg-muted);font-size:12px;margin-bottom:4px">' + sub + '</div><div style="display:flex;flex-wrap:wrap;gap:5px">' + arr.map(function (r) { return pill(r, fmt(r)); }).join('') + '</div>';
-      };
-      var nm = function (r) { return 'Ch ' + r[0] + ' ' + r[1]; };
-      return '<hr style="margin:16px 0 10px;border:0;border-top:1px solid var(--color-border-line,#ccc)"><b style="font-size:15px">Black Book (practice questions)</b>' +
-        '<div style="margin-top:6px">' + sol + ' of ' + tot + ' Black Book questions have a solution added. ' + flg + ' carry a flag to check' + (other && other.length ? ' (plus ' + other.length + ' other practice questions below)' : '') + '.</div>' +
-        blk('Solutions fully added', 'Every question of this book chapter has a solution.', rows.filter(function (r) { return r[3] === r[2]; }), function (r) { return nm(r) + ' \u00b7 ' + r[2] + (r[4] ? ' (' + r[4] + ' flagged)' : ''); }) +
-        blk('Partly added', 'Some questions have a solution, some do not yet.', rows.filter(function (r) { return r[3] > 0 && r[3] < r[2]; }), function (r) { return nm(r) + ' \u00b7 ' + r[3] + '/' + r[2]; }) +
-        blk('Yet to add', 'No solution added so far (book chapters waiting for their Word file with solutions).', rows.filter(function (r) { return r[3] === 0; }), function (r) { return nm(r) + ' \u00b7 ' + r[2] + ' Qs'; }) +
-        (other && other.length ? '<div style="margin:12px 0 4px;font-weight:600">Other practice questions with an Attention flag <span style="font-weight:400;color:var(--color-fg-muted)">(' + other.length + ')</span></div><div style="color:var(--color-fg-muted);font-size:12px;margin-bottom:4px">DPP / sheet questions outside the Black Book that need a check; no solution yet.</div><div style="display:flex;flex-wrap:wrap;gap:5px">' + other.map(function (o) { return '<span style="border:1px solid var(--color-border-line,#ccc);border-radius:999px;padding:2px 9px;font-size:12px" title="' + esc(o[2] || '') + '">' + esc(o[0]) + ' \u00b7 ' + esc(o[1]) + '</span>'; }).join('') + '</div>' : '');
-    };
-    try {
-      var bl2 = document.querySelector('.qb-build');
-      if (bl2 && !document.querySelector('.qb-sstat-link')) {
-        var lk = document.createElement('a'); lk.href = '#'; lk.className = 'qb-sstat-link'; lk.textContent = 'Solutions status \u203a';
-        var fl = document.getElementById('appFootLink');
-        if (fl) { lk.textContent = 'Solutions status'; fl.appendChild(lk); } else { lk.style.cssText = 'display:block;font-size:11px;text-align:right;padding:2px 4px;color:var(--color-fg-muted);text-decoration:underline;cursor:pointer'; bl2.insertAdjacentElement('afterend', lk); }
-        lk.addEventListener('click', function (ev) {
-          ev.preventDefault();
-          var ov = document.createElement('div');
-          ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px';
-          var bx = document.createElement('div');
-          bx.style.cssText = 'background:var(--color-bg,#fff);color:var(--color-fg,#111);border:1px solid var(--color-border-line,#ccc);border-radius:10px;max-width:640px;width:100%;max-height:85vh;overflow:auto;padding:16px 18px;font-size:13px;line-height:1.45;box-sizing:border-box';
-          bx.textContent = 'Loading\u2026'; ov.appendChild(bx); document.body.appendChild(ov);
-          var close = function () { ov.remove(); };
-          ov.addEventListener('click', function (e2) { if (e2.target === ov) close(); });
-          /* the counts come ready-made in the small first.json; only an old first.json falls back to the big file */
-          var bbRows = null, bbOther = null;
-          Promise.resolve(pre.first).catch(function () { return null; }).then(function (fj) {
-            bbRows = (fj && fj.bb) || null; bbOther = (fj && fj.fl) || null;
-            if (fj && fj.st) return fj.st;
-            return Promise.resolve(get('pyq')).then(function (rows) {
-              var gg = {};
-              rows.forEach(function (q) {
-                var ex = q.exam || 'Other', yr = q.year || 'n/a', k = ex + '|' + yr;
-                var o = gg[k] || (gg[k] = [ex, yr, 0, 0, 0]);
-                o[2]++; if (q.solution && String(q.solution).trim()) o[3]++; if (q.attention) o[4]++;
-              });
-              return Object.keys(gg).map(function (k) { return gg[k]; });
-            });
-          }).then(function (st) {
-            var g = {};
-            st.forEach(function (t) { g[t[0] + '|' + t[1]] = { ex: t[0], yr: t[1], n: t[2], s: t[3], f: t[4] }; });
-            var L = Object.keys(g).map(function (k) { return g[k]; });
-            var ord = { 'JEE Advanced': 0, 'JEE Main': 1, 'IIT': 2, 'AIEEE': 3 };
-            L.sort(function (a, b) { return ((ord[a.ex] != null ? ord[a.ex] : 9) - (ord[b.ex] != null ? ord[b.ex] : 9)) || (String(b.yr).localeCompare(String(a.yr))); });
-            var tot = 0, sol = 0, flg = 0; L.forEach(function (o) { tot += o.n; sol += o.s; flg += o.f; });
-            var done = L.filter(function (o) { return o.s === o.n; }), part = L.filter(function (o) { return o.s > 0 && o.s < o.n; }), none = L.filter(function (o) { return o.s === 0; });
-            var esc = function (t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
-            var sec = function (title, sub, arr, fmt) {
-              if (!arr.length) return '';
-              return '<div style="margin:12px 0 4px;font-weight:600">' + title + ' <span style="font-weight:400;color:var(--color-fg-muted)">(' + arr.length + ')</span></div>' +
-                '<div style="color:var(--color-fg-muted);font-size:12px;margin-bottom:4px">' + sub + '</div>' +
-                '<div style="display:flex;flex-wrap:wrap;gap:5px">' + arr.map(function (o) { return '<a href="#" class="qb-sstat-pill" data-ex="' + esc(o.ex) + '" data-yr="' + esc(o.yr) + '" title="Show these questions in the Question Bank" style="border:1px solid var(--color-border-line,#ccc);border-radius:999px;padding:2px 9px;font-size:12px;color:inherit;text-decoration:underline;cursor:pointer">' + esc(fmt(o)) + '</a>'; }).join('') + '</div>';
-            };
-            var ys = function (o) { return o.ex + ' ' + o.yr; };
-            var flagged = L.filter(function (o) { return o.f > 0; });
-            bx.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="font-size:15px">Solutions status (past papers)</b><button type="button" class="qb-sstat-x" style="font:inherit;border:1px solid var(--color-border-line,#ccc);background:var(--color-bg,#fff);color:inherit;border-radius:6px;padding:2px 10px;cursor:pointer">Close</button></div>' +
-              '<div style="margin-top:6px">' + sol + ' of ' + tot + ' past-paper questions have a solution added. ' + flg + ' carry a flag to check.</div>' +
-              sec('Solutions fully added', 'Every question of this paper year has a solution.', done, function (o) { return ys(o) + ' \u00b7 ' + o.n; }) +
-              sec('Partly added', 'Some questions have a solution, some do not yet.', part, function (o) { return ys(o) + ' \u00b7 ' + o.s + '/' + o.n; }) +
-              sec('Yet to add', 'No solution added so far (questions in the bank).', none, function (o) { return ys(o) + ' \u00b7 ' + o.n + ' Qs'; }) +
-              sec('Flagged \u2013 yet to check', 'Questions carrying an attention note (shown on the question card).', flagged, function (o) { return ys(o) + ' \u00b7 ' + o.f + ' flagged'; }) +
-              '';
-            bx.querySelector('.qb-sstat-x').addEventListener('click', close);
-            Array.prototype.forEach.call(bx.querySelectorAll('.qb-sstat-bb'), function (a) {
-              a.addEventListener('click', function (e4) { e4.preventDefault(); close(); try { if (window.QBX && window.QBX.goBB) window.QBX.goBB(a.getAttribute('data-bb')); } catch (x) { /* link only */ } });
-            });
-            Array.prototype.forEach.call(bx.querySelectorAll('.qb-sstat-pill'), function (a) {
-              a.addEventListener('click', function (e3) {
-                e3.preventDefault(); close();
-                try { if (window.QBX && window.QBX.goYear) window.QBX.goYear(a.getAttribute('data-yr') === 'n/a' ? null : a.getAttribute('data-yr'), null, a.getAttribute('data-ex')); } catch (x) { /* link only */ }
-              });
-            });
-          }).catch(function () { bx.textContent = 'Could not load the data. Please try again.'; });
-        });
-      }
-    } catch (e) { /* link only */ }
     var small = await Promise.all([get('topics'), get('chapters')]);
     D.topics = mk('ok', small[0]); D.chapters = mk('ok', small[1]);
     /* the big files are retried (fresh request, growing pause) so a dropped phone connection cannot leave the first-screen 50 cards stuck */
@@ -903,7 +753,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   function printDocument(qs, o) {
     o = o || {};
     var body = blocksFor(qs, o).map(function (b) { return '<section class="' + (o.pptLayout && b.q ? 'brk' : 'blk') + '">' + b.html + '</section>' + (o.pptLayout && b.q ? '<section class="brk"></section>' : ''); }).join('');
-    return '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(o.title || 'JEE Maths PYQs') + '</title><style>' + PCSS + (window.QB_TEMML_CSS || '') + '.blk{margin-bottom:16px;break-inside:avoid}.brk{break-after:page;min-height:1px}@page{size:A4;margin:12mm}</style></head><body class="qbp">' + body +
+    return '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(o.title || 'Physics Questions') + '</title><style>' + PCSS + (window.QB_TEMML_CSS || '') + '.blk{margin-bottom:16px;break-inside:avoid}.brk{break-after:page;min-height:1px}@page{size:A4;margin:12mm}</style></head><body class="qbp">' + body +
       '<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)})<\/script></body></html>';
   }
   function plainText(q) { return q.question.replace(/\*\*/g, '').replace(FIG_RE, ' [figure] ') + '\n' + (q.options || []).map(function (op, j) { return '(' + LET[j] + ') ' + op; }).join('\n'); }
@@ -920,50 +770,21 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   /* ---------- calculations (readers see these in Sources) ---------- */
   dash.calc('counts', {
     inputs: ['pyq', 'nonpyq'],
-    title: 'Questions by exam and year',
-    description: 'Number of questions in the bank: all, PYQs per exam and year, and practice (non-PYQ) questions.',
+    title: 'Questions by class',
+    description: 'Number of questions in the bank, in total and per class.',
     fn: function (pyq, nonpyq) {
-      var ex = {}, pb = {};
-      pyq.forEach(function (q) { ex[q.exam] = (ex[q.exam] || 0) + 1; });
-      nonpyq.forEach(function (q) { var k = q.publisher || 'Practice'; pb[k] = (pb[k] || 0) + 1; });
-      var g = function (m, k) { return m[k] || 0; };
-      return [
-        { group: 'all', n: pyq.length + nonpyq.length },
-        { group: 'pyq', n: pyq.length },
-        { group: 'nonpyq', n: nonpyq.length },
-        { group: 'exam_main', n: g(ex, 'JEE Main') },
-        { group: 'exam_adv', n: g(ex, 'JEE Advanced') },
-        { group: 'exam_aieee', n: g(ex, 'AIEEE') },
-        { group: 'exam_iit', n: g(ex, 'IIT') },
-        { group: 'exam_kcet', n: g(ex, 'KCET') },
-        { group: 'exam_iat', n: g(ex, 'IAT') },
-        { group: 'exam_nda', n: g(ex, 'NDA') },
-        { group: 'src_BlackBook', n: g(pb, 'Black Book') }
-      ];
+      var all = pyq.concat(nonpyq), out = [{ group: 'all', n: all.length }];
+      [9, 10, 11, 12].forEach(function (k) { out.push({ group: 'class_' + k, n: all.filter(function (q) { return Number(q.class) === k; }).length }); });
+      return out;
     }
   });
   dash.calc('by_chapter', {
     inputs: ['chapters', 'pyq', 'nonpyq'],
     title: 'Questions per chapter',
-    description: 'For every chapter, PYQs per exam and year, practice (non-PYQ) questions, and the total.',
+    description: 'For every chapter, the number of questions.',
     fn: function (chapters, pyq, nonpyq) {
-      var P = {}, N = {};
-      pyq.forEach(function (q) {
-        var o = P[q.chapter_code] || (P[q.chapter_code] = { t: 0, e: {}, y: {} });
-        o.t++; o.e[q.exam] = (o.e[q.exam] || 0) + 1;
-        var yk = q.exam + '|' + Number(q.year); o.y[yk] = (o.y[yk] || 0) + 1;
-      });
-      nonpyq.forEach(function (q) {
-        var o = N[q.chapter_code] || (N[q.chapter_code] = { t: 0, p: {} });
-        o.t++; o.p[q.publisher] = (o.p[q.publisher] || 0) + 1;
-      });
-      return chapters.map(function (c) {
-        var p = P[c.chapter_code] || { t: 0, e: {}, y: {} }, nn = N[c.chapter_code] || { t: 0, p: {} };
-        var n = function (exam, year) { return p.y[exam + '|' + year] || 0; };
-        var ex = function (exam) { return p.e[exam] || 0; };
-        var sc = function (pb) { return nn.p[pb] || 0; };
-        return { chapter_code: c.chapter_code, chapter: c.chapter, main_2025: n('JEE Main', 2025), main_2026: n('JEE Main', 2026), adv_2025: n('JEE Advanced', 2025), adv_2026: n('JEE Advanced', 2026), main_all: ex('JEE Main') + ex('AIEEE'), adv_all: ex('JEE Advanced') + ex('IIT'), kcet_all: ex('KCET'), iat_all: ex('IAT'), nda_all: ex('NDA'), src_BlackBook: sc('Black Book'), nonpyq: nn.t, total: p.t + nn.t };
-      });
+      var T = {}; pyq.concat(nonpyq).forEach(function (q) { T[q.chapter_code] = (T[q.chapter_code] || 0) + 1; });
+      return chapters.map(function (c) { return { chapter_code: c.chapter_code, chapter: c.chapter, block: c.block, total: T[c.chapter_code] || 0 }; });
     }
   });
 
@@ -975,7 +796,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     return SOLP;
   }
   var PER_PAGE = 20, page = 0, lastKey = null;
-  var S = { exam: new Set(), year: new Set(), cls: new Set(), diff: new Set(), type: new Set(), ch: new Set(), tp: new Set(), src: new Set(), q: '', onlySel: false, flag: false, attn: false, oos: false, oosx: false, sel: new Set() };
+  var S = { exam: new Set(), year: new Set(), cls: new Set(), blk: new Set(), diff: new Set(), type: new Set(), ch: new Set(), tp: new Set(), src: new Set(), q: '', onlySel: false, flag: false, attn: false, oos: false, oosx: false, sel: new Set() };
   S.oosx = false; /* out of syllabus questions are included by default */
   /* Question Bank opens first from qb/data/first.json (first cards + counts) while the full data downloads: PARTIAL holds the stub rows used for the header numbers and filter lists */
   var PARTIAL = null;
@@ -1013,7 +834,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   }
   function VR() { return PARTIAL ? PARTIAL.rows : ROWS; } /* overview numbers (counts, chapter-wise, weightage) never depend on any filter */
   var ROWS = [], BYID = {}, CHAPTERS = [], CHMAP = {}, TOPICS = [], tpBuiltFrom = null, CARDS = {}, builtFrom = null, npFrom = null, chBuiltFrom = null;
-  var SESSION = { 2025: 'JEE 2025', 2026: 'JEE 2026' };
+  var SESSION = {};
   var DIFF_ORDER = ['L1', 'L2', 'L3'];
   var TYPE_ORDER = ['MCQ', 'MSQ', 'Numerical', 'Matching', 'Comprehension', 'Subjective'];
   var LET = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -1125,22 +946,15 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     });
   }
 
-  /* chapter order; PYQs first: JEE Main (with AIEEE), JEE Advanced (with IIT), KCET, each newest first (year, month, day, shift); then practice questions by source: Cengage, Black Book, VMC (then any other), each in sheet order */
+  /* chapter order, then newest year first, then question number */
   var PUB_ORDER = ['Black Book'];
   function pubRank(q) { var i = PUB_ORDER.indexOf(q.publisher); return i < 0 ? PUB_ORDER.length : i; }
-  function examRank(q) { var e = q.exam; return e === 'JEE Main' || e === 'AIEEE' ? 0 : e === 'JEE Advanced' || e === 'IIT' ? 1 : e === 'KCET' ? 2 : e === 'IAT' ? 3 : e === 'NDA' ? 4 : 5; }
+
   function cmp(a, b) {
     var ca = CHMAP[a.chapter_code], cb = CHMAP[b.chapter_code];
     var oa = ca ? ca.order : 99, ob = cb ? cb.order : 99;
     if (oa !== ob) return oa - ob;
-    var pa = a.source === 'PYQ' ? 0 : 1, pb = b.source === 'PYQ' ? 0 : 1;
-    if (pa !== pb) return pa - pb;
-    if (pa === 0) { var xa = examRank(a), xb = examRank(b); if (xa !== xb) return xa - xb; }
-    else { var ra = pubRank(a), rb = pubRank(b); if (ra !== rb) return ra - rb; }
-    var da = a.sort_date || '', db = b.sort_date || '';
-    if (da !== db) return pa === 0 ? (da < db ? 1 : -1) : (da < db ? -1 : 1);
-    var ea = a.exam === 'JEE Main' ? 0 : 1, eb = b.exam === 'JEE Main' ? 0 : 1;
-    if (ea !== eb) return ea - eb;
+    if ((a.year || 0) !== (b.year || 0)) return (b.year || 0) - (a.year || 0);
     return (Number(a.qno) || 0) - (Number(b.qno) || 0);
   }
 
@@ -1195,8 +1009,8 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
       if (q.pyq) { var pt = el('span', 'qb-tag ex-main', 'PYQ'); pt.title = 'This question is also a previous-year question' + (q.pyq_ref ? ' (' + q.pyq_ref + ')' : ''); meta.appendChild(pt); meta.appendChild(el('span', 'qb-date', q.pyq_paper + (q.pyq_exam === 'JEE Main' || !q.pyq_year ? '' : ' · ' + q.pyq_year))); }
       if (q.ref_year) meta.appendChild(el('span', 'qb-tag', '[' + q.ref_year + ']'));
     } else {
-      meta.appendChild(el('span', 'qb-tag ' + (q.exam === 'JEE Main' ? 'ex-main' : 'ex-adv'), q.exam));
-      meta.appendChild(el('span', 'qb-date', q.exam === 'JEE Main' || !q.year || String(q.paper).indexOf(String(q.year)) >= 0 ? q.paper : q.paper + ' · ' + q.year));
+      meta.appendChild(el('span', 'qb-tag ex-main', 'Class ' + q.class));
+      meta.appendChild(el('span', 'qb-date', (q.year ? q.year : '') + (q.paper ? (q.year ? ' \u00b7 ' : '') + q.paper : '')));
     }
     var bTop = null, bTyp = icoBtn('list', q.type, true);
     if (q.topic) { bTop = icoBtn('tag', (q.topic_code && !/^UNMAPPED/.test(q.topic_code) ? q.topic_code.replace(/^JM-/, '') + ' · ' : '') + q.topic, true); }
@@ -1364,226 +1178,52 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
 
   /* ---------- filters ---------- */
   function matches(q, skip) {
-    var cp = comboPubs();
-    if (skip !== 'exam' && S.exam.size && (q.source === 'PYQ' ? !S.exam.has(effExam(q, cp)) : !S.src.size)) return false;
-    if (skip !== 'year' && S.year.size && (q.source === 'PYQ' ? !S.year.has(String(effYear(q, cp))) : !S.src.size)) return false;
+    if (skip !== 'year' && S.year.size && !S.year.has(String(q.year))) return false;
     if (skip !== 'cls' && S.cls.size && !S.cls.has(String(q.class))) return false;
+    if (skip !== 'blk' && S.blk.size && !S.blk.has(q.block)) return false;
     if (skip !== 'diff' && S.diff.size && !S.diff.has(q.difficulty)) return false;
-    if (skip !== 'type' && S.type.size && !S.type.has(q.type)) return false;
     if (skip !== 'ch' && S.ch.size && !S.ch.has(q.chapter_code)) return false;
-    if (skip !== 'tp' && S.tp.size && !S.tp.has(q.topic_code)) return false;
-    if (skip !== 'src' && S.src.size) {
-      var sv = srcOf(q);
-      if (cp.length) { if (!((q.pyq && cp.indexOf(sv) >= 0) || (sv !== 'PYQs' && cp.indexOf(sv) < 0 && S.src.has(sv)))) return false; }
-      else if (!S.src.has(sv)) return false;
-    }
     if (S.onlySel && !S.sel.has(q.id)) return false;
     if (S.flag && !isFlagged(q)) return false;
     if (S.attn && !q.attention) return false;
-    if (S.oosx && q.oos) return false;
-    if (S.oos && !q.oos) return false;
     if (S.q) {
-      var hay = (q.id + ' ' + q.question + ' ' + (q.options || []).join(' ') + ' ' + q.chapter + ' ' + q.paper).toLowerCase();
+      var hay = (q.id + ' ' + q.question + ' ' + (q.options || []).join(' ') + ' ' + q.chapter + ' ' + q.block).toLowerCase();
       if (hay.indexOf(S.q) < 0) return false;
     }
     return true;
   }
 
-  /* ---------- everything about one year (opens when a year tile is clicked) ---------- */
-  var YM = null, YM_FROM = null;
-  function closeYear() { if (!YM) return; YM.remove(); YM = null; document.removeEventListener('keydown', ymKey, true); if (YM_FROM && YM_FROM.focus) { try { YM_FROM.focus(); } catch (e) { /* ignore */ } } }
-  function ymKey(e) { if (e.key === 'Escape') { e.stopPropagation(); closeYear(); } }
-  function makeYearBtn(t, y, exam, oos) {
-    t.setAttribute('role', 'button'); t.tabIndex = 0; t.title = 'Open the summary' + (y ? ' of ' + (exam || '') + ' ' + y : ' of ' + (oos ? 'out-of-syllabus ' : '') + (exam || 'all') + ' questions');
-    t.addEventListener('click', function () { openYear(y, t, exam, oos); });
-    t.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openYear(y, t, exam, oos); } });
-  }
-  function openYear(y, from, exam, oos) {
-    closeYear(); YM_FROM = from || null;
-    var rows = VR().filter(function (q) { return q.source === 'PYQ' && (exam ? q.exam === exam : (q.exam !== 'KCET' && q.exam !== 'IAT' && q.exam !== 'NDA')) && (y == null || Number(q.year) === y) && (!oos || q.oos); });
-    var exams = ['JEE Main', 'JEE Advanced', 'AIEEE', 'IIT', 'KCET', 'IAT', 'NDA'].filter(function (e) { return rows.some(function (q) { return q.exam === e; }); });
-    var ov = el('div', 'qb-ymodal'); ov.addEventListener('mousedown', function (e) { if (e.target === ov) closeYear(); });
-    var box = el('div', 'qb-ybox'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Summary ' + y);
-    var head = el('div', 'qb-yhead');
-    var ttl = (oos ? 'Out of syllabus' : (exam || 'All exams')) + (oos && exam ? ' · ' + exam : '') + (y != null ? ' · ' + y : ''); head.appendChild(el('h2', null, ttl + ' · all questions'));
-    var x = el('button', 'qb-btn', 'Close'); x.type = 'button'; x.addEventListener('click', closeYear); head.appendChild(x);
-    box.appendChild(head);
-    var sum = el('div', 'qb-ysum');
-    sum.appendChild(el('span', 'qb-tag', rows.length + ' PYQs'));
-    if (exams.length > 1) exams.forEach(function (e) { sum.appendChild(el('span', 'qb-tag ' + (e === 'JEE Main' ? 'ex-main' : 'ex-adv'), e + ' ' + rows.filter(function (q) { return q.exam === e; }).length)); });
-    ['L1', 'L2', 'L3'].forEach(function (d) { sum.appendChild(el('span', 'qb-tag', d + ' ' + rows.filter(function (q) { return q.difficulty === d; }).length)); });
-    var at = rows.filter(function (q) { return !!q.attention; }).length; if (at) sum.appendChild(el('span', 'qb-tag attn', at + ' attention'));
-    var fl = rows.filter(isFlagged).length; if (fl) sum.appendChild(el('span', 'qb-tag rev', fl + ' review'));
-    var oy = oos ? 0 : rows.filter(function (q) { return q.oos; }).length; if (oy) sum.appendChild(el('span', 'qb-tag oos', oy + ' out of syllabus'));
-    box.appendChild(sum);
-    var act = el('div', 'qb-yact');
-    var all = el('button', 'qb-btn primary', 'Show all these questions in the list'); all.type = 'button';
-    all.addEventListener('click', function () { goYear(y, null, exam, oos); }); act.appendChild(all); box.appendChild(act);
-    var cwh = el('h3', null, 'Chapter-wise'); box.appendChild(cwh); var selP = null;
-    var wrap = el('div', 'qb-tablewrap qb-ytable'); var tbl = el('table'); var th = el('thead'); var hr = el('tr');
-    var showEx = exams.length > 1; ['Code', 'Chapter'].concat(showEx ? exams : [], ['Total', 'L1', 'L2', 'L3', '']).forEach(function (h) { hr.appendChild(el('th', null, h)); });
-    th.appendChild(hr); tbl.appendChild(th); var tb = el('tbody');
-    function fill() {
-    tb.innerHTML = ''; var rs = selP ? rows.filter(function (q) { return q.exam + '|' + q.paper === selP.k; }) : rows;
-    cwh.textContent = 'Chapter-wise' + (selP ? ' · ' + selP.paper + ' (' + rs.length + ' questions)' : '');
-    var tot = { e: {}, all: 0, L1: 0, L2: 0, L3: 0 };
-    CHAPTERS.slice().sort(function (a, b) { return a.order - b.order; }).forEach(function (c) {
-      var mine = rs.filter(function (q) { return q.chapter_code === c.chapter_code; }); if (!mine.length) return;
-      var tr = el('tr'); tr.appendChild(el('td', null, c.chapter_code)); tr.appendChild(el('td', null, c.chapter));
-      exams.forEach(function (e) { var n = mine.filter(function (q) { return q.exam === e; }).length; tot.e[e] = (tot.e[e] || 0) + n; if (showEx) tr.appendChild(el('td', n ? null : 'z', String(n))); });
-      tot.all += mine.length; tr.appendChild(el('td', null, String(mine.length)));
-      ['L1', 'L2', 'L3'].forEach(function (d) { var n = mine.filter(function (q) { return q.difficulty === d; }).length; tot[d] += n; tr.appendChild(el('td', n ? null : 'z', String(n))); });
-      var td = el('td'); var b = el('button', 'qb-lnk', 'Show'); b.type = 'button'; b.addEventListener('click', function () { goYear(y, c.chapter_code, exam, oos, selP && selP.paper); }); td.appendChild(b); tr.appendChild(td);
-      tb.appendChild(tr);
-    });
-    var tr = el('tr', 'qb-ytot'); tr.appendChild(el('td', null, '')); tr.appendChild(el('td', null, 'Total'));
-    if (showEx) exams.forEach(function (e) { tr.appendChild(el('td', null, String(tot.e[e] || 0))); });
-    tr.appendChild(el('td', null, String(tot.all))); ['L1', 'L2', 'L3'].forEach(function (d) { tr.appendChild(el('td', null, String(tot[d]))); }); tr.appendChild(el('td', null, ''));
-    tb.appendChild(tr);
-    }
-    fill(); tbl.appendChild(tb); wrap.appendChild(tbl); box.appendChild(wrap);
-    // papers / shifts
-    var pm = {}; rows.forEach(function (q) { var k = q.exam + '|' + q.paper; if (!pm[k]) pm[k] = { k: k, exam: q.exam, paper: q.paper, sd: q.sort_date || '', n: 0, ch: {}, L1: 0, L2: 0, L3: 0 }; pm[k].n++; if (pm[k][q.difficulty] != null) pm[k][q.difficulty]++; pm[k].ch[q.chapter_code] = 1; });
-    var plist = Object.keys(pm).map(function (k) { return pm[k]; }).sort(function (a, b) { return a.exam === b.exam ? (a.sd < b.sd ? 1 : a.sd > b.sd ? -1 : 0) : (a.exam < b.exam ? -1 : 1); });
-    var nMain = plist.filter(function (p) { return p.exam === 'JEE Main'; }).length;
-    var kind = nMain === plist.length ? 'Shift' : (nMain === 0 ? 'Paper' : 'Paper / shift');
-    var kindPl = nMain === plist.length ? 'Shifts' : (nMain === 0 ? 'Papers' : 'Papers and shifts');
-    box.appendChild(el('h3', null, kindPl + ' (' + plist.length + ')'));
-    var hint = el('div', 'qb-ysum', 'Click a ' + kind.toLowerCase() + ' to see only its questions in the chapter-wise table above. Click it again to see all.'); hint.style.fontSize = '12px'; hint.style.opacity = '.7'; box.appendChild(hint);
-    var pw = el('div', 'qb-tablewrap qb-ytable'); var pt = el('table'); var pth = el('thead'); var phr = el('tr');
-    [kind, 'Questions', 'Chapters', 'L1', 'L2', 'L3'].forEach(function (h) { phr.appendChild(el('th', null, h)); }); pth.appendChild(phr); pt.appendChild(pth);
-    var ptb = el('tbody'); plist.forEach(function (p) { var r = el('tr'); r.style.cursor = 'pointer'; r.tabIndex = 0; r.title = 'Show only this ' + kind.toLowerCase() + ' in the chapter-wise table'; r.appendChild(el('td', null, (showEx ? p.exam + ' · ' : '') + p.paper)); r.appendChild(el('td', null, String(p.n))); r.appendChild(el('td', null, String(Object.keys(p.ch).length))); ['L1', 'L2', 'L3'].forEach(function (d) { r.appendChild(el('td', p[d] ? null : 'z', String(p[d]))); });
-      function pick() { var on = !(selP && selP.k === p.k); selP = on ? p : null; Array.prototype.forEach.call(ptb.children, function (t) { t.style.background = ''; t.style.outline = ''; }); if (on) { r.style.background = 'rgba(80,140,255,.18)'; r.style.outline = '1px solid rgba(80,140,255,.6)'; } fill(); }
-      r.addEventListener('click', pick); r.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }); ptb.appendChild(r); });
-    pt.appendChild(ptb); pw.appendChild(pt); box.appendChild(pw);
-    ov.appendChild(box); root.appendChild(ov); YM = ov;
-    document.addEventListener('keydown', ymKey, true); x.focus();
-  }
-  function goYear(y, ch, ex, oos, pp) {
-    S.exam.clear(); S.ch.clear(); S.tp.clear(); S.year.clear(); S.src.clear(); if (y != null) S.year.add(String(y)); if (ch) S.ch.add(ch); if (ex) S.exam.add(ex);
-    S.flag = false; S.attn = false; S.oos = !!oos; if (oos) { S.oosx = false; try { localStorage.setItem('oosEx2', '0'); } catch (e) { /* ignore */ } buildChips(); } S.q = pp ? String(pp).toLowerCase() : ''; var se = $('.qb-search'); if (se) se.value = pp || '';
-    closeYear(); apply();
-    var r = $('.qb-results'); if (r && r.scrollIntoView) r.scrollIntoView({ block: 'start' });
-  }
-  function goOos(exam) {
-    S.exam.clear(); S.ch.clear(); S.tp.clear(); S.year.clear(); S.src.clear(); S.diff.clear(); S.type.clear(); S.cls.clear();
-    if (exam) S.exam.add(exam);
-    S.flag = false; S.attn = false; S.oos = true; S.oosx = false; try { localStorage.setItem('oosEx2', '0'); } catch (e) { /* ignore */ } buildChips(); S.q = ''; var se = $('.qb-search'); if (se) se.value = '';
-    apply();
-    var r = $('.qb-results'); if (r && r.scrollIntoView) r.scrollIntoView({ block: 'start' });
-  }
-  function makeSrcBtn(t, v) {
-    t.setAttribute('role', 'button'); t.tabIndex = 0; t.title = 'Open the summary of ' + v + ' questions';
-    t.addEventListener('click', function () { openSource(v, t); });
-    t.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSource(v, t); } });
-  }
-  function exOf(q) { var m = /Exercise-(\d)/.exec(q.paper || q.section || ''); var n = m ? Number(m[1]) : 0; if (q.type === 'Matching') n = 4; else if (q.type === 'Numerical' || q.type === 'Subjective') n = 5; return n; }
-  function goSrc(v, ch) {
-    S.exam.clear(); S.ch.clear(); S.tp.clear(); S.year.clear(); S.src.clear(); S.diff.clear(); S.type.clear(); S.cls.clear(); S.src.add(v); if (ch) S.ch.add(ch);
-    S.flag = false; S.attn = false; S.oos = false; S.q = ''; var se = $('.qb-search'); if (se) se.value = '';
-    closeYear(); apply();
-    var r = $('.qb-results'); if (r && r.scrollIntoView) r.scrollIntoView({ block: 'start' });
-  }
-  function openSource(v, from) {
-    closeYear(); YM_FROM = from || null;
-    var rows = VR().filter(function (q) { return q.source !== 'PYQ' && srcOf(q) === v; });
-    var isBB = v === 'Black Book', EX = [1, 2, 3, 4, 5];
-    var EXN = { 1: 'Ex-1 Single', 2: 'Ex-2 Multi', 3: 'Ex-3 Compr.', 4: 'Ex-4 Match', 5: 'Ex-5 Subj.' };
-    var ov = el('div', 'qb-ymodal'); ov.addEventListener('mousedown', function (e) { if (e.target === ov) closeYear(); });
-    var box = el('div', 'qb-ybox'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', v + ' summary');
-    var head = el('div', 'qb-yhead');
-    head.appendChild(el('h2', null, v + ' · all questions'));
-    var x = el('button', 'qb-btn', 'Close'); x.type = 'button'; x.addEventListener('click', closeYear); head.appendChild(x);
-    box.appendChild(head);
-    var sum = el('div', 'qb-ysum');
-    sum.appendChild(el('span', 'qb-tag', rows.length + ' questions'));
-    if (isBB) EX.forEach(function (e) { sum.appendChild(el('span', 'qb-tag', 'Exercise-' + e + ' ' + rows.filter(function (q) { return exOf(q) === e; }).length)); });
-    ['L1', 'L2', 'L3'].forEach(function (d) { sum.appendChild(el('span', 'qb-tag', d + ' ' + rows.filter(function (q) { return q.difficulty === d; }).length)); });
-    var at = rows.filter(function (q) { return !!q.attention; }).length; if (at) sum.appendChild(el('span', 'qb-tag attn', at + ' attention'));
-    var fl = rows.filter(isFlagged).length; if (fl) sum.appendChild(el('span', 'qb-tag rev', fl + ' review'));
-    box.appendChild(sum);
-    var act = el('div', 'qb-yact');
-    var all = el('button', 'qb-btn primary', 'Show all ' + v + ' questions in the list'); all.type = 'button';
-    all.addEventListener('click', function () { goSrc(v, null); }); act.appendChild(all); box.appendChild(act);
-    box.appendChild(el('h3', null, 'Chapter-wise'));
-    var wrap = el('div', 'qb-tablewrap qb-ytable'); var tbl = el('table'); var th = el('thead'); var hr = el('tr');
-    var cols = ['Code', 'Chapter'].concat(isBB ? EX.map(function (e) { return EXN[e]; }) : [], ['Total', 'L1', 'L2', 'L3', '']);
-    cols.forEach(function (h) { hr.appendChild(el('th', null, h)); });
-    th.appendChild(hr); tbl.appendChild(th); var tb = el('tbody');
-    var tot = { ex: {}, all: 0, L1: 0, L2: 0, L3: 0 };
-    CHAPTERS.slice().sort(function (a, b) { return a.order - b.order; }).forEach(function (c) {
-      var mine = rows.filter(function (q) { return q.chapter_code === c.chapter_code; }); if (!mine.length) return;
-      var tr = el('tr'); tr.appendChild(el('td', null, c.chapter_code)); tr.appendChild(el('td', null, c.chapter));
-      if (isBB) EX.forEach(function (e) { var n = mine.filter(function (q) { return exOf(q) === e; }).length; tot.ex[e] = (tot.ex[e] || 0) + n; tr.appendChild(el('td', n ? null : 'z', String(n))); });
-      tot.all += mine.length; tr.appendChild(el('td', null, String(mine.length)));
-      ['L1', 'L2', 'L3'].forEach(function (d) { var n = mine.filter(function (q) { return q.difficulty === d; }).length; tot[d] += n; tr.appendChild(el('td', n ? null : 'z', String(n))); });
-      var td = el('td'); var b = el('button', 'qb-lnk', 'Show'); b.type = 'button'; b.addEventListener('click', function () { goSrc(v, c.chapter_code); }); td.appendChild(b); tr.appendChild(td);
-      tb.appendChild(tr);
-    });
-    var tr = el('tr', 'qb-ytot'); tr.appendChild(el('td', null, '')); tr.appendChild(el('td', null, 'Total'));
-    if (isBB) EX.forEach(function (e) { tr.appendChild(el('td', null, String(tot.ex[e] || 0))); });
-    tr.appendChild(el('td', null, String(tot.all))); ['L1', 'L2', 'L3'].forEach(function (d) { tr.appendChild(el('td', null, String(tot[d]))); }); tr.appendChild(el('td', null, ''));
-    tb.appendChild(tr); tbl.appendChild(tb); wrap.appendChild(tbl); box.appendChild(wrap);
-    if (!rows.length) box.appendChild(el('p', null, 'No ' + v + ' questions in the bank yet.'));
-    ov.appendChild(box); root.appendChild(ov); YM = ov;
-    document.addEventListener('keydown', ymKey, true); x.focus();
-  }
+  var BLOCKS = [];
   function buildYearTiles() {
     var host = document.getElementById('tiles'); if (!host) return;
     host.replaceChildren();
-    function box(cls, lbl, n) {
+    function tile(cls, lbl, n) {
       var t = document.createElement('div'); t.className = cls;
       var l = document.createElement('div'); l.className = 'lbl'; l.textContent = lbl;
       var v = document.createElement('div'); v.className = 'num'; v.textContent = Number(n).toLocaleString('en-US');
       t.appendChild(l); t.appendChild(v); return t;
     }
-    function row(hue, head, subs) {
-      var r = document.createElement('div'); r.className = 'qb-trow ' + hue;
-      r.appendChild(head); subs.forEach(function (s) { r.appendChild(s); }); host.appendChild(r);
-    }
-    var pyq = VR().filter(function (q) { return q.source === 'PYQ'; });
-    var np = VR().filter(function (q) { return q.source !== 'PYQ'; });
-    row('h-all', box('qb-tile all', 'All questions', pyq.length + np.length), [box('qb-tile', 'PYQs', pyq.length)]);
-    [['JEE Main', 'h-main'], ['JEE Advanced', 'h-adv'], ['AIEEE', 'h-old'], ['IIT', 'h-old'], ['KCET', 'h-kcet'], ['IAT', 'h-iat'], ['NDA', 'h-nda']].forEach(function (e) {
-      var mine = pyq.filter(function (q) { return q.exam === e[0]; }), cnt = {};
-      mine.forEach(function (q) { if (q.year) cnt[q.year] = (cnt[q.year] || 0) + 1; });
-      var eh = box('qb-tile', e[0], mine.length); makeYearBtn(eh, null, e[0]);
-      row(e[1], eh, Object.keys(cnt).sort(function (x, y) { return Number(y) - Number(x); }).map(function (y) { var t = box('qb-ytile', y, cnt[y]); makeYearBtn(t, Number(y), e[0]); return t; }));
-    });
-    var oosRows = pyq.filter(function (q) { return q.oos; });
-    if (oosRows.length) {
-      var oh = box('qb-tile', 'Out of syllabus', oosRows.length); makeYearBtn(oh, null, null, true);
-      row('h-oos', oh, ['JEE Main', 'JEE Advanced', 'AIEEE', 'IIT', 'NDA'].filter(function (e) { return oosRows.some(function (q) { return q.exam === e; }); }).map(function (e) { var t = box('qb-ytile', e === 'JEE Advanced' ? 'Advanced' : e, oosRows.filter(function (q) { return q.exam === e; }).length); makeYearBtn(t, null, e, true); return t; }));
-    }
-    var sc = {}; np.forEach(function (q) { var k = srcOf(q); sc[k] = (sc[k] || 0) + 1; });
-    row('h-np', box('qb-tile', 'Non-PYQ', np.length), SRC_VALS.filter(function (v) { return v !== 'PYQs'; }).map(function (v) { var t = box('qb-ytile', v, sc[v] || 0); makeSrcBtn(t, v); return t; }));
+    var rows = VR(), r = document.createElement('div'); r.className = 'qb-trow h-all';
+    r.appendChild(tile('qb-tile all', 'All questions', rows.length));
+    [9, 10, 11, 12].forEach(function (k) { r.appendChild(tile('qb-tile', 'Class ' + k, rows.filter(function (q) { return Number(q.class) === k; }).length)); });
+    host.appendChild(r);
   }
   function buildChips() {
     buildYearTiles();
     var defs = {
-      src: { vals: SRC_VALS, label: function (v) { return v; } },
-      exam: { vals: EXAM_VALS, label: function (v) { return v; } },
-      year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(), label: function (v) { return SESSION[v] || v; } },
-      cls: { vals: uniq(VR().map(function (q) { return String(q.class); })).sort(), label: function (v) { return 'Class ' + v; } },
-      diff: { vals: DIFF_ORDER.filter(function (d) { return VR().some(function (q) { return q.difficulty === d; }); }), label: function (v) { return v; } },
-      type: { vals: TYPE_ORDER.filter(function (d) { return VR().some(function (q) { return q.type === d; }); }), label: function (v) { return v; } }
+      year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(function (a, b) { return Number(b) - Number(a); }), label: function (v) { return v; } },
+      cls: { vals: ['9', '10', '11', '12'], label: function (v) { return 'Class ' + v; } },
+      blk: { vals: BLOCKS.slice(), label: function (v) { return v; } },
+      diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } }
     };
-    defs.year.vals = defs.year.vals.slice().sort(function (a, b) { return Number(b) - Number(a); });
-    defs.year.label = function (v) { return v; };
-    var DD = { src: 'All sources', exam: 'All exams', year: 'All years', type: 'All question types' };
+    var DD = { year: 'All years', cls: 'All classes', blk: 'All blocks', diff: 'All levels' };
     DDS = [];
-    $$('.qb-chips[data-f], .qb-dd[data-f]').forEach(function (box) {
+    $$('.qb-dd[data-f]').forEach(function (box) {
       var f = box.dataset.f, d = defs[f];
-      if (DD[f]) { buildDropdown(box, f, d, DD[f]); return; }
-      box.replaceChildren();
-      d.vals.forEach(function (v) {
-        var b = el('button', 'qb-chip', d.label(v)); b.type = 'button'; b.dataset.v = v;
-        b.addEventListener('click', function () { if (S[f].has(v)) S[f].delete(v); else S[f].add(v); apply(); });
-        box.appendChild(b);
-      });
+      buildDropdown(box, f, d, DD[f]);
     });
   }
-  var SRC_VALS = ['PYQs', 'Black Book'], EXAM_VALS = ['JEE Main', 'JEE Advanced', 'AIEEE', 'IIT', 'KCET', 'IAT', 'NDA'];
+  var SRC_VALS = [], EXAM_VALS = [];
   function srcOf(q) { return q.source === 'PYQ' ? 'PYQs' : (q.publisher || 'Practice'); }
   /* "PYQs" ticked together with a source that has PYQ-tagged questions (Black Book) = the PYQs of that source only */
   var PYQ_PUBS = {};
@@ -1614,7 +1254,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     });
     DDS.push(function () {
       var counts = {};
-      ROWS.forEach(function (q) { if (matches(q, f) && (q.source === 'PYQ' || (f !== 'exam' && f !== 'year'))) { var k = f === 'src' ? srcOf(q) : f === 'exam' ? effExam(q, comboPubs()) : f === 'year' ? String(effYear(q, comboPubs())) : q.type; counts[k] = (counts[k] || 0) + 1; } });
+      ROWS.forEach(function (q) { if (matches(q, f)) { var k = f === 'year' ? String(q.year) : f === 'cls' ? String(q.class) : f === 'blk' ? q.block : q.difficulty; counts[k] = (counts[k] || 0) + 1; } });
       d.vals.forEach(function (v) { var b = boxes[v]; b.cb.checked = S[f].has(v); b.n.textContent = String(counts[v] || 0); b.lab.classList.toggle('zero', !counts[v]); });
       var sel = d.vals.filter(function (v) { return S[f].has(v); });
       btn.textContent = sel.length === 0 ? allLabel : sel.length <= 2 ? sel.map(d.label).join(', ') : sel.length + ' selected';
@@ -1638,19 +1278,24 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   msSearch.addEventListener('input', drawMsList);
   $('.qb-ms-all', ms).addEventListener('click', function () { visibleChapters().forEach(function (c) { S.ch.add(c.chapter_code); }); apply(); });
   $('.qb-ms-none', ms).addEventListener('click', function () { S.ch.clear(); apply(); });
+  function chapterOk(c) {
+    if (S.cls.size && !(c.classes || []).some(function (k) { return S.cls.has(String(k)); })) return false;
+    if (S.blk.size && !S.blk.has(c.block)) return false;
+    return true;
+  }
   function visibleChapters() {
     var s = msSearch.value.trim().toLowerCase();
-    return CHAPTERS.filter(function (c) { return !s || (c.chapter_code + ' ' + c.chapter).toLowerCase().indexOf(s) >= 0; });
+    return CHAPTERS.filter(function (c) { return chapterOk(c) && (!s || (c.chapter_code + ' ' + c.chapter + ' ' + c.block).toLowerCase().indexOf(s) >= 0); });
   }
   function drawMsList() {
     if (msPanel.hidden) return;
     var counts = {};
     ROWS.forEach(function (q) { if (matches(q, 'ch')) counts[q.chapter_code] = (counts[q.chapter_code] || 0) + 1; });
     msList.replaceChildren();
-    [11, 12].forEach(function (cls) {
-      var list = visibleChapters().filter(function (c) { return Number(c.class) === cls; });
+    BLOCKS.forEach(function (blk) {
+      var list = visibleChapters().filter(function (c) { return c.block === blk; });
       if (!list.length) return;
-      msList.appendChild(el('div', 'qb-ms-grp', 'Class ' + cls));
+      msList.appendChild(el('div', 'qb-ms-grp', blk));
       list.forEach(function (c) {
         var lab = el('label', 'qb-ms-item' + (counts[c.chapter_code] ? '' : ' zero'));
         var cb = el('input'); cb.type = 'checkbox'; cb.checked = S.ch.has(c.chapter_code);
@@ -1659,11 +1304,12 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
         msList.appendChild(lab);
       });
     });
+    if (!msList.children.length) msList.appendChild(el('div', 'qb-ms-grp', 'No chapters match.'));
   }
 
   /* topic multi-select (shows once chapters are chosen) */
   var tf = $('#topic-filter'), tpBtn = $('.qb-ms-btn', tf), tpPanel = $('.qb-ms-panel', tf), tpList = $('.qb-ms-list', tf), tpSearch = $('.qb-ms-search', tf);
-  function openTp(open) { if (open && !S.ch.size) return; tpPanel.hidden = !open; tpBtn.setAttribute('aria-expanded', String(open)); if (open) { tpSearch.value = ''; drawTpList(); tpSearch.focus(); tf.classList.remove('ask'); } }
+  function openTp(open) { return; tpPanel.hidden = !open; tpBtn.setAttribute('aria-expanded', String(open)); if (open) { tpSearch.value = ''; drawTpList(); tpSearch.focus(); tf.classList.remove('ask'); } }
   tpBtn.addEventListener('click', function () { openTp(tpPanel.hidden); });
   document.addEventListener('click', function (e) { if (!tpPanel.hidden && e.target.isConnected && !tf.contains(e.target) && !ms.contains(e.target)) openTp(false); });
   tf.addEventListener('keydown', function (e) { if (e.key === 'Escape') { openTp(false); tpBtn.focus(); } });
@@ -1698,13 +1344,6 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   $('.qb-onlysel').addEventListener('click', function () { S.onlySel = !S.onlySel; apply(); });
   $('.qb-flagf').addEventListener('click', function () { S.flag = !S.flag; apply(); });
   $('.qb-attnf').addEventListener('click', function () { S.attn = !S.attn; apply(); });
-  $('.qb-oosonly').addEventListener('click', function () { var on = !S.oos; S.oos = on; if (on && S.oosx) { setOosx(false); } apply(); });
-  function setOosx(on) {
-    S.oosx = on; if (on) S.oos = false;
-    try { localStorage.setItem('oosEx2', on ? '1' : '0'); } catch (e) { /* ignore */ }
-    buildChips(); drawWeight();
-  }
-  Array.prototype.forEach.call(document.querySelectorAll('.qb-oosx button'), function (b) { b.addEventListener('click', function () { var ex = b.dataset.v === 'ex'; if (ex !== S.oosx) { setOosx(ex); apply(); } }); });
   /* wide display equations: break them over lines at a top-level = (or + / -) so each line fits the card; a piece that is still too wide shrinks (down to 55 percent) and then scrolls */
   (function () {
     var qs = $('#questions'), raf = 0, mo = null;
@@ -1743,7 +1382,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   $('.qb-hideopts').addEventListener('click', function () { var b = $('.qb-hideopts'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Show options' : 'Hide options'; $('#questions').classList.toggle('hide-opts', on); });
   $('.qb-revall').addEventListener('click', function () { var b = $('.qb-revall'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); $('#questions').classList.toggle('rev-all', on); });
   $('.qb-reset').addEventListener('click', function () {
-    ['exam', 'year', 'cls', 'diff', 'type', 'ch', 'tp', 'src'].forEach(function (k) { S[k].clear(); });
+    ['year', 'cls', 'blk', 'diff', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
     S.q = ''; S.onlySel = false; S.flag = false; S.attn = false; S.oos = false; $('.qb-search').value = ''; apply();
   });
 
@@ -1760,9 +1399,9 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     var years = uniq(qs.filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort();
     var parts = [];
     if (chs.length === 1) { var c = CHMAP[chs[0]]; parts.push(chs[0] + ' ' + (c ? c.chapter : qs[0].chapter)); }
-    else parts.push('Maths');
+    else parts.push('Physics');
     if (years.length === 1) parts.push(years[0]); else if (years.length > 1) parts.push(years[0] + '-' + years[years.length - 1]);
-    if (exams.length === 1) parts.push(exams[0] === 'JEE Main' ? 'JEE Mains' : exams[0]);
+    if (exams.length === 1) parts.push(exams[0]);
     var srcs = uniq(qs.map(function (q) { return q.source; }));
     parts.push(srcs.length === 1 ? (srcs[0] === 'PYQ' ? 'PYQs' : 'Practice Qs') : 'PYQs + Practice Qs');
     if (chs.length > 1) parts.push('(' + chs.length + ' chapters)');
@@ -1790,13 +1429,9 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   window.QBX = window.QBX || {};
   window.QBX.cardFor = function (id) { var q = BYID[id]; if (!q) return null; var c = buildCard(q); c.querySelector('.qb-num').textContent = ''; return c; };
   window.QBX.hasRows = function () { return ROWS.length > 0; };
-  window.QBX.goYear = goYear;
-  window.QBX.goBB = function (ch) { goSrc('Black Book'); S.q = 'bb-' + ch + '-'; var se = $('.qb-search'); if (se) se.value = 'BB-' + ch + '-'; apply(); var r = $('.qb-results'); if (r && r.scrollIntoView) r.scrollIntoView({ block: 'start' }); };
+
+
   function apply() {
-    /* Exam and Year only make sense for PYQs: hide them when a practice source alone is chosen */
-    var npOnly = S.src.size > 0 && !S.src.has('PYQs');
-    if (npOnly) { S.exam.clear(); S.year.clear(); }
-    $$('.qb-fgroup>[data-f=exam],.qb-fgroup>[data-f=year]').forEach(function (c) { if (c.parentNode) c.parentNode.style.display = npOnly ? 'none' : ''; });
     $$('.qb-chips[data-f] .qb-chip').forEach(function (b) { var f = b.parentNode.dataset.f; b.setAttribute('aria-pressed', String(S[f].has(b.dataset.v))); });
     DDS.forEach(function (fn) { fn(); });
     $('.qb-onlysel').setAttribute('aria-pressed', String(S.onlySel));
@@ -1804,12 +1439,10 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     $('.qb-flagf').textContent = 'Review (' + flagCount() + ')';
     $('.qb-attnf').setAttribute('aria-pressed', String(S.attn));
     $('.qb-attnf').textContent = 'Attention (' + attnCount() + ')';
-    $('.qb-oosonly').setAttribute('aria-pressed', String(S.oos));
-    Array.prototype.forEach.call(document.querySelectorAll('.qb-oosx button'), function (b) { b.setAttribute('aria-pressed', String((b.dataset.v === 'ex') === S.oosx)); if (b.dataset.v === 'in') b.textContent = 'Include (' + oosCount() + ')'; });
     msBtn.textContent = S.ch.size === 0 ? 'All chapters' : S.ch.size === 1 ? (function () { var c = CHMAP[Array.from(S.ch)[0]]; return c ? c.chapter_code + ' ' + c.chapter : '1 chapter'; })() : S.ch.size + ' chapters';
     var tpCh = {}; TOPICS.forEach(function (t) { tpCh[t.topic_code] = t.chapter_code; }); Array.from(S.tp).forEach(function (t) { if (!S.ch.has(tpCh[t])) S.tp.delete(t); });
     var wasHidden = tf.hidden;
-    tf.hidden = !S.ch.size;
+    tf.hidden = true;
     if (wasHidden && !tf.hidden) tf.classList.add('ask');
     if (tf.hidden) { tpPanel.hidden = true; tf.classList.remove('ask'); }
     tpBtn.textContent = S.tp.size === 0 ? 'All topics' : S.tp.size === 1 ? (function (t0) { return t0 ? (/^UNMAPPED/.test(t0.topic_code) ? '' : t0.topic_code.replace(/^JM-/, '') + ' ') + t0.topic : '1 topic'; })(TOPICS.filter(function (t) { return S.tp.has(t.topic_code); })[0]) : S.tp.size + ' topics';
@@ -1867,7 +1500,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     updateSelUI();
   }
   function filterKey() {
-    return ['exam', 'year', 'cls', 'diff', 'type', 'ch', 'tp', 'src'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
+    return ['year', 'cls', 'blk', 'diff', 'ch'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
   }
   function pager(pages, start, n, total) {
     var nav = el('nav', 'qb-pager'); nav.setAttribute('aria-label', 'Pages');
@@ -1903,87 +1536,18 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
   }
   /* ---------- chapter weightage graph ---------- */
   var WC = { exam: 'all', yrs: 'all', sort: 'count', pct: false };
-  function drawWeight() {
-    var body = $('#wchartBody'); if (!body) return;
-    var pyq = VR().filter(function (q) { return q.source === 'PYQ' && q.year && q.exam !== 'KCET' && q.exam !== 'IAT' && q.exam !== 'NDA'; });
-    var maxY = pyq.reduce(function (m, q) { return Math.max(m, q.year); }, 0);
-    var from = WC.yrs === 'all' ? 0 : WC.yrs === '2013' ? 2013 : maxY - Number(WC.yrs) + 1;
-    var rows = pyq.filter(function (q) {
-      if (q.year < from) return false;
-      if (WC.exam === 'main') return q.exam === 'JEE Main' || q.exam === 'AIEEE';
-      if (WC.exam === 'adv') return q.exam === 'JEE Advanced' || q.exam === 'IIT';
-      return true;
-    });
-    var m = {}; CHAPTERS.forEach(function (c) { m[c.chapter_code] = { c: c, main: 0, adv: 0 }; });
-    rows.forEach(function (q) { var r = m[q.chapter_code]; if (!r) return; if (q.exam === 'JEE Main' || q.exam === 'AIEEE') r.main++; else r.adv++; });
-    var list = Object.keys(m).map(function (k) { return m[k]; });
-    list.forEach(function (r) { r.n = r.main + r.adv; });
-    var byCount = list.slice().sort(function (a, b) { return b.n - a.n; });
-    byCount.forEach(function (r, i) { r.rank = i + 1; });
-    var total = rows.length, top = byCount.length ? Math.max(byCount[0].n, 1) : 1;
-    var third = Math.ceil(byCount.length / 3);
-    list.forEach(function (r) { r.band = r.rank <= third ? 'hi' : (r.rank <= 2 * third ? 'mid' : 'lo'); });
-    if (WC.sort === 'count') list = byCount;
-    var top5 = byCount.slice(0, 5).reduce(function (t, r) { return t + r.n; }, 0);
-    body.replaceChildren();
-    var yl = WC.yrs === 'all' ? 'all years' : WC.yrs === '2013' ? ('2013 onwards, the current JEE Main and JEE Advanced pattern, ' + from + '–' + maxY) : ('the last ' + WC.yrs + ' years, ' + from + '–' + maxY);
-    var ex = WC.exam === 'main' ? 'JEE Main (with AIEEE)' : WC.exam === 'adv' ? 'JEE Advanced (with IIT-JEE)' : 'JEE Main and JEE Advanced';
-    body.appendChild(el('p', 'qb-wc-intro', 'Showing ' + ex + ' questions from ' + yl + '. A longer bar means more questions came from that chapter. Chapters whose old papers are still being added may show fewer questions.'));
-    var cards = el('div', 'qb-wc-cards');
-    function card(big, small) { var c = el('div', 'qb-wc-card'); c.appendChild(el('b', null, big)); c.appendChild(el('span', null, small)); cards.appendChild(c); }
-    card(total.toLocaleString('en-US'), 'previous-year questions counted');
-    if (byCount.length && byCount[0].n) card(byCount[0].c.chapter, 'most asked chapter (' + byCount[0].n + ' questions)');
-    card(total ? Math.round(top5 / total * 100) + '%' : '0%', 'of all questions come from the top 5 chapters');
-    body.appendChild(cards);
-    var box = el('div', 'qb-wc-list');
-    list.forEach(function (r) {
-      var row = el('button', 'qb-wc-row'); row.type = 'button';
-      var pct = total ? (r.n / total * 100) : 0;
-      row.title = r.c.chapter_code + ' ' + r.c.chapter + ': ' + r.n + ' questions (JEE Main ' + r.main + ', JEE Advanced ' + r.adv + '). Click to list them.';
-      row.appendChild(el('span', 'qb-wc-rk', WC.sort === 'count' ? '#' + r.rank : ''));
-      var lb = el('span', 'qb-wc-lbl', r.c.chapter_code + ' ' + r.c.chapter); lb.appendChild(el('small', null, r.c.chapter_code + ' · Class ' + r.c['class']));
-      row.appendChild(lb);
-      var tr = el('span', 'qb-wc-track'), f = el('span', 'qb-wc-seg ' + r.band); f.style.width = (r.n / top * 100) + '%'; tr.appendChild(f);
-      row.appendChild(tr);
-      var vl = el('span', 'qb-wc-val'); vl.appendChild(el('b', null, String(r.n))); vl.appendChild(el('span', null, pct.toFixed(1) + '% of all'));
-      row.appendChild(vl);
-      row.addEventListener('click', function () {
-        S.ch.clear(); S.ch.add(r.c.chapter_code); S.oos = false;
-        if (WC.exam === 'main') { S.exam.clear(); S.exam.add('JEE Main'); S.exam.add('AIEEE'); } else if (WC.exam === 'adv') { S.exam.clear(); S.exam.add('JEE Advanced'); S.exam.add('IIT'); }
-        apply(); var t = $('#selection'); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'start' });
-      });
-      box.appendChild(row);
-    });
-    body.appendChild(box);
-    var lg = el('div', 'qb-wc-leg');
-    lg.appendChild(el('span', 'qb-wc-key hi', 'Most asked (top third)'));
-    lg.appendChild(el('span', 'qb-wc-key mid', 'Often asked'));
-    lg.appendChild(el('span', 'qb-wc-key lo', 'Asked less'));
-    body.appendChild(lg);
-  }
+  function drawWeight() {}
   var weightWired = false;
-  function wireWeight() {
-    if (weightWired) return; weightWired = true;
-    $$('#wchart [data-wc]').forEach(function (g) {
-      var k = g.dataset.wc;
-      $$('button', g).forEach(function (b) {
-        b.addEventListener('click', function () {
-          var v = b.dataset.v; if (k === 'pct') WC.pct = v === '1'; else WC[k] = v;
-          $$('button', g).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-          drawWeight();
-        });
-      });
-    });
-  }
+  function wireWeight() {}
   function drawOverview(rows) {
     var tb = $('#overview tbody');
     tb.replaceChildren();
     var chFl = chapterFlagCounts(), chAt = chapterAttnCounts(), chOos = {};
     ROWS.forEach(function (q) { if (q.oos) chOos[q.chapter_code] = (chOos[q.chapter_code] || 0) + 1; });
     rows.forEach(function (r) {
-      r.flagged = chFl[r.chapter_code] || 0; r.attn = chAt[r.chapter_code] || 0; r.oos = chOos[r.chapter_code] || 0;
+      r.flagged = 0; r.attn = 0; r.oos = 0;
       var tr = el('tr'); tr.dataset.key = r.chapter_code;
-      ['chapter_code', 'chapter', 'main_all', 'adv_all', 'kcet_all', 'iat_all', 'nda_all', 'src_BlackBook', 'total', 'oos', 'attn', 'flagged'].forEach(function (k) {
+      ['chapter_code', 'chapter', 'block', 'total'].forEach(function (k) {
         var td = el('td', typeof r[k] === 'number' && r[k] === 0 ? 'z' : null, String(r[k]));
         tr.appendChild(td);
       });
@@ -2145,13 +1709,14 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAACx20lEQVR42uyd
     }
     if (chBuiltFrom !== c.data) {
       chBuiltFrom = c.data;
-      CHAPTERS = c.data.map(function (r) { return { chapter_code: r.chapter_code, chapter: r.chapter, class: Number(r.class), order: Number(r.order) }; });
+      CHAPTERS = c.data.map(function (r) { return { chapter_code: r.chapter_code, chapter: r.chapter, block: r.block || '', classes: r.classes || [], class: Number((r.classes || [0])[0]), order: Number(r.order) }; });
+      BLOCKS = uniq(CHAPTERS.map(function (r) { return r.block; }));
       CHMAP = {}; CHAPTERS.forEach(function (r) { CHMAP[r.chapter_code] = r; });
     }
     var np = dash.data('nonpyq'), npData = np.status === 'ok' ? np.data : [];
     if (builtFrom !== d.data || npFrom !== npData) {
       builtFrom = d.data; npFrom = npData;
-      ROWS = toRows(d.data, npData).sort(cmp);
+      ROWS = toRows(d.data, npData); ROWS.forEach(function (q) { var c = CHMAP[q.chapter_code]; q.block = c ? c.block : ''; }); ROWS.sort(cmp);
       BYID = {}; CARDS = {};
       PYQ_PUBS = {}; ROWS.forEach(function (q) { BYID[q.id] = q; if (q.pyq && q.publisher) PYQ_PUBS[q.publisher] = 1; });
       Array.from(S.sel).forEach(function (id) { if (!BYID[id]) S.sel.delete(id); });

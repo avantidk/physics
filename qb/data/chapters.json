@@ -1,198 +1,477 @@
 [
  {
-  "chapter_code": "11M1",
-  "chapter": "Fundamental of Mathematics",
-  "class": 11,
-  "order": 1,
-  "folder": "c11M1 Fundamental of Mathematics"
+  "chapter_code": "P1",
+  "chapter": "Making measurements",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 1
  },
  {
-  "chapter_code": "11M2",
-  "chapter": "Sets, Relations and Functions",
-  "class": 11,
-  "order": 2,
-  "folder": "c11M2 Sets, Relations and Functions"
+  "chapter_code": "P2",
+  "chapter": "Describing motion",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 2
  },
  {
-  "chapter_code": "11M3",
-  "chapter": "Trigonometry",
-  "class": 11,
-  "order": 3,
-  "folder": "c11M3 Trigonometry"
+  "chapter_code": "P3",
+  "chapter": "Forces and motion",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 3
  },
  {
-  "chapter_code": "11M4",
-  "chapter": "Quadratic Equations",
-  "class": 11,
-  "order": 4,
-  "folder": "c11M4 Quadratic Equations"
+  "chapter_code": "P4",
+  "chapter": "Turning effects of forces",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 4
  },
  {
-  "chapter_code": "11M5",
-  "chapter": "Complex Numbers",
-  "class": 11,
-  "order": 5,
-  "folder": "c11M5 Complex Numbers"
+  "chapter_code": "P5",
+  "chapter": "Forces and matter",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 5
  },
  {
-  "chapter_code": "11M6",
-  "chapter": "Sequences and Series",
-  "class": 11,
-  "order": 6,
-  "folder": "c11M6 Sequences and Series"
+  "chapter_code": "P6",
+  "chapter": "Energy stores and transfers",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 6
  },
  {
-  "chapter_code": "11M7",
-  "chapter": "Permutations and Combinations",
-  "class": 11,
-  "order": 7,
-  "folder": "c11M7 Permutations and Combinations"
+  "chapter_code": "P7",
+  "chapter": "Energy resources",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 7
  },
  {
-  "chapter_code": "11M8",
-  "chapter": "Binomial Theorem",
-  "class": 11,
-  "order": 8,
-  "folder": "c11M8 Binomial Theorem"
+  "chapter_code": "P8",
+  "chapter": "Work and power",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 1: Motion, forces and energy",
+  "order": 8
  },
  {
-  "chapter_code": "11M9",
-  "chapter": "Straight Lines",
-  "class": 11,
-  "order": 9,
-  "folder": "c11M9 Straight Lines"
+  "chapter_code": "P9",
+  "chapter": "The kinetic model of matter",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 2: Thermal physics",
+  "order": 9
  },
  {
-  "chapter_code": "11M10",
-  "chapter": "Circle",
-  "class": 11,
-  "order": 10,
-  "folder": "c11M10 Circle"
+  "chapter_code": "P10",
+  "chapter": "Thermal properties of matter",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 2: Thermal physics",
+  "order": 10
  },
  {
-  "chapter_code": "11M11",
-  "chapter": "Conic Sections",
-  "class": 11,
-  "order": 11,
-  "folder": "c11M11 Conic Sections"
+  "chapter_code": "P11",
+  "chapter": "Thermal energy transfers",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 2: Thermal physics",
+  "order": 11
  },
  {
-  "chapter_code": "11M12",
-  "chapter": "Statistics",
-  "class": 11,
-  "order": 12,
-  "folder": "c11M12 Statistics"
+  "chapter_code": "P12",
+  "chapter": "Sound",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 3: Waves",
+  "order": 12
  },
  {
-  "chapter_code": "12M13",
-  "chapter": "Functions",
-  "class": 12,
-  "order": 13,
-  "folder": "c12M13 Functions"
+  "chapter_code": "P13",
+  "chapter": "Light",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 3: Waves",
+  "order": 13
  },
  {
-  "chapter_code": "12M14",
-  "chapter": "Inverse Trigonometric Functions",
-  "class": 12,
-  "order": 14,
-  "folder": "c12M14 Inverse Trigonometric Functions"
+  "chapter_code": "P14",
+  "chapter": "Properties of waves",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 3: Waves",
+  "order": 14
  },
  {
-  "chapter_code": "12M15",
-  "chapter": "Matrices and Determinants",
-  "class": 12,
-  "order": 15,
-  "folder": "c12M15 Matrices and Determinants"
+  "chapter_code": "P15",
+  "chapter": "The Electromagnetic Spectrum",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 3: Waves",
+  "order": 15
  },
  {
-  "chapter_code": "12M16",
-  "chapter": "Limits",
-  "class": 12,
-  "order": 16,
-  "folder": "c12M16 Limits"
+  "chapter_code": "P16",
+  "chapter": "Magnetism",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 4: Electricity and magnetism",
+  "order": 16
  },
  {
-  "chapter_code": "12M17",
-  "chapter": "Continuity and Differentiability",
-  "class": 12,
-  "order": 17,
-  "folder": "c12M17 Continuity and Differentiability"
+  "chapter_code": "P17",
+  "chapter": "Static electricity",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 4: Electricity and magnetism",
+  "order": 17
  },
  {
-  "chapter_code": "12M18",
-  "chapter": "Application of Derivative",
-  "class": 12,
-  "order": 18,
-  "folder": "c12M18 Application of Derivative"
+  "chapter_code": "P18",
+  "chapter": "Electrical quantities",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 4: Electricity and magnetism",
+  "order": 18
  },
  {
-  "chapter_code": "12M19",
-  "chapter": "Indefinite Integration",
-  "class": 12,
-  "order": 19,
-  "folder": "c12M19 Indefinite Integration"
+  "chapter_code": "P19",
+  "chapter": "Electric circuits",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 4: Electricity and magnetism",
+  "order": 19
  },
  {
-  "chapter_code": "12M20",
-  "chapter": "Definite Integration and Area Under the Curve",
-  "class": 12,
-  "order": 20,
-  "folder": "c12M20 Definite Integration and Area Under the Curve"
+  "chapter_code": "P20",
+  "chapter": "Electromagnetic forces",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 4: Electricity and magnetism",
+  "order": 20
  },
  {
-  "chapter_code": "12M21",
-  "chapter": "Differential Equations",
-  "class": 12,
-  "order": 21,
-  "folder": "c12M21 Differential Equations"
+  "chapter_code": "P21",
+  "chapter": "Electromagnetic induction",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 4: Electricity and magnetism",
+  "order": 21
  },
  {
-  "chapter_code": "12M22",
-  "chapter": "Vectors",
-  "class": 12,
-  "order": 22,
-  "folder": "c12M22 Vectors"
+  "chapter_code": "P22",
+  "chapter": "The nuclear atom",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 5: Nuclear physics",
+  "order": 22
  },
  {
-  "chapter_code": "12M23",
-  "chapter": "Three Dimensional Geometry",
-  "class": 12,
-  "order": 23,
-  "folder": "c12M23 Three Dimensional Geometry"
+  "chapter_code": "P23",
+  "chapter": "Radioactivity",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 5: Nuclear physics",
+  "order": 23
  },
  {
-  "chapter_code": "12M24",
-  "chapter": "Probability",
-  "class": 12,
-  "order": 24,
-  "folder": "c12M24 Probability"
+  "chapter_code": "P24",
+  "chapter": "Earth and the Solar System",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 6: Space physics",
+  "order": 24
  },
  {
-  "chapter_code": "12M25",
-  "chapter": "Linear Programming Problem",
-  "class": 12,
-  "order": 25,
-  "folder": "c12M25 Linear Programming Problem"
+  "chapter_code": "P25",
+  "chapter": "Stars and the universe",
+  "classes": [
+   9,
+   10
+  ],
+  "block": "Block 6: Space physics",
+  "order": 25
  },
  {
-  "chapter_code": "12M26",
-  "chapter": "Mathematical Reasoning",
-  "class": 12,
-  "order": 26,
-  "folder": "c12M26 Mathematical Reasoning"
+  "chapter_code": "A1",
+  "chapter": "Kinematics: describing motion",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 26
  },
  {
-  "chapter_code": "12M27",
-  "chapter": "Solution of Triangle",
-  "class": 12,
-  "order": 27,
-  "folder": "c12M27 Solution of Triangle"
+  "chapter_code": "A2",
+  "chapter": "Accelerated motion",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 27
  },
  {
-  "chapter_code": "12M28",
-  "chapter": "Height and Distance",
-  "class": 12,
-  "order": 28,
-  "folder": "c12M28 Height and Distance"
+  "chapter_code": "A3",
+  "chapter": "Dynamics: explaining motion",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 28
+ },
+ {
+  "chapter_code": "A4",
+  "chapter": "Forces: vectors and moments",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 29
+ },
+ {
+  "chapter_code": "A5",
+  "chapter": "Work, energy and power",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 30
+ },
+ {
+  "chapter_code": "A6",
+  "chapter": "Momentum",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 31
+ },
+ {
+  "chapter_code": "A7",
+  "chapter": "Matter and materials",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 1: Mechanics",
+  "order": 32
+ },
+ {
+  "chapter_code": "A8",
+  "chapter": "Electric current, potential difference and resistance",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 2: Electricity",
+  "order": 33
+ },
+ {
+  "chapter_code": "A9",
+  "chapter": "Kirchhoff's laws",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 2: Electricity",
+  "order": 34
+ },
+ {
+  "chapter_code": "A10",
+  "chapter": "Waves",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 3: Waves",
+  "order": 35
+ },
+ {
+  "chapter_code": "A11",
+  "chapter": "Superposition",
+  "classes": [
+   11
+  ],
+  "block": "AS Block 3: Waves",
+  "order": 36
+ },
+ {
+  "chapter_code": "A12",
+  "chapter": "Motion in a Circle",
+  "classes": [
+   12
+  ],
+  "block": "CA1",
+  "order": 37
+ },
+ {
+  "chapter_code": "A13",
+  "chapter": "Gravitational Fields",
+  "classes": [
+   12
+  ],
+  "block": "CA1",
+  "order": 38
+ },
+ {
+  "chapter_code": "A14",
+  "chapter": "Temperature",
+  "classes": [
+   12
+  ],
+  "block": "CA1",
+  "order": 39
+ },
+ {
+  "chapter_code": "A15",
+  "chapter": "Ideal Gases",
+  "classes": [
+   12
+  ],
+  "block": "CA1",
+  "order": 40
+ },
+ {
+  "chapter_code": "A16",
+  "chapter": "Thermodynamics",
+  "classes": [
+   12
+  ],
+  "block": "SA1",
+  "order": 41
+ },
+ {
+  "chapter_code": "A17",
+  "chapter": "Oscillations",
+  "classes": [
+   12
+  ],
+  "block": "SA1",
+  "order": 42
+ },
+ {
+  "chapter_code": "A18",
+  "chapter": "Electric Fields",
+  "classes": [
+   12
+  ],
+  "block": "SA1",
+  "order": 43
+ },
+ {
+  "chapter_code": "A19",
+  "chapter": "Capacitance",
+  "classes": [
+   12
+  ],
+  "block": "SA1",
+  "order": 44
+ },
+ {
+  "chapter_code": "A20",
+  "chapter": "Magnetic Fields",
+  "classes": [
+   12
+  ],
+  "block": "CA2",
+  "order": 45
+ },
+ {
+  "chapter_code": "A21",
+  "chapter": "Alternating Currents",
+  "classes": [
+   12
+  ],
+  "block": "CA2",
+  "order": 46
+ },
+ {
+  "chapter_code": "A22",
+  "chapter": "Quantum Physics",
+  "classes": [
+   12
+  ],
+  "block": "CA2",
+  "order": 47
+ },
+ {
+  "chapter_code": "A23",
+  "chapter": "Nuclear Physics",
+  "classes": [
+   12
+  ],
+  "block": "CA2",
+  "order": 48
+ },
+ {
+  "chapter_code": "A24",
+  "chapter": "Medical Physics",
+  "classes": [
+   12
+  ],
+  "block": "SA2",
+  "order": 49
+ },
+ {
+  "chapter_code": "A25",
+  "chapter": "Astronomy & Cosmology",
+  "classes": [
+   12
+  ],
+  "block": "SA2",
+  "order": 50
  }
 ]

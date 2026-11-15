@@ -22,12 +22,7 @@ const TYPES = ['MCQ', 'MSQ', 'Numerical', 'Subjective', 'Comprehension', 'Matchi
 /* Out-of-syllabus questions (bank field oo): include or exclude them from the DPP library */
 const OOS = { ex: false };
 try { OOS.ex = localStorage.getItem('oosEx2') === '1'; } catch (e) {}
-function oosBox() {
-  const n = BANK && BANK.all ? BANK.all.filter(q => q.oo).length : 0;
-  return h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Out-of-syllabus questions' }),
-    h('div', { class: 'seg oosSeg' }, h('button', { type: 'button', 'data-act': 'oos', 'data-k': 'in', text: 'Include' }), h('button', { type: 'button', 'data-act': 'oos', 'data-k': 'ex', text: 'Exclude' })),
-    h('p', { class: 'hint', text: n + ' PYQs are marked out of syllabus (topics removed from the current JEE syllabus). Exclude keeps them out of every test and DPP.' }));
-}
+function oosBox() { return null; }
 function syncOos() { document.querySelectorAll('.oosSeg button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.k === 'ex') === OOS.ex))); }
 function applyOos() {
   BANK.qs = OOS.ex ? BANK.all.filter(q => !q.oo) : BANK.all.slice();
@@ -158,13 +153,10 @@ const plain = s => s.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}\\()^_]/g, '');
 
 /* ---------- sheet building ---------- */
 function colWidth(cols) { return Math.floor((SHEET_W - 2 * PAD_X - (cols - 1) * COL_GAP) / cols); }
-/* PYQ section label (chapterwise + question paper, preview and exports): JEE Main = date + shift, JEE ADV = paper + year, NDA = I or II + year, KCET / IAT / AIEEE / IIT = year */
+/* question label (preview and exports): class, year, paper */
 function pyqLabel(q) {
   const y = q.y ? String(q.y) : '', p = String(q.p || '');
-  if (q.e === 'Main') { if (exOf(q) !== 'JEE Main') return 'AIEEE' + (y ? ' ' + y : ''); const m = /(\d{1,2} [A-Za-z]{3} \d{4})(.*)$/.exec(p); return m ? ('JEE Main ' + m[1] + (m[2] || '').replace(/\s+/g, ' ').trimEnd()) : 'JEE Main' + (y ? ' ' + y : ''); }
-  if (q.e === 'Adv') { const m = /Paper\s*(\d)/i.exec(p); return (exOf(q) === 'IIT' ? 'IIT-JEE' : 'JEE ADV') + (m ? ' P' + m[1] : '') + (y ? ' ' + y : ''); }
-  if (q.e === 'NDA') { const m = /\((NDA[^)]*)\)/.exec(p); return (m ? m[1] : 'NDA') + (y ? ' ' + y : ''); }
-  return q.e + (y ? ' ' + y : '');
+  return ['Class ' + q.cl, y, p].filter(x => x && x !== 'Class 0').join(' \u00b7 ');
 }
 function tagText(q) { if (q.s !== 'P') return q.i ? '[' + q.i + ']' : '';   /* practice (non-PYQ) questions: only their question code */
   const lv = q.lvTag ? 'L' + practiceLevel(q) : ''; const ex = pyqLabel(q); return lv || ex ? '[' + [lv, ex].filter(Boolean).join(' \u00b7 ') + ']' : ''; }
@@ -218,14 +210,14 @@ try { fetch('img/ankit-logo-dark.png').then(r => r.ok ? r.blob() : null).then(bl
 /* a figure that is just a picture wrapped in an SVG is drawn from the picture itself (screenshots and PDFs then never lose it) */
 function figSrc(f) { const m = /<image[^>]*?href="(data:image\/(?:png|jpeg|jpg);base64,[^"]+)"/.exec(f.svg || ''); return m ? m[1] : 'data:image/svg+xml;utf8,' + encodeURIComponent(f.svg); }
 function skeleton(p, keyMode) {
-  const test = p.mode === 'test', sub = keyMode ? (keyMode === 'exp' ? 'Explanations' : 'Answer key') : (p.sub || 'Maths');
+  const test = p.mode === 'test', sub = keyMode ? (keyMode === 'exp' ? 'Explanations' : 'Answer key') : (p.sub || 'Physics');
   const info = h('div', { class: 'sh-info' },
     h('span', { text: 'Name: ______________________' }), h('span', { text: 'Avanti ID: __________' }),
     h('span', { text: (p.total || p.qs.length) + ' questions' }),
     test ? h('span', { text: 'Time: ' + p.mins + ' min' }) : h('span', { text: 'Date: ______________' }),
     test ? h('span', { text: 'Max marks: ' + (p.total || p.qs.length) * p.pos + '  (+' + p.pos + ' / \u2212' + p.neg + ')' }) : h('span', { text: 'Marks: ____ / ' + p.qs.length }));
   const dt = p.date ? new Date(p.date + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-  /* header: logo left, exam name (18 bold) with date below (14), Mathematics top right; footer: Exam - Date left, page number right */
+  /* header: logo left, exam name (18 bold) with date below (14), Physics top right; footer: Exam - Date left, page number right */
   const examName = p.pyq ? String(p.sub || '').replace(/\s*\u00b7\s*all topics$/, '') : p.title, dateLine = p.pyq ? p.title : sub;
   const headTitle = p.pyq ? examName : p.title, headSub = p.pyq ? (keyMode ? dateLine + ' \u00b7 ' + (keyMode === 'exp' ? 'Explanations' : 'Answer key') : dateLine) : sub;
   const logo = h('img', { class: 'sh-logo', src: LOGO_DATA || 'img/ankit-logo-dark.png', alt: 'Unkganit', style: 'height:40px;width:auto;display:block' });
@@ -233,7 +225,7 @@ function skeleton(p, keyMode) {
     h('div', { class: 'sh-head' },
       h('div', { class: 'sh-brand' }, logo),
       h('div', { class: 'sh-title', style: 'font-size:18px;font-weight:700;line-height:1.2' }, headTitle, h('small', { text: headSub, style: 'font-size:14px;font-weight:600;margin-top:3px;letter-spacing:0;color:var(--sheet-muted)' })),
-      h('div', { class: 'sh-meta' }, h('div', { text: 'Mathematics', style: 'font-weight:700;font-size:12px' }), p.pyq ? h('div', { class: 'sh-badge', text: 'PYQ' }) : p.badge ? h('div', { class: 'sh-badge', text: p.badge }) : (dt ? h('div', { text: dt }) : null), p.batch ? h('div', { text: p.batch }) : null)),
+      h('div', { class: 'sh-meta' }, h('div', { text: 'Physics', style: 'font-weight:700;font-size:12px' }), p.pyq ? h('div', { class: 'sh-badge', text: 'PYQ' }) : p.badge ? h('div', { class: 'sh-badge', text: p.badge }) : (dt ? h('div', { text: dt }) : null), p.batch ? h('div', { text: p.batch }) : null)),
     keyMode || !test ? null : info,
     h('div', { class: 'sh-body' }),
     h('div', { class: 'sh-foot' }, h('span', { text: p.pyq ? examName + ' - ' + dateLine : p.title }), h('span', { text: keyMode ? 'Teacher copy' : test ? 'Test' + (p.pageOf ? ' \u00b7 Page ' + p.pageOf : '') : (p.pg ? 'Page ' + p.pg : '') })));
@@ -401,8 +393,7 @@ function pickSpread(topics, n) {
    - small neighbouring topics are merged into one DPP
    Each DPP: at least 5 L1 + 5 L2 + 5 L3 (gaps filled from L2 first, then the other level), up to 20 questions on one A4 side. */
 /* lectures to be taken per chapter (M2=2A+2B, M3 = 3A only, M11=A+B+C, M20=A+B); a DPP is submitted after every class */
-const LECTURES = { '11M1': 12, '11M2': 7, '11M3': 9, '11M4': 9, '11M5': 7, '11M6': 13, '11M7': 8, '11M8': 13, '11M9': 15, '11M10': 11, '11M11': 18, '11M12': 3,
-  '12M13': 19, '12M14': 7, '12M15': 12, '12M16': 7, '12M17': 7, '12M18': 7, '12M19': 8, '12M20': 10, '12M21': 6, '12M22': 8, '12M23': 3, '12M24': 6 };
+const LECTURES = {};
 const evenPick = (a, k) => a.length <= k ? a.slice() : Array.from({ length: k }, (_, j) => a[Math.floor((j + 0.5) * a.length / k)]);
 function buildSubDpps(bank, chmap) {
   const out = [], byCh = {};
@@ -479,9 +470,9 @@ function buildPyqTopics() {
 let SUBS = [];
 const BK = {};
 const LS = { kind: 'sub', chs: [], ids: [], idk: '', part: 'all', page: 0, key: false, shown: false, year: 'all', yrs: [], ex: [], lv: ['L1', 'L2', 'L3'], pubs: [], srcs: [], tough: 2, mixv: 2, stat: '', seed: 0 };
-const PUBS = [];   /* every source tag found in the bank (Black Book and any new one) */
+const PUBS = [];
 function initPubs() {
-  const found = [...new Set(BANK.qs.filter(q => q.s === 'N').map(q => q.pb || 'Practice'))], first = ['Black Book'];
+  const found = [...new Set(BANK.qs.filter(q => q.s === 'N').map(q => q.pb || 'Practice'))], first = [];
   PUBS.length = 0; first.concat(found.filter(x => !first.includes(x)).sort()).forEach(x => PUBS.push(x));
   LS.pubs = PUBS.slice(); LS.srcs = EXAMS.concat(PUBS);
 }
@@ -551,8 +542,8 @@ function bookletPages(cc, part) {
   });
   return (BK[key] = out);
 }
-const exOf = q => q.e === 'KCET' ? 'KCET' : q.e === 'IAT' ? 'IAT' : q.e === 'NDA' ? 'NDA' : q.e === 'Adv' ? (q.y < 2013 ? 'IIT' : 'JEE Advanced') : (q.y < 2013 ? 'AIEEE' : 'JEE Main');
-const EXAMS = ['JEE Main', 'JEE Advanced', 'AIEEE', 'IIT', 'KCET', 'IAT', 'NDA'];
+const exOf = q => 'School Level';
+const EXAMS = ['School Level'];
 const yf = qs => qs.filter(q => (!LS.yrs.length || LS.yrs.includes(String(q.y))) && (!LS.ex.length || LS.ex.includes(exOf(q))) && LS.lv.includes(q.d));
 function pyqYears(cc) { const c = PYQT[cc], a = c.other.concat(...c.topics.map(t => t.qs)); return [...new Set(a.map(q => String(q.y)))].sort((x, y) => y - x); }
 function pyqPages(cc, id) {
@@ -892,13 +883,13 @@ function exportLib(kind) {
   doExport(kind, { pages, file: pages[0].file });
 }
 /* ---------- "PYQ ChapterWise PDF" and "Shift Wise PDF" tabs ---------- */
-const PDFT = { cw: { bucket: 'Main', sel: null, page: 0, v: 0, years: [], key: false }, sw: { bucket: 'Main', sel: null, page: 0, v: 0, year: 'all', key: false } };
-const BUCKET_NAME = { Main: 'JEE Main', Adv: 'JEE Advanced', KCET: 'KCET', IAT: 'IAT', NDA: 'NDA' };
+const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, year: 'all', key: false } };
+const BUCKET_NAME = { School: 'School Level' };
 const chOrder = cc => { const c = CHMAP.get(cc); return c.cl * 100 + c.o; };
-function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P' && q.e === bucket); }
-const cwYearOk = q => !PDFT.cw.years.length || PDFT.cw.years.includes(String(q.y));
-const cwYrKey = () => PDFT.cw.years.length ? PDFT.cw.years.slice().sort().join(',') : 'all';
-const cwYrSfx = () => PDFT.cw.years.length ? ' ' + PDFT.cw.years.slice().sort().join('+') : '';
+function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P'); }
+const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.blocks.length || (c && P.blocks.includes(c.b))) && (!P.lv.length || P.lv.includes(q.d)); };
+const cwYrKey = () => ['years', 'cls', 'blocks', 'lv'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
+const cwYrSfx = () => ['cls', 'years', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
 function pdfRows(T) {
   const P = PDFT[T], key = 'rows|' + T + '|' + P.bucket + (T === 'cw' ? '|' + cwYrKey() : '');
@@ -906,14 +897,14 @@ function pdfRows(T) {
   const qs = pyqOf(P.bucket).filter(q => T !== 'cw' || cwYearOk(q)); let rows = [];
   if (T === 'cw') {
     const by = {}; qs.forEach(q => { (by[q.cc] = by[q.cc] || []).push(q); });
-    rows = Object.keys(by).sort((a, b) => chOrder(a) - chOrder(b)).map(cc => ({ k: cc, name: CHMAP.get(cc).n, qs: by[cc], file: CHMAP.get(cc).n + ' ' + BUCKET_NAME[P.bucket] + ' PYQs' + (T === 'cw' ? cwYrSfx() : '') }));
+    rows = Object.keys(by).sort((a, b) => chOrder(a) - chOrder(b)).map(cc => ({ k: cc, name: CHMAP.get(cc).n, qs: by[cc], file: CHMAP.get(cc).n + ' ' + BUCKET_NAME[P.bucket] + ' Questions' + (T === 'cw' ? cwYrSfx() : '') }));
   } else {
     const by = {};
     qs.forEach(q => { if (/^PYQARC/.test(q.i) || /shift not given|Year not printed/i.test(q.p || '')) return; const k = (q.y || '') + '|' + q.p; (by[k] = by[k] || []).push(q); });
     const sk = k => { const q = by[k][0], m = /^(?:J[MA]|IIT)(\d{4})(\d{2})(\d{2})(\d)/.exec(q.i) || /^(?:KCET|IAT|NDA)(\d{4})(\d{2})(\d{2})()/.exec(q.i); return m ? m[1] + m[2] + m[3] + m[4] : String(q.y || '') + '0000' + (/(\d)\s*$/.exec(q.p) || [0, 0])[1]; };
     rows = Object.keys(by).sort((a, b) => sk(b).localeCompare(sk(a))).map(k => {
       const q = by[k][0], name = P.bucket === 'Adv' && q.y >= 2013 ? q.y + ' \u00b7 ' + q.p : q.p.replace(/\s+(Shift|Screening|Mains|Paper)/, ' \u00b7 $1');
-      return { k, name, qs: by[k], file: BUCKET_NAME[P.bucket] + ' ' + name + ' PYQs' };
+      return { k, name, qs: by[k], file: BUCKET_NAME[P.bucket] + ' ' + name + ' Questions' };
     });
   }
   return (BK[key] = rows);
@@ -924,7 +915,7 @@ function pdfPages(T, r) {
   const bucket = PDFT[T].bucket, sub = (T !== 'cw' && bucket === 'Adv' && r.qs[0] && r.qs[0].y && r.qs[0].y < 2013 ? 'IIT-JEE' : BUCKET_NAME[bucket]) + (T === 'cw' ? ' \u00b7 all topics' : '');
   let flat = [];
   if (T === 'cw') {
-    const c = PYQT[r.k], topics = c ? c.topics.map(t => ({ label: t.code || ('Topic ' + t.no), name: t.name, qs: t.qs.filter(q => q.e === bucket && cwYearOk(q)) })).concat([{ label: 'Other', name: 'Other topics', qs: c.other.filter(q => q.e === bucket && cwYearOk(q)) }]) : [{ label: '', name: 'All topics', qs: r.qs }];
+    const c = PYQT[r.k], topics = c ? c.topics.map(t => ({ label: t.code || ('Topic ' + t.no), name: t.name, qs: t.qs.filter(q => cwYearOk(q)) })).concat([{ label: 'Other', name: 'Other topics', qs: c.other.filter(q => cwYearOk(q)) }]) : [{ label: '', name: 'All topics', qs: r.qs }];
     topics.forEach(t => t.qs.forEach((q, i) => flat.push(Object.assign({}, q, { _pf: 1, _t: (t.label ? t.label + ' \u00b7 ' : '') + t.name, head: i === 0 ? (t.label ? t.label + ' \u00b7 ' : '') + t.name : '' }))));
   } else {
     r.qs.slice().sort((a, b) => chOrder(a.cc) - chOrder(b.cc)).forEach(q => flat.push(Object.assign({}, q, { _pf: 1, _t: '', head: '' }))); /* question paper: no chapter names, like a real paper */
@@ -939,7 +930,7 @@ function pyqMeta() { return PYQMETA || (PYQMETA = fetch('qb/data/pyq.json').then
 async function cwPptxData(r) {
   const P = PDFT.cw, bucket = P.bucket, cc = r.k, c = CHMAP.get(cc), pc = PYQT[cc];
   const years = {}; pyqOf(bucket).filter(q => q.cc === cc && q.y).forEach(q => { years[q.y] = (years[q.y] || 0) + 1; });
-  const inScope = q => q.e === bucket && cwYearOk(q);
+  const inScope = q => cwYearOk(q);
   const flat = pc ? [].concat(...pc.topics.map(t => t.qs.filter(inScope).map(q => Object.assign({}, q, { _t: t.name, _lab: pyqLabel(q) }))), pc.other.filter(inScope).map(q => Object.assign({}, q, { _t: 'Other topics', _lab: pyqLabel(q) }))) : r.qs.map(q => Object.assign({}, q, { _t: r.name, _lab: pyqLabel(q) }));
   const topics = pc ? pc.topics.map(t => ({ name: t.name, n: t.qs.filter(inScope).length })).concat(pc.other.filter(inScope).length ? [{ name: 'Other topics', n: pc.other.filter(inScope).length }] : []) : [];
   const figs = {}; for (const q of flat) if (q.f && !figs[q.i]) { try { figs[q.i] = await figPng(q.f); } catch (e) { /* skip the picture */ } }
@@ -972,12 +963,12 @@ function qbJson(n) {
   }
   return QBJ[n];
 }
-const QB_EXAM = { 'JEE Main': 'Main', 'AIEEE': 'Main', 'JEE Advanced': 'Adv', 'IIT': 'Adv', 'KCET': 'KCET', 'IAT': 'IAT', 'NDA': 'NDA' };
+const QB_EXAM = { 'School Level': 'School' };
 function qbCompact(r, withKcet) {
-  const e = QB_EXAM[r.exam]; if (!e) return null;
-  const P = r.source === 'PYQ';
+  const e = QB_EXAM[r.exam] || 'School';
+  const P = true;
   let o = r.options || []; if (typeof o === 'string') { try { o = JSON.parse(o); } catch (x) { o = []; } }
-  const q = { i: String(r.id), s: P ? 'P' : 'N', e, y: P && r.year != null && r.year !== '' ? Number(r.year) : null, p: r.paper, t: r.type, cc: r.chapter_code, tc: String(r.topic_code || '').replace(/^JM-/, ''), tp: r.topic || '', d: r.difficulty, q: r.question || '', o, a: r.answer == null ? '' : String(r.answer) };
+  const q = { i: String(r.id), s: P ? 'P' : 'N', e, cl: Number(r.class) || 0, y: P && r.year != null && r.year !== '' ? Number(r.year) : null, p: r.paper, t: r.type, cc: r.chapter_code, tc: String(r.topic_code || '').replace(/^JM-/, ''), tp: r.topic || '', d: r.difficulty, q: r.question || '', o, a: r.answer == null ? '' : String(r.answer) };
   if (!P) { q.pb = r.publisher || 'Practice'; q.sec = r.section || ''; if (r.pyq) q.pq = r.pyq_ref || ''; }
   if (r.oos) q.oo = 1;
   if (r.figure && r.figure.svg) q.f = r.figure;
@@ -1014,7 +1005,7 @@ window.__qbCwPptx = async function (ids, explain) {
   const topics = [...tm.values()].sort((a, b) => a.o - b.o).map(t => ({ name: t.name, n: t.n }));
   const years = {}; qs.filter(q => q.s === 'P' && q.y).forEach(q => { years[q.y] = (years[q.y] || 0) + 1; });
   const nP = qs.filter(q => q.s === 'P').length, nN = qs.length - nP, ex = [...new Set(qs.filter(q => q.s === 'P').map(q => q.e))];
-  const kindLabel = nN && nP ? 'PYQs + practice' : nN ? 'Practice questions' : ex.length === 1 ? BUCKET_NAME[ex[0]] + ' PYQs' : 'JEE Main + Advanced PYQs';
+  const kindLabel = nN && nP ? 'PYQs + practice' : nN ? 'Practice questions' : 'Physics Questions';
   const figs = {}; for (const q of flat) if (q.f && !figs[q.i]) { try { figs[q.i] = await figPng(q.f); } catch (e) { /* skip the picture */ } }
   let logo = null; try { const rs = await fetch('img/ankit-logo.png'); if (rs.ok) { const bl = await rs.blob(), bm = await createImageBitmap(bl), dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(bl); }); logo = { dataUrl, w: bm.width, h: bm.height }; } } catch (e) { /* no logo file: skip */ }
   const yl = Object.keys(years).map(Number).sort((a, b) => a - b);
@@ -1034,22 +1025,27 @@ function renderPdfTab(T) {
     view.append(
       h('div', { class: 'rail' }, h('div', { class: 'card' },
         h('div', { class: 'tglrow' }, keySwitch(T + 'Key', 'pdfkey', { 'data-t': T }), expSwitch(T + 'Expl', 'pdfexp', { 'data-t': T })),
-        h('div', { class: 'pyqkind', role: 'group', 'aria-label': 'PYQs' }, [['sw', 'Question Paper', 'A whole shift paper'], ['cw', 'Chapterwise', 'Every chapter, all topics']].map(([k, t, d]) =>
-          h('button', { type: 'button', class: 'pyqk', 'aria-pressed': String(T === k), onclick: () => { if (PYQSUB !== k) { PYQSUB = k; pyqShow(); } } }, h('strong', { text: t }), h('span', { text: d })))),
-        h('div', { class: 'fld' }, h('label', { class: 'lbl', for: T + 'Ex', text: 'Exam' }), h('select', { id: T + 'Ex', onchange: e => { PDFT[T].bucket = e.target.value; PDFT[T].sel = null; PDFT[T].page = 0; renderPdfTab(T); } }, ['Main', 'Adv', 'KCET', 'IAT', 'NDA'].map(k => h('option', { value: k, text: BUCKET_NAME[k] })))),
-        T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Years (tick one or many)' }), msel('cwYr', 'years')) : h('div', { class: 'fld' }, h('label', { class: 'lbl', for: T + 'Year', text: 'Year' }), h('select', { id: T + 'Year', onchange: e => { PDFT[T].year = e.target.value; PDFT[T].sel = null; PDFT[T].page = 0; renderPdfTab(T); } })),
-        h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: T === 'cw' ? 'Chapter' : 'Question paper (date and shift)' }), ssel(T + 'Pick', T === 'cw' ? 'a chapter' : 'a shift'))))),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), msel('cwYr', 'years')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), msel('cwCl', 'classes')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Block' }), msel('cwBk', 'blocks')),
+        h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapter' }), ssel(T + 'Pick', 'a chapter'))),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')))),
       h('div', { class: 'stage' }, h('div', { class: 'statbar' }, h('div', { class: 'msg', id: T + 'Msg', 'aria-live': 'polite' }), h('div', { class: 'pgbtns', id: T + 'Pages', hidden: true }), h('div', { class: 'rowbtns', id: T + 'Exp', hidden: true }, ...[['docx', 'Word (editable)'], ['pdf', 'PDF'], ['pptx', 'PowerPoint (editable)']].map(([f, nm]) => h('button', { type: 'button', class: 'btn ibtn', 'data-act': 'pdfdl', 'data-t': T, 'data-k': '', 'data-f': f, title: 'Download ' + nm, 'aria-label': 'Download ' + nm, html: FIMG[f] })), ...['xprint', 'xshare'].map(a => { const b = a === 'xprint' ? prtBtn('pyq') : shrBtn('pyq'); b.dataset.t = T; b.dataset.k = ''; return b; }), wsRow(T)), h('button', { type: 'button', class: 'btn ibtn maxbtn', 'data-act': 'max', 'aria-pressed': 'false', title: 'Maximize', 'aria-label': 'Maximize', html: ICO.max })), h('div', { class: 'pgwrap', id: T + 'Prev' })));
     if (window.ResizeObserver) new ResizeObserver(rescale).observe($('#' + T + 'Prev'));
   }
-  $('#' + T + 'Ex').value = P.bucket;
   const list = $('#' + T + 'List'); list.querySelectorAll('.hint').forEach(e => e.remove());
   let rows = pdfRows(T); const my = ++P.v;
   if (T === 'cw') {
-    const all = pyqOf(P.bucket), cnt = {}; all.forEach(q => { if (q.y) cnt[q.y] = (cnt[q.y] || 0) + 1; });
+    const all = pyqOf(P.bucket), refresh = () => { P.sel = null; P.page = 0; renderPdfTab('cw'); };
+    const cnt = {}; all.forEach(q => { if (q.y) cnt[q.y] = (cnt[q.y] || 0) + 1; });
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
-    const keep = P.years.filter(y => ys.includes(+y)); if (keep.length !== P.years.length) { P.years = keep; rows = pdfRows(T); }
-    mfill('cwYr', ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), P.years, v => { P.years = v; P.sel = null; P.page = 0; renderPdfTab('cw'); }, 'years', { none: 'All years' });
+    P.years = P.years.filter(y => ys.includes(+y));
+    mfill('cwYr', ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
+    mfill('cwCl', ['9', '10', '11', '12'].map(c => [c, 'Class ' + c + ' (' + all.filter(q => String(q.cl) === c).length + ')']), P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
+    const blocks = [...new Set(BANK.chapters.map(c => c.b).filter(Boolean))];
+    mfill('cwBk', blocks.map(b => [b, b]), P.blocks, v => { P.blocks = v; refresh(); }, 'blocks', { none: 'All blocks' });
+    mfill('cwLv', ['L1', 'L2', 'L3'].map(l => [l, l + ' (' + all.filter(q => q.d === l).length + ')']), P.lv, v => { P.lv = v; refresh(); }, 'levels', { none: 'All levels' });
+    rows = pdfRows(T);
   }
   if (T === 'sw') {
     const ys = [...new Set(rows.map(r => r.qs[0].y))].filter(Boolean).sort((a, b) => b - a), sel = $('#swYear');
@@ -1078,271 +1074,11 @@ function showPdfPrev(T) {
   const step = () => { if (P.tok !== tok) return; const end = Math.min(i + 3, pages.length); for (; i < end; i++) { const L = layoutSheet(pages[i], scalers[i]); if (L.overflow) warn = true; } rescale(); say(i >= pages.length); if (i < pages.length) setTimeout(step, 0); else addKeyPages(wrap, pages); };
   step();
 }
-/* ---------- Handouts tab: compact PDF list ---------- */
-let HO = null;
-/* In-page handout viewer (PDF.js draws the pages; no download or print button). Everyone can view; downloads need Premium. */
-let PDFJS_P = null;
-function loadPdfJs() {
-  if (!PDFJS_P) PDFJS_P = loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js').then(() => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; return window.pdfjsLib; }).catch(e => { PDFJS_P = null; throw e; });
-  return PDFJS_P;
-}
-async function viewHandout(x, url) {
-  const close = () => { m.remove(); document.removeEventListener('keydown', onKey); document.body.classList.remove('hv-on'); if (io) io.disconnect(); };
-  const onKey = e => { if (e.key === 'Escape') close(); };
-  const pages = h('div', { class: 'hv-pages' }, h('p', { class: 'hv-msg', text: 'Loading the handout\u2026' }));
-  const m = h('div', { class: 'hv', role: 'dialog', 'aria-modal': 'true', 'aria-label': x.title },
-    h('div', { class: 'hv-bar' }, h('span', { class: 'hv-code', text: x.code }), h('strong', { class: 'hv-title', text: x.title }), h('span', { class: 'hv-n' }),
-      h('button', { type: 'button', class: 'hv-x', 'aria-label': 'Close viewer', html: '&times;', onclick: () => close() })), pages);
-  let io = null;
-  document.body.append(m); document.body.classList.add('hv-on'); document.addEventListener('keydown', onKey); m.querySelector('.hv-x').focus();
-  try {
-    const lib = await loadPdfJs();
-    const doc = await lib.getDocument({ url }).promise;
-    m.querySelector('.hv-n').textContent = doc.numPages + ' pages';
-    pages.textContent = '';
-    const draw = async (n, holder) => {
-      if (holder.dataset.done) return; holder.dataset.done = '1';
-      const pg = await doc.getPage(n), w = Math.min(pages.clientWidth - 24, 1000), v0 = pg.getViewport({ scale: 1 }), sc = w / v0.width, dpr = Math.min(window.devicePixelRatio || 1, 2), vp = pg.getViewport({ scale: sc * dpr });
-      const c = h('canvas', { class: 'hv-page', width: Math.floor(vp.width), height: Math.floor(vp.height), 'aria-label': 'Page ' + n });
-      c.style.width = Math.floor(vp.width / dpr) + 'px'; holder.textContent = ''; holder.style.height = ''; holder.append(c);
-      await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
-    };
-    const first = await doc.getPage(1), ratio = first.getViewport({ scale: 1 }).height / first.getViewport({ scale: 1 }).width, wd = Math.min(pages.clientWidth - 24, 1000);
-    const holders = [];
-    for (let n = 1; n <= doc.numPages; n++) { const d = h('div', { class: 'hv-slot', 'data-n': n, style: 'height:' + Math.round(wd * ratio) + 'px;width:' + wd + 'px' }); holders.push(d); pages.append(d); }
-    io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) draw(+e.target.dataset.n, e.target).catch(() => {}); }), { root: pages, rootMargin: '600px 0px' });
-    holders.forEach(d => io.observe(d));
-  } catch (e) { pages.textContent = ''; pages.append(h('p', { class: 'hv-msg', text: 'The handout could not be opened. Check your internet connection and try again.' })); }
-}
-async function renderHandouts() {
-  const view = $('#viewHo'); if (!view) return;
-  if (!HO) { try { HO = await (await fetch('handouts/index.json')).json(); } catch (e) { HO = []; } }
-  view.textContent = '';
-  if (!document.getElementById('hp-css')) {
-    const st = document.createElement('style'); st.id = 'hp-css';
-    st.textContent = '#viewHo.hoview{max-width:1080px;gap:16px;padding-block:4px 20px}'
-      + '.hp-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}'
-      + '.hp-head h1{margin:0;font-size:22px;line-height:1.2;letter-spacing:-.01em;color:var(--ink)}'
-      + '.hp-head p{margin:0;font-size:13px;color:var(--muted)}'
-      + '.hp-sec{display:flex;flex-direction:column;gap:8px;min-width:0}'
-      + '.hp-sech{margin:6px 0 0;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}'
-      + '.hp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}'
-      + '.hp-card{--ac:#0a86c2;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 14px;min-width:0;background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--ac);border-radius:10px;padding:11px 14px;transition:box-shadow .12s,border-color .12s}'
-      + '.hp-card:hover{box-shadow:0 3px 12px color-mix(in srgb,var(--ac) 18%,transparent)}'
-      + '.hp-code{font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,transparent);border-radius:6px;padding:6px 8px;white-space:nowrap}'
-      + '.hp-main{min-width:0}'
-      + '.hp-title{margin:0;font-size:15px;line-height:1.3;font-weight:650;color:var(--ink);overflow-wrap:anywhere}'
-      + '.hp-meta{margin:2px 0 0;font-size:12px;color:var(--muted)}'
-      + '.hp-act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}'
-      + '.hp-btn{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:5px 11px;border-radius:8px;border:1px solid var(--ac);background:var(--ac);color:#fff;font:600 12.5px Figtree,system-ui,sans-serif;cursor:pointer;white-space:nowrap}'
-      + '.hp-btn:hover{filter:brightness(1.08)}.hp-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--ac) 40%,transparent);outline-offset:2px}'
-      + '.hp-btn.bw{background:transparent;color:var(--ink);border-color:var(--rule)}.hp-btn.bw:hover{background:var(--ink);color:var(--bg);filter:none}'
-      + '.hp-btn svg{width:14px;height:14px;flex:none}'
-      + '@media(max-width:480px){.hp-list{grid-template-columns:1fr}.hp-card{grid-template-columns:auto 1fr}.hp-act{grid-column:1 / -1;justify-content:flex-start}}';
-    document.head.append(st);
-  }
-  const list = (HO || []).filter(Boolean);
-  if (!list.length) { view.append(h('p', { class: 'hint', text: 'No handouts yet.' })); return; }
-  const base = x => x.file.replace(/\.pdf$/, '');
-  const path = (x, bw) => 'handouts/' + (bw ? x.dir + '/bw/' + base(x) + '_BW.pdf' : x.file);
-  const dl = async (x, bw) => {
-    const name = base(x) + (bw ? '_BW' : '') + '.pdf';
-    if (!downloads) { toast('Downloads are not available in this view'); return; }
-    try { toast('Preparing ' + name + '…'); const r = await fetch(path(x, bw)); await downloads.save({ filename: name, data: await r.blob() }); toast('Saved ' + name); }
-    catch (er) { if (er && er.code === 'declined') toast('Download cancelled'); else toast('Could not download'); }
-  };
-  const ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8m0 0L4.8 6.8M8 10l3.2-3.2M3 13h10"/></svg>';
-  const btn = (x, bw) => h('button', { type: 'button', class: 'hp-btn' + (bw ? ' bw' : ''), title: bw ? 'Download PDF (black and white, for printing)' : 'Download PDF', 'aria-label': 'Download ' + x.title + (bw ? ' PDF, black and white' : ' PDF'), html: ICON + (bw ? 'PDF · B&W' : 'PDF'), onclick: () => dl(x, bw) });
-  const ACC = ['#e0197a', '#0a86c2', '#16a06a', '#d98200', '#7a3fd1', '#e8590c', '#5a9a00'];
-  const EYE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
-  const viewBtn = x => h('button', { type: 'button', class: 'hp-btn hp-view', title: 'Open in the viewer', 'aria-label': 'View ' + x.title, html: EYE + 'View', onclick: () => viewHandout(x, path(x, false)) });
-  const card = (x, k) => h('article', { class: 'hp-card', style: '--ac:' + ACC[k % ACC.length] },
-    h('span', { class: 'hp-code', text: x.code }),
-    h('div', { class: 'hp-main' }, h('h3', { class: 'hp-title', text: x.title }), h('p', { class: 'hp-meta', text: [x.pages ? x.pages + ' pages' : '', x.orient || 'A4'].filter(Boolean).join(' · ') })),
-    h('div', { class: 'hp-act' }, viewBtn(x), G('pdf') ? [btn(x, false), x.nobw ? null : btn(x, true)] : null));
-  const secs = [['11', 'Class 11'], ['12', 'Class 12']].map(([c, t]) => { const L = list.filter(x => x.code.startsWith(c)); return L.length ? h('section', { class: 'hp-sec' }, h('h2', { class: 'hp-sech', text: t }), h('div', { class: 'hp-list' }, L.map((x, k) => card(x, k)))) : null; }).filter(Boolean);
-  view.append(h('div', { class: 'hp-head' }, h('h1', { text: 'Handouts' }), h('p', { text: G('pdf') ? 'Handwritten revision notes · view or download as PDF' : 'Handwritten revision notes · view online (PDF download with Premium)' })), ...secs);
-}
+function renderHandouts() {}
+function renderMust() {}
+function mustPages() { return null; }
 
-/* ---------- Must Solve tab: questions that repeat in JEE (exact or very similar) and sure-shot picks, by chapter and topic ---------- */
-let MUST = null, MTOP = null; const MS = { sel: new Set(), chs: [], kind: 'all', lv: ['L1', 'L2', 'L3'], ans: false, key: false };
-const MKIND = { e: ['Exact repeat', 'mk-e'], i: ['Similar type', 'mk-i'], u: ['Sure-shot', 'mk-u'] };
-const mYear = q => (q.y ? q.y : 'n/a') + ' ' + (q.e === 'KCET' ? 'KCET' : q.e === 'IAT' ? 'IAT' : q.e === 'NDA' ? 'NDA' : q.e === 'Adv' ? 'Adv' : 'Main');
-/* Must Solve: click a year (or "Asked N times") to see the question as it came in that year, in a pop-up */
-function mustPopStyle() {
-  if (document.getElementById('mpopcss')) return;
-  const st = h('style', { text: '.mclk{cursor:pointer;font:inherit;color:inherit}.mclk:hover,.mclk:focus-visible{border-color:var(--accent,#0f766e);box-shadow:0 0 0 2px var(--accent-soft,rgba(15,118,110,.2))}.mb.mclk{font-size:12px;font-weight:700}.mpopq{border:1px solid var(--rule,#ddd);border-radius:12px;padding:8px;margin:0 0 12px}.mpoph{font-weight:700;font-size:13px;margin:0 0 6px;color:var(--accent,#0f766e)}#mpop .mbody{padding:12px}#mpop .mcard{max-width:900px}' });
-  st.id = 'mpopcss'; document.head.append(st);
-}
-function mustPop(title, ids, useQb) {
-  mustPopStyle();
-  const old = document.getElementById('mpop'); if (old) old.remove();
-  let ov; const esc = e => { if (e.key === 'Escape') close(); }; const close = () => { if (ov) ov.remove(); document.removeEventListener('keydown', esc); };
-  const body = h('div', { class: 'mbody qbhost' });
-  ids.forEach(id => {
-    const q = BYID.get(id); if (!q) return;
-    let view = useQb ? window.QBX.cardFor(id) : null;
-    if (!view) view = h('article', { class: 'mq' }, h('div', { class: 'mqt', text: q.q }), (q.o || []).length ? h('ol', { class: 'mopts' }, q.o.map(o => h('li', { text: o }))) : null, h('div', { class: 'mans', text: 'Answer: ' + q.a }));
-    body.append(h('div', { class: 'mpopq' }, h('div', { class: 'mpoph', text: mYear(q) + (q.p ? ' · ' + q.p : '') + ' · ' + q.i }), view));
-  });
-  ov = h('div', { class: 'modal', id: 'mpop', role: 'dialog', 'aria-modal': 'true', 'aria-label': title, onclick: e => { if (e.target === ov) close(); } },
-    h('div', { class: 'mcard' }, h('div', { class: 'mbar' }, h('b', { text: title }), h('button', { type: 'button', class: 'btn', text: 'Close', onclick: close })), body));
-  document.body.append(ov); document.addEventListener('keydown', esc); math(body);
-}
-async function renderMust() {
-  const view = $('#viewMust'); if (!view) return;
-  if (!MUST) { try { MUST = await (await fetch('must.json')).json(); } catch (e) { MUST = []; } }
-  if (!MUST.length) { view.textContent = ''; view.append(h('p', { class: 'hint', text: 'Must Solve is not available yet.' })); return; }
-  try { await qbInit(); for (let k = 0; k < 150 && !(window.QBX && window.QBX.hasRows && window.QBX.hasRows()); k++) await new Promise(r => setTimeout(r, 100)); } catch (e) { /* fall back to simple cards */ }
-  const useQb = !!(window.QBX && window.QBX.cardFor && window.QBX.hasRows && window.QBX.hasRows());
-  if (!MTOP) { try { MTOP = await (await fetch('qb/data/topics.json')).json(); } catch (e) { MTOP = []; } }
-  const topIdx = (c, name) => { const i = MTOP.filter(t => t.chapter_code === c).findIndex(t => t.topic === name); return i < 0 ? 999 : i; };
-  const chs = MUST.map(m => CHMAP.get(m.c)).filter(Boolean);
-  const chName = c => (CHMAP.get(c) || { n: c }).n;
-  const list = h('div', { class: 'mlist qbhost' }), msg = h('div', { class: 'msg', 'aria-live': 'polite' });
-  const PER = 20; let page = 0;
-  const pager = (start, n, total) => {
-    const nav = h('nav', { class: 'qb-pager', 'aria-label': 'Pages' }, h('span', { class: 'qb-pinfo', text: (start + 1) + '\u2013' + (start + n) + ' of ' + total }));
-    const go = p => { page = p; draw(true); view.scrollIntoView({ block: 'start' }); window.scrollTo(0, 0); };
-    const btn = (label, p, on, dis) => nav.append(h('button', { type: 'button', class: 'qb-pbtn' + (on ? ' on' : ''), text: label, disabled: !!dis, 'aria-current': on ? 'page' : null, onclick: () => go(p) }));
-    const pages = MS.pages;
-    btn('\u2039 Prev', page - 1, false, page === 0);
-    const shown = []; for (let p = 0; p < pages; p++) if (p === 0 || p === pages - 1 || Math.abs(p - page) <= 2) shown.push(p);
-    shown.forEach((p, i) => { if (i && p - shown[i - 1] > 1) nav.append(h('span', { class: 'qb-pgap', text: '\u2026' })); btn(String(p + 1), p, p === page); });
-    btn('Next \u203a', page + 1, false, page === pages - 1);
-    return nav;
-  };
-  const selCnt = h('span', { class: 'mselcnt' });
-  const topN = h('span', { class: 'msel-n', text: '0' }), topOf = h('span', { class: 'msel-of' });
-  const selInfo = () => { const n = (MS.flat || []).filter(f => MS.sel.has(f.it.r)).length, all = (MS.flat || []).length; selCnt.textContent = n ? n + ' selected \u00b7 downloads only these' : 'None selected \u00b7 downloads all ' + all + ' shown'; topN.textContent = String(n); topOf.textContent = 'of ' + all + ' shown'; };
-  const tick = on => { (MS.flat || []).forEach(f => { if (on) MS.sel.add(f.it.r); else MS.sel.delete(f.it.r); }); list.querySelectorAll('.mpick input').forEach(c => { c.checked = MS.sel.has(c.dataset.r); }); selInfo(); };
-  const draw = (keep) => {
-    if (!keep) page = 0;
-    list.textContent = '';
-    /* flatten the filtered questions in chapter, topic, then most-repeated order, and show 20 per page */
-    const flat = [], yc = {};
-    MUST.forEach(m => {
-      if (MS.chs.length && !MS.chs.includes(m.c)) return;
-      const items = m.i.filter(it => (MS.kind === 'all' || it.k === MS.kind) && MS.lv.includes((BYID.get(it.r) || {}).d));
-      if (!items.length) return;
-      const y = yc[m.c] = {}; items.forEach(it => [it.r, ...it.m].forEach(id => { const q = BYID.get(id); if (!q) return; const k = q.y ? (q.y >= 2019 ? String(q.y) : 'Before 2019') : 'Year n/a'; y[k] = (y[k] || 0) + 1; }));
-      const tops = new Map();
-      items.forEach(it => { const q = BYID.get(it.r); if (!q) return; const nm = q.tc && !/UNMAPPED/.test(q.tc) ? q.tp : 'Mixed problems'; if (!tops.has(nm)) tops.set(nm, []); tops.get(nm).push(it); });
-      [...tops.entries()].sort((a, b) => (topIdx(m.c, a[0]) - topIdx(m.c, b[0])) || a[0].localeCompare(b[0])).forEach(([nm, its]) => {
-        its.sort((a, b) => (b.m.length - a.m.length) || a.k.localeCompare(b.k));
-        its.forEach(it => flat.push({ c: m.c, n: items.length, tp: nm, it }));
-      });
-    });
-    MS.flat = flat; selInfo(); MS.pages = Math.max(1, Math.ceil(flat.length / PER)); if (page >= MS.pages) page = MS.pages - 1;
-    const part = flat.slice(page * PER, page * PER + PER);
-    if (flat.length > PER) list.append(pager(page * PER, part.length, flat.length));
-    let curC = null, curT = null, sec = null, tsec = null, num = 0;
-    part.forEach(f => {
-      if (f.c !== curC) {
-        curC = f.c; curT = null;
-        const ykeys = Object.keys(yc[f.c]).sort((a, b) => (b === 'Before 2019' ? -1 : a === 'Before 2019' ? 1 : b === 'Year n/a' ? -1 : a === 'Year n/a' ? 1 : b - a));
-        sec = h('section', { class: 'mch' },
-          h('div', { class: 'mchh' }, h('span', { class: 'mchn', text: f.c }), h('h3', { text: chName(f.c) }), h('span', { class: 'mcnt', text: f.n + ' questions' })),
-          h('div', { class: 'myrs', 'aria-label': 'Year-wise count of these questions' }, h('b', { text: 'Year-wise: ' }), ...ykeys.map(k => h('span', { class: 'myr' }, k + ' ', h('b', { text: String(yc[f.c][k]) })))));
-        list.append(sec);
-      }
-      if (f.tp !== curT) { curT = f.tp; tsec = h('div', { class: 'mtop' }, h('h4', { text: f.tp })); sec.append(tsec); }
-      const it = f.it, q = BYID.get(it.r), times = it.m.length + 1;
-      const yrs = [it.r, ...it.m].map(id => BYID.get(id)).filter(Boolean).sort((a, b) => (b.y || 0) - (a.y || 0));
-      const pick = h('input', { type: 'checkbox', 'aria-label': 'Select question ' + it.l + ' for download', onchange: e => { if (e.target.checked) MS.sel.add(it.r); else MS.sel.delete(it.r); selInfo(); } }); pick.checked = MS.sel.has(it.r); pick.dataset.r = it.r;
-      const strip = h('div', { class: 'mstrip' },
-        h('label', { class: 'mpick', title: 'Select for download' }, pick),
-        h('b', { class: 'mlab', text: it.l }),
-        h('span', { class: 'mb ' + MKIND[it.k][1], text: MKIND[it.k][0] }),
-        it.k === 'u' ? h('span', { class: 'mb mtimes', text: 'Must know' }) : h('button', { type: 'button', class: 'mb mtimes mclk', title: 'Click to see all ' + times + ' questions with their years', 'aria-label': 'Asked ' + times + ' times: show all', text: 'Asked ' + times + ' times', onclick: () => mustPop(it.l + ' \u00b7 asked ' + times + ' times', yrs.map(y => y.i), useQb) }),
-        h('span', { class: 'myl' }, h('span', { class: 'mylb', text: it.k === 'u' ? 'Came in:' : 'Years:' }), ...yrs.map(y => h('button', { type: 'button', class: 'myc mclk', title: (y.p || '') + ' \u00b7 click to see this question', text: mYear(y), onclick: () => mustPop(it.l + ' \u00b7 ' + mYear(y), [y.i], useQb) }))),
-        it.k === 'u' && it.w ? h('span', { class: 'mwhy', text: it.w }) : null);
-      const qc = useQb ? window.QBX.cardFor(it.r) : null; if (qc) { const nn = qc.querySelector('.qb-num'); if (nn) nn.textContent = String(page * PER + (++num)); }
-      if (qc) { tsec.append(h('div', { class: 'mitem qb' }, strip, qc)); return; }
-      const opts = (q.o || []).length ? h('ol', { class: 'mopts' }, q.o.map(o => h('li', { text: o }))) : null;
-      tsec.append(h('article', { class: 'mq' }, strip, h('div', { class: 'mqt', text: q.q }), opts, h('div', { class: 'mans', text: 'Answer: ' + q.a })));
-    });
-    if (MS.key && part.length) list.append(h('section', { class: 'mkeybox' }, h('h3', { text: 'Answer key' }), h('div', { class: 'keyflow' }, part.map((f, i) => { const q = BYID.get(f.it.r) || {}; return h('span', { class: 'kitem' }, h('b', { text: (page * PER + i + 1) + '.' }), h('span', { text: ' ' + (q.a || '\u2014') })); }))));
-    if (flat.length > PER) list.append(pager(page * PER, part.length, flat.length));
-    msg.innerHTML = '<b>' + flat.length + '</b> questions to solve first' + (MS.chs.length === 1 ? ' in ' + MS.chs[0] + ' ' + chName(MS.chs[0]) : MS.chs.length ? ' in ' + MS.chs.length + ' chapters' : ' across all chapters') + (flat.length > PER ? ' \u00b7 showing ' + (page * PER + 1) + '-' + (page * PER + part.length) : '') + '.';
-    if (!flat.length) list.append(h('p', { class: 'hint', text: 'No questions match these filters.' }));
-    math(list);
-  };
-  MS.redraw = () => draw(true);
-  const seg = (items, cur, set) => h('div', { class: 'seg' }, items.map(([k, t]) => h('button', { type: 'button', 'aria-pressed': String(cur() === k), text: t, onclick: e => { set(k); e.currentTarget.parentNode.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); draw(); } })));
-  const chSel = msel('mustCh', 'chapters'), chItems = chs.map(c => [c.c, c.c + ' ' + c.n]);
-  const fillCh = () => mfill('mustCh', chItems, MS.chs, v => { MS.chs = v; draw(); fillCh(); }, 'chapters', { none: 'All chapters' });
-  const lvBtns = h('div', { class: 'seg' }, ['L1', 'L2', 'L3'].map(l => h('button', { type: 'button', 'aria-pressed': String(MS.lv.includes(l)), text: l, onclick: e => { MS.lv = MS.lv.includes(l) ? MS.lv.filter(x => x !== l) : MS.lv.concat(l); e.currentTarget.setAttribute('aria-pressed', String(MS.lv.includes(l))); draw(); } })));
-  view.textContent = '';
-  /* top of the side panel, like the Question Bank: count, switches, Save as worksheet, Create test + Export menu */
-  const mRow = wsRow('must') || h('div', { class: 'wsrow' });
-  mRow.classList.add('qb-wsrow', 'm-wsrow');
-  const sv = mRow.querySelector('[data-act=wssave]'); if (sv) sv.classList.add('qb-savews');
-  const mExp = h('button', { type: 'button', class: 'btn wsbtn qb-expbtn', 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: 'Download, print or share these questions', html: ICO.dl + '<span>Export</span><span class="pt-caret" aria-hidden="true">\u25be</span>',
-    onclick: e => {
-      const P = window.AvantiPortal, IC = (P && P.icons) || {}, hid = sel => () => { const b = view.querySelector('.mtop ' + sel); if (b) b.click(); };
-      if (!P || !P.dropMenu) return;
-      P.dropMenu(e.currentTarget, [
-        { icon: IC.pdf, text: 'Download PDF', sub: 'Print-ready, with the Avanti header', onclick: () => exportMust('pdf') },
-        G('docx') ? { icon: IC.docx, text: 'Download Word', sub: 'Editable document', onclick: () => exportMust('docx') } : null,
-        G('pptx') ? { icon: IC.pptx, text: 'Download PowerPoint', sub: 'One question per slide', onclick: () => exportMust('pptx') } : null,
-        '-',
-        { icon: ICO.print, text: 'Print', sub: 'Opens the PDF to print', onclick: hid('[data-act=xprint]') },
-        { icon: IC.share || ICO.share, text: 'Share PDF\u2026', sub: 'WhatsApp, email or your phone\u2019s apps', onclick: hid('[data-act=xshare]') }]);
-    } });
-  mRow.append(mExp); mRow.classList.add('n' + mRow.children.length);
-  view.append(h('div', { class: 'rail' }, h('div', { class: 'card' }, h('div', { class: 'msel-top' }, topN, h('b', { text: 'selected' }), topOf),
-    h('div', { class: 'tglrow' }, keySwitch('mustKey', 'mkey'), expSwitch('mustExpl', 'mexp')),
-    mRow,
-    h('div', { class: 'fld mtop', hidden: true },
-      h('div', { class: 'mexp' }, ['docx', 'pdf', 'pptx'].map(k => h('button', { type: 'button', class: 'btn ibtn mexpb', 'data-mexp': k, title: 'Download ' + ({ pdf: 'PDF', docx: 'Word (editable)', pptx: 'PowerPoint (editable)' })[k], 'aria-label': 'Download ' + ({ pdf: 'PDF', docx: 'Word', pptx: 'PowerPoint' })[k], html: FIMG[k] || ICO.dl, onclick: () => exportMust(k) })).concat([h('button', { type: 'button', class: 'btn ibtn mexpb', 'data-act': 'xprint', 'data-src': 'must', title: 'Print', 'aria-label': 'Print', html: ICO.print }), h('button', { type: 'button', class: 'btn ibtn mexpb', 'data-act': 'xshare', 'data-src': 'must', title: 'Share the PDF (WhatsApp, Discord, email)', 'aria-label': 'Share the PDF', html: ICO.share })]))),
-    h('p', { class: 'hint', text: 'Questions that came again and again in JEE, in the same or a very similar form, plus questions that are sure to come. Solve these first.' }),
-    h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapters (tick one or many)' }), chSel),
-    h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Type' }), seg([['all', 'All'], ['e', 'Exact repeat'], ['i', 'Similar type'], ['u', 'Sure-shot']], () => MS.kind, k => { MS.kind = k; })),
-    h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level' }), lvBtns),
-    h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Choose questions' }),
-      h('div', { class: 'mselbar' }, h('button', { type: 'button', class: 'btn', text: 'Select all shown', onclick: () => tick(true) }), h('button', { type: 'button', class: 'btn', text: 'Clear', onclick: () => tick(false) })),
-      selCnt),
-    h('div', { class: 'mlegend' }, h('p', { class: 'hint', html: '<b>Exact repeat:</b> the same question came again. <b>Similar type:</b> the same idea and method, different numbers or wording. <b>Sure-shot:</b> a standard JEE must-know picked by us.' })))),
-    h('div', { class: 'stage' }, list));   /* the count line above the list was removed; the side panel shows the count */
-  draw(); fillCh();
-  KATEX_P && KATEX_P.then(() => math(list)).catch(() => {});
-}
-const chName0 = c => (CHMAP.get(c) || { n: c }).n;
-function mustPages() {
-  const all = (MS.flat || []).filter(f => BYID.get(f.it.r)), chosen = all.filter(f => MS.sel.has(f.it.r)), flat = chosen.length ? chosen : all;
-  if (!flat.length) { toast('No questions to export'); return null; }
-  const chs = [...new Set(flat.map(f => f.c))], one = chs.length === 1;
-  const title = one ? chName0(chs[0]) : 'Must Solve';
-  const file = 'Must Solve ' + (one ? chs[0] + ' ' + title : chs.length > 3 ? chs.length + ' chapters' : chs.join(' ')) + (MS.kind !== 'all' ? ' ' + MKIND[MS.kind][0] : '') + (MS.lv.length < 3 ? ' ' + MS.lv.join('+') : '');
-  const groups = [], gi = new Map();
-  flat.forEach(f => { const k = f.c + '|' + f.tp; if (!gi.has(k)) { gi.set(k, { label: (one ? '' : f.c + ' · ') + f.tp, qs: [] }); groups.push(gi.get(k)); } gi.get(k).qs.push(BYID.get(f.it.r)); });
-  const lf = levelFlat(groups);
-  const pages = packPages(lf, (g, i, n) => ({ title, sub: 'Must Solve · questions to solve first', badge: n > 1 ? 'Page ' + (i + 1) + ' of ' + n : 'Must Solve' }));
-  pages.forEach(pg => { if (pg.qs.length && !pg.qs[0].head) pg.qs = [Object.assign({}, pg.qs[0], { head: contHead(pg.qs[0]) })].concat(pg.qs.slice(1)); });
-  pages.forEach(pg => { pg.key = !!MS.key; pg.exp = !!MS.exp; });
-  return { flat, title, file, pages };
-}
-async function exportMust(kind) {
-  if (!need(kind)) return;
-  const m = mustPages(); if (!m) return;
-  if (!downloads) { toast('Downloads are not available in this view'); return; }
-  const btns = document.querySelectorAll('[data-mexp]'); btns.forEach(b => { b.disabled = true; });
-  try {
-    if (kind === 'pptx') {
-      toast('Preparing PPT…');
-      const blob = await window.__qbCwPptx(m.flat.map(f => f.it.r), MS.exp);
-      await downloads.save({ filename: m.file.replace(/[\\/:*?"<>|]+/g, ' ') + '.pptx', data: blob }); toast('Saved the PPT');
-    } else {
-      btns.forEach(b => { b.disabled = false; });
-      await doExport(kind, { pages: m.pages, file: m.file });
-      return;
-    }
-  } catch (e) {
-    if (e && e.code === 'declined') toast('Download cancelled'); else toast('Export failed: ' + (e && e.message ? e.message : 'try again'));
-  } finally { btns.forEach(b => { b.disabled = false; }); }
-}
-let PYQSUB = (() => { try { return localStorage.getItem('avanti-pyqsub') === 'cw' ? 'cw' : 'sw'; } catch (e) { return 'sw'; } })();
+let PYQSUB = 'cw';
 function pyqShow() {
   hideViews();
   try { localStorage.setItem('avanti-pyqsub', PYQSUB); } catch (e) { /* optional */ }
@@ -1402,7 +1138,7 @@ function onAct(e) {
     case 'guideback': if (e.target === t) guideClose(); break;
     case 'qbinfo': { const pp = $('#qbPop'), op = pp.hidden; pp.hidden = !op; t.setAttribute('aria-expanded', String(op)); break; }
     case 'tab': setTab(k); break;
-    case 'pyqsub': PYQSUB = k; pyqShow(); break;
+    case 'pyqsub': PYQSUB = 'cw'; pyqShow(); break;
     case 'libkind': LS.kind = k; LS.idk = ''; LS.chTouched = false; renderLib(); break;
     case 'oos': { OOS.ex = k === 'ex'; try { localStorage.setItem('oosEx2', OOS.ex ? '1' : '0'); } catch (e) {} applyOos(); LS.idk = ''; syncOos(); renderLib(); toast(OOS.ex ? 'Out-of-syllabus questions excluded' : 'Out-of-syllabus questions included'); break; }
     case 'pdfex': { const T = t.dataset.t; PDFT[T].bucket = k; PDFT[T].sel = null; PDFT[T].page = 0; renderPdfTab(T); break; }
@@ -1573,124 +1309,7 @@ async function buildEditable(kind, pages) {
 }
 
 
-/* ---------- Syllabus Priority tab: JEE Main vs JEE Advanced since 2013, all 24 chapters and subtopics (from syllabus.json, built by .github/scripts/build_syllabus.py) ---------- */
-async function renderSyl() {
-  const box = $('#viewSyl'); if (!box || box.dataset.ready) return;
-  box.dataset.ready = '1';
-  box.textContent = ''; box.append(h('p', { class: 'hint', text: 'Loading…' }));
-  let D;
-  try { D = await fetch('syllabus.json').then(r => { if (!r.ok) throw new Error('syl'); return r.json(); }); }
-  catch (e) { delete box.dataset.ready; box.textContent = ''; box.append(h('p', { class: 'hint', text: 'Could not load the syllabus list. Switch tabs and back to try again.' })); return; }
-  const ch = D.chapters, cnt = D.cnt, cntOf = (a, t) => cnt[a + '|' + t] || 0;
-  const Y0 = D.from || 2013, Y1 = D.to || 2026, YEARS = []; for (let y = Y0; y <= Y1; y++) YEARS.push(y);
-  const TM = D.tm || ch.reduce((t, c) => t + c.m, 0), TA = D.ta || ch.reduce((t, c) => t + c.a, 0);
-  const T = D.tiers || { m: [20, 8], a: [5, 2] };
-  const range = (a, b) => a === b ? 'exactly ' + a : a + ' to ' + b;
-  const pct = (n, tot) => tot ? n / tot * 100 : 0, f1 = n => n.toFixed(1);
-  const yv = (o, y) => (o && o[y]) || 0;
-  const pill = t => h('span', { class: 'sy-pill sy-p-' + t.toLowerCase(), text: t });
-  const numCell = n => h('td', { class: 'num' }, n ? String(n) : h('span', { class: 'sy-zero', text: '0' }));
-  const tierItem = (t, txt, n) => h('li', {}, h('span', {}, pill(t), ' ' + txt), h('b', { text: String(n) }));
-  const openChap = el => { const b = el && el.querySelector('.sy-chbtn'); if (b && b.getAttribute('aria-expanded') !== 'true') b.click(); };
-  const goTo = code => e => { e.preventDefault(); const el = box.querySelector('#sy-' + code); if (el) { openChap(el); el.scrollIntoView({ block: 'start' }); } };
-  const svgEl = (tag, attrs) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
-  /* per chapter: share of all Main PYQs and of all Advanced PYQs, and which exam leans on it more */
-  ch.forEach(c => { c.pm = pct(c.m, TM); c.pa = pct(c.a, TA); c.gap = c.pa - c.pm; });
-  const rankBy = key => { const s = ch.slice().sort((a, b) => b[key] - a[key]); const r = {}; s.forEach((c, i) => { r[c.code] = i + 1; }); return r; };
-  const rkM = rankBy('m'), rkA = rankBy('a');
-  const focus = c => Math.abs(c.gap) < 1.5 ? { txt: 'Same in both', cls: 'same' } : c.gap > 0 ? { txt: 'Advanced leans', cls: 'adv' } : { txt: 'Main leans', cls: 'main' };
-  const maxYear = Math.max(1, ...ch.flatMap(c => YEARS.map(y => Math.max(yv(c.ym, y), yv(c.ya, y)))));
-  const trendSvg = c => {
-    const W = 170, H = 38, P = 5, n = YEARS.length, mx = Math.max(1e-9, ...YEARS.map(y => Math.max(yv(c.ym, y) / Math.max(1, TM), yv(c.ya, y) / Math.max(1, TA))));
-    /* each exam on its own share scale, so Main (many questions) and Advanced (few) can be compared fairly */
-    const line = (o, tot, cls) => { const pts = YEARS.map((y, i) => ({ x: P + i * (W - 2 * P) / (n - 1), y: H - P - (yv(o, y) / Math.max(1, tot)) / mx * (H - 2 * P), v: yv(o, y), yr: y })); const g = svgEl('g', {}); g.append(svgEl('polyline', { points: pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' '), fill: 'none', class: 'sy-tline ' + cls })); pts.forEach(p => { const d = svgEl('circle', { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 2.2, class: 'sy-tdot ' + cls }); const t = svgEl('title', {}); t.textContent = (cls === 'm' ? 'JEE Main ' : 'JEE Advanced ') + p.yr + ': ' + p.v; d.append(t); g.append(d); }); return g; };
-    const svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, class: 'sy-trend', role: 'img', 'aria-label': c.name + ' PYQs per year ' + Y0 + ' to ' + Y1 + ' (JEE Main and JEE Advanced, each as a share of its own total)' });
-    svg.append(line(c.ym, TM, 'm'), line(c.ya, TA, 'a')); return svg;
-  };
-  let sortKey = 'order';
-  const sorters = { order: null, main: (a, b) => b.m - a.m, adv: (a, b) => b.a - a.a, gap: (a, b) => Math.abs(b.gap) - Math.abs(a.gap) };
-  const shareCell = (p, cls) => h('td', { class: 'sy-sh' }, h('span', { class: 'sy-shbar' }, h('span', { class: 'sy-shfill ' + cls, style: 'width:' + Math.min(100, p * 4) + '%' })), h('span', { class: 'sy-shv', text: f1(p) + '%' }));
-  const compareTable = () => {
-    const list = ch.slice(); if (sorters[sortKey]) list.sort(sorters[sortKey]);
-    return h('div', { class: 'sy-tw' }, h('table', { class: 'sy-cmp' },
-      h('thead', {}, h('tr', {}, h('th', { text: 'Code' }), h('th', { text: 'Chapter' }), h('th', { class: 'num', text: 'Main PYQs' }), h('th', { text: 'Share of Main' }), h('th', { class: 'num', text: 'Main rank' }), h('th', { class: 'num', text: 'Adv PYQs' }), h('th', { text: 'Share of Advanced' }), h('th', { class: 'num', text: 'Adv rank' }), h('th', { text: 'Which exam leans on it' }), h('th', { text: 'Per year ' + Y0 + '–' + String(Y1).slice(2) }))),
-      h('tbody', {}, list.map(c => { const fc = focus(c); return h('tr', {},
-        h('td', { class: 'mono' }, h('a', { href: '#', onclick: goTo(c.code) }, c.code)),
-        h('td', {}, h('a', { href: '#', onclick: goTo(c.code) }, c.name)),
-        numCell(c.m), shareCell(c.pm, 'm'), h('td', { class: 'num', text: '#' + rkM[c.code] }),
-        numCell(c.a), shareCell(c.pa, 'a'), h('td', { class: 'num', text: '#' + rkA[c.code] }),
-        h('td', {}, h('span', { class: 'sy-fc sy-fc-' + fc.cls, title: 'Share of Advanced minus share of Main: ' + (c.gap > 0 ? '+' : '') + f1(c.gap) + ' points', text: fc.txt })),
-        h('td', { class: 'sy-trc' }, trendSvg(c))); }))));
-  };
-  const cmpHost = h('div', { class: 'sy-cmpwrap' });
-  const redrawCmp = () => { cmpHost.textContent = ''; cmpHost.append(compareTable()); };
-  const sortBar = h('div', { class: 'sy-sort', role: 'group', 'aria-label': 'Sort chapters' }, h('span', { text: 'Sort by' }),
-    [['order', 'Syllabus order'], ['main', 'Most in JEE Main'], ['adv', 'Most in JEE Advanced'], ['gap', 'Biggest difference']].map(([k, t]) => h('button', { type: 'button', class: 'sy-chip', 'aria-pressed': String(k === sortKey), text: t, onclick: e => { sortKey = k; sortBar.querySelectorAll('.sy-chip').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); redrawCmp(); } })));
-  /* year by year: how many chapters-in-syllabus PYQs each exam asked */
-  const yTot = (k, y) => ch.reduce((t, c) => t + yv(c[k], y), 0);
-  const maxT = Math.max(1, ...YEARS.map(y => yTot('ym', y)));
-  const yearBlock = h('div', { class: 'sy-years', role: 'img', 'aria-label': 'PYQs per year, JEE Main and JEE Advanced, ' + Y0 + ' to ' + Y1 + ': ' + YEARS.map(y => y + ' Main ' + yTot('ym', y) + ', Advanced ' + yTot('ya', y)).join('; ') },
-    YEARS.map(y => h('div', { class: 'sy-ycol' },
-      h('div', { class: 'sy-ybars' }, h('div', { class: 'sy-yb m', title: 'JEE Main ' + y + ': ' + yTot('ym', y), style: 'height:' + Math.max(1, Math.round(yTot('ym', y) / maxT * 90)) + 'px' }), h('div', { class: 'sy-yb a', title: 'JEE Advanced ' + y + ': ' + yTot('ya', y), style: 'height:' + Math.max(1, Math.round(yTot('ya', y) / maxT * 90)) + 'px' })),
-      h('span', { class: 'sy-yn', text: yTot('ym', y) + ' · ' + yTot('ya', y) }), h('span', { class: 'sy-by', text: String(y) }))));
-  const topN = (k, n) => ch.slice().sort((a, b) => b[k] - a[k]).slice(0, n);
-  const topShare = (k, tot) => topN(k, 5).reduce((t, c) => t + c[k], 0) / Math.max(1, tot) * 100;
-  const common = topN('m', 5).filter(c => rkA[c.code] <= 5).length;
-  const card = (big, small) => h('div', { class: 'sy-card' }, h('b', { text: big }), h('span', { text: small }));
-  const chapterSection = c => {
-    const body = h('div', { class: 'sy-chbody', id: 'sy-body-' + c.code, hidden: true },
-      h('div', { class: 'sy-tw' }, h('table', {},
-        h('thead', {}, h('tr', {}, h('th', { text: 'CMS code' }), h('th', { text: 'Subtopic' }), h('th', { class: 'num', text: 'Main PYQs' }), h('th', { text: 'Main priority' }), h('th', { class: 'num', text: 'Adv PYQs' }), h('th', { text: 'Adv priority' }))),
-        h('tbody', {}, c.subs.map(s => h('tr', {},
-          h('td', { class: 'mono sy-code' }, String(s.code).replace(/^JM-/, '')),
-          h('td', { class: 'sy-sn', text: s.no + '. ' + s.name }),
-          numCell(s.m), h('td', {}, pill(s.mt)),
-          numCell(s.a), h('td', {}, pill(s.at))))))));
-    const bars = h('div', { class: 'sy-bars', role: 'img', 'aria-label': c.name + ' PYQs per year, ' + Y0 + ' to ' + Y1 + ': ' + YEARS.map(y => y + ' Main ' + yv(c.ym, y) + ' Advanced ' + yv(c.ya, y)).join(', ') },
-      YEARS.map(y => h('div', { class: 'sy-bcol' },
-        h('div', { class: 'sy-bbar2' }, h('div', { class: 'sy-bfill m', title: 'JEE Main ' + y + ': ' + yv(c.ym, y), style: 'height:' + Math.round(yv(c.ym, y) / maxYear * 46) + 'px' }), h('div', { class: 'sy-bfill a', title: 'JEE Advanced ' + y + ': ' + yv(c.ya, y), style: 'height:' + Math.round(yv(c.ya, y) / maxYear * 46) + 'px' })),
-        h('span', { class: 'sy-by', text: String(y).slice(2) }))));
-    const fc = focus(c);
-    const btn = h('button', { type: 'button', class: 'sy-chbtn', 'aria-expanded': 'false', 'aria-controls': 'sy-body-' + c.code },
-      h('span', { class: 'sy-chtxt' },
-        h('span', { class: 'sy-eyebrow', text: (c.code.startsWith('11') ? 'Class 11' : 'Class 12') + ' · Chapter ' + Number(c.no) + ' · ' + c.code }),
-        h('span', { class: 'sy-h', text: c.name }),
-        h('span', { class: 'sy-cht', text: c.subs.length + ' subtopics · JEE Main ' + c.m + ' PYQs (' + f1(c.pm) + '% of Main, #' + rkM[c.code] + ') · JEE Advanced ' + c.a + ' PYQs (' + f1(c.pa) + '% of Advanced, #' + rkA[c.code] + ') · ' + fc.txt })),
-      bars,
-      h('span', { class: 'sy-caret', 'aria-hidden': 'true', text: '▾' }));
-    btn.addEventListener('click', () => { const open = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!open)); body.hidden = open; btn.classList.toggle('open', !open); });
-    return h('section', { class: 'sy-chap', id: 'sy-' + c.code }, btn, body);
-  };
-  const c11 = ch.filter(c => c.code.startsWith('11')), c12 = ch.filter(c => c.code.startsWith('12'));
-  redrawCmp();
-  box.textContent = '';
-  box.append(
-    h('p', { class: 'sy-eyebrow', text: 'Unkganit · Maths · Class 11 and 12' }),
-    h('h2', { class: 'sy-title', text: 'JEE Maths Syllabus Priority: Main vs Advanced' }),
-    h('p', { class: 'sy-lede', text: 'JEE Main and JEE Advanced compared side by side, using the past-year questions from ' + Y0 + ' to ' + Y1 + ' for all ' + ch.length + ' chapters and ' + D.tot_sub + ' subtopics.' }),
-    h('div', { class: 'sy-cards' },
-      card(TM.toLocaleString('en-US'), 'JEE Main PYQs, ' + Y0 + '–' + Y1),
-      card(TA.toLocaleString('en-US'), 'JEE Advanced PYQs, ' + Y0 + '–' + Y1),
-      card(f1(topShare('m', TM)) + '% · ' + f1(topShare('a', TA)) + '%', 'of Main · of Advanced come from their own top 5 chapters'),
-      card(common + ' of 5', 'top-5 chapters are the same in both exams')),
-    h('div', { class: 'sy-method' },
-      h('p', { text: 'How priority is set. Only questions from ' + Y0 + ' onwards are counted (the current JEE Main and JEE Advanced pattern), separately for JEE Main and for JEE Advanced. Each subtopic is tiered by the PYQs tagged to it in the bank. Advanced papers have far fewer questions than Main, so its tiers start lower, and the chapter shares below let you compare the two fairly. This shows what the bank has seen, not the official weightage.' }),
-      h('div', { class: 'sy-tiers' },
-        h('div', { class: 'sy-tier' }, h('h4', { text: 'JEE Main tiers' }), h('ul', {},
-          tierItem('High', T.m[0] + ' or more PYQs', cntOf('m', 'High')), tierItem('Medium', range(T.m[1], T.m[0] - 1), cntOf('m', 'Medium')), tierItem('Low', range(1, T.m[1] - 1), cntOf('m', 'Low')), tierItem('None', 'no PYQ yet', cntOf('m', 'None')))),
-        h('div', { class: 'sy-tier' }, h('h4', { text: 'JEE Advanced tiers' }), h('ul', {},
-          tierItem('High', T.a[0] + ' or more PYQs', cntOf('a', 'High')), tierItem('Medium', range(T.a[1], T.a[0] - 1), cntOf('a', 'Medium')), tierItem('Low', range(1, T.a[1] - 1), cntOf('a', 'Low')), tierItem('None', 'no PYQ yet', cntOf('a', 'None')))))),
-    h('h3', { class: 'sy-h sy-idx', text: 'Questions per year' }),
-    h('div', { class: 'sy-leg' }, h('span', { class: 'sy-lk m', text: 'JEE Main' }), h('span', { class: 'sy-lk a', text: 'JEE Advanced' })),
-    yearBlock,
-    h('p', { class: 'sy-yhint', text: 'Under each year: Main questions · Advanced questions (in-syllabus chapters). Main bars and Advanced bars use the same scale.' }),
-    h('h3', { class: 'sy-h sy-idx', text: 'Chapter comparison' }),
-    h('p', { class: 'sy-yhint', style: 'margin-top:0', text: 'Share is the chapter’s part of all JEE Main (or all JEE Advanced) questions, so the two exams can be compared fairly even though Main asks more. “Leans” means the share differs by 1.5 points or more. The small line chart shows each exam’s year-wise trend as a share of its own total.' }),
-    sortBar, cmpHost,
-    h('p', { class: 'sy-yhint', text: 'Bars on each chapter show PYQs per year (’' + String(Y0).slice(2) + ' to ’' + String(Y1).slice(2) + '), Main and Advanced on one scale. Tap a chapter to see its subtopics.' }),
-    h('h3', { class: 'sy-band', text: 'Class 11' }), ...c11.map(chapterSection),
-    h('h3', { class: 'sy-band', text: 'Class 12' }), ...c12.map(chapterSection));
-}
+function renderSyl() {}
 
 /* ---------- boot ---------- */
 /* ---------- light / dark toggle ---------- */
@@ -1708,30 +1327,27 @@ const THEME_ICONS = {
 function themeInit() { let m = null; try { m = localStorage.getItem(THEME_KEY); } catch (e) { m = null; } if (m === 'dark' || m === 'light') document.documentElement.setAttribute('data-theme', m); themeApply(themeNow()); }
 function themeToggle() { const m = themeNow() === 'dark' ? 'light' : 'dark'; themeApply(m); try { localStorage.setItem(THEME_KEY, m); } catch (e) { /* optional */ } }
 const GUIDE_HTML = () => `
-<p class="gd-lead">This dashboard has 100 JEE Main 2026 Mathematics previous-year questions with answers and solutions. There is no sign-in and nothing to install.</p>
-<nav class="gd-toc" aria-label="Guide sections"><a href="#gd-qb">Dashboard</a><a href="#gd-cnt">Counts</a><a href="#gd-pyq">PYQs</a><a href="#gd-dates">Exam dates</a><a href="#gd-tips">Tips</a></nav>
+<p class="gd-lead">This dashboard holds Cambridge Board Physics questions for Classes 9 to 12, with answers and solutions. There is no sign-in and nothing to install.</p>
+<nav class="gd-toc" aria-label="Guide sections"><a href="#gd-qb">Dashboard</a><a href="#gd-cnt">Counts</a><a href="#gd-pyq">PYQs</a><a href="#gd-tips">Tips</a></nav>
 <h3 id="gd-qb">1. Dashboard</h3>
-<p>All 100 questions in one list, grouped by chapter.</p>
+<p>All questions in one list, grouped by chapter.</p>
 <ul>
-<li><b>Find questions:</b> search by words or question id, or filter by chapter, exam, year, class, level (L1 easy, L2 medium, L3 hard) and question type.</li>
-<li><b>Each question card</b> shows the exam, date and shift, and the level. Use the eye icon to show the answer and the book icon to open the full solution.</li>
-<li><b>Show all answers</b> and <b>Hide options</b> change how the whole page looks. <b>Out of syllabus</b> shows only questions on topics no longer in JEE.</li>
+<li><b>Find questions:</b> search by words or question id, or filter by year, class, block, chapter and level (L1 easy, L2 medium, L3 hard), in that order.</li>
+<li><b>Each question card</b> shows the class, year and level. Use the eye icon to show the answer and the book icon to open the full solution.</li>
+<li><b>Show all answers</b> and <b>Hide options</b> change how the whole page looks.</li>
 </ul>
 <h3 id="gd-cnt">2. Counts (bar-chart icon, top right)</h3>
 <ul>
-<li><b>Physics Bank: Question Counts</b> shows how many questions there are in total and by exam, year and level.</li>
+<li><b>Physics Bank: Question Counts</b> shows how many questions there are in total and by class.</li>
 <li><b>Chapter-wise Count</b> shows how many questions come from each chapter. Click a chapter row to see only that chapter's questions.</li>
 </ul>
 <h3 id="gd-pyq">3. PYQs</h3>
-<p>The same questions as papers: <b>Question Paper</b> (by date and shift) and <b>Chapterwise</b> (every chapter, all topics). Pick a paper or a chapter and see the live page preview. Turn on <b>Answer Key</b> to add the answers on a separate page and <b>Explanation</b> to add the full solutions.</p>
-<h3 id="gd-dates">Exam dates</h3>
-<p>Dates of the exams whose papers are in the bank.</p>
-<div id="gd-dates-box" style="max-height:340px;overflow:auto;border:1px solid var(--color-border-line,#ccc);border-radius:8px">Loading…</div>
+<p>The same questions as printable sheets, one chapter at a time. Pick a year, class, block, chapter and level, and see the live page preview. Turn on <b>Answer Key</b> to add the answers on a separate page and <b>Explanation</b> to add the full solutions.</p>
 <h3 id="gd-tips">Tips</h3>
 <ul>
 <li>The <b>moon/sun icon</b> (top right) switches between light and dark mode.</li>
 <li>On a phone the menu wraps into two rows; everything works there too.</li>
-<li>Maths is written in proper notation. If a formula looks broken, refresh the page once.</li>
+<li>Formulas are written in proper notation. If one looks broken, refresh the page once.</li>
 </ul>
 <p class="gd-foot">Built by Ankit for the Unkganit teaching team.</p>`;
 
@@ -1747,32 +1363,7 @@ function guideOpen() {
   guideDates(m);
   const x = m.querySelector('.gd-x'); if (x) x.focus();
 }
-function guideDates(m) {
-  const box = m.querySelector('#gd-dates-box'); if (!box) return;
-  const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  box.style.cssText = 'max-height:none;overflow:visible;border:0';
-  fetch('qb/data/examdates.json').then(r => { if (!r.ok) throw new Error('dates'); return r.json(); }).then(d => {
-    const exams = d.exams || []; let cur = 0;
-    const line = 'var(--color-border-line,#d8d2c4)', mute = 'var(--color-text-secondary,#6E6757)';
-    const draw = () => {
-      const ex = exams[cur] || { rows: [] };
-      let h = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px">' + exams.map((e, i) => '<button type="button" data-ex="' + i + '" style="cursor:pointer;font:inherit;font-size:12.5px;padding:4px 12px;border-radius:999px;border:1px solid ' + (i === cur ? 'transparent' : line) + ';background:' + (i === cur ? 'var(--color-fg,#1c1a16)' : 'transparent') + ';color:' + (i === cur ? 'var(--color-bg,#fff)' : 'inherit') + '">' + esc(e.name) + '</button>').join('') + '</div>';
-      if (ex.sub) h += '<div style="font-size:12px;color:' + mute + ';margin:0 0 8px">' + esc(ex.sub) + ' · ' + (ex.rows || []).length + ' years</div>';
-      h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px">';
-      (ex.rows || []).forEach(r => {
-        h += '<div style="border:1px solid ' + line + ';border-radius:10px;padding:8px 10px"><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:15px">' + esc(r.y) + '</b>' + (r.v ? '<span title="Checked against official or news sources" style="font-size:11px;color:#2f7d4f">✓ checked</span>' : '<span title="As stored in the bank, not checked online" style="font-size:11px;color:' + mute + '">from bank</span>') + '</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">';
-        if (!(r.d || []).length) h += '<span style="font-size:12px;color:' + mute + ';font-style:italic">Date not added yet</span>';
-        (r.d || []).forEach(x => { h += '<span style="font-size:12px;border-radius:6px;padding:2px 7px;background:var(--color-bg-subtle,rgba(127,127,127,.12))">' + esc(x[0]) + (x[1] ? ' <span style="color:' + mute + '">· ' + esc(x[1]) + '</span>' : '') + '</span>'; });
-        h += '</div></div>';
-      });
-      h += '</div>';
-      if (d.note) h += '<p style="font-size:12px;color:' + mute + ';margin:10px 0 0">' + esc(d.note) + (d.asof ? ' Updated ' + esc(d.asof) + '.' : '') + '</p>';
-      box.innerHTML = h;
-      box.querySelectorAll('button[data-ex]').forEach(b => b.addEventListener('click', () => { cur = +b.getAttribute('data-ex'); draw(); }));
-    };
-    draw();
-  }).catch(() => { box.textContent = 'The dates could not load. Please refresh the page.'; });
-}
+function guideDates(m) {}
 function guideClose() { const m = document.getElementById('guideModal'); if (m) m.remove(); const b = document.getElementById('guideBtn'); if (b) b.focus(); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('guideModal')) guideClose(); });
 function buildShell() {
@@ -1782,7 +1373,7 @@ function buildShell() {
   root.append(
     h('div', { class: 'shell' },
       h('header', { class: 'topbar' },
-        h('div', { class: 'tb-head' }, h('img', { class: 'tb-logo', src: 'img/ankit-logo.png', alt: 'Unkganit', width: 145, height: 51 }), h('h1', { class: 'tb-title', text: 'Physics Dashboard' }), h('span', { class: 'tb-sub', text: "JEE Main 2026 PYQs" })),
+        h('div', { class: 'tb-head' }, h('img', { class: 'tb-logo', src: 'img/ankit-logo.png', alt: 'Unkganit', width: 145, height: 51 }), h('h1', { class: 'tb-title', text: 'Physics Dashboard' }), h('span', { class: 'tb-sub', text: 'Cambridge Board \u00b7 Classes 9 to 12' })),
         h('button', { type: 'button', class: 'tb-theme', id: 'themeBtn', 'data-act': 'theme', 'aria-pressed': 'false' }),
         h('button', { type: 'button', class: 'tb-theme tb-guide', id: 'guideBtn', 'data-act': 'guide', title: 'Guide: what is in this site', 'aria-label': 'Guide: what is in this site', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>' }),
         h('button', { type: 'button', class: 'tb-theme tb-info', id: 'qbInfoBtn', 'data-act': 'qbinfo', 'aria-haspopup': 'true', 'aria-expanded': 'false', title: 'Question Bank overview', 'aria-label': 'Question Bank overview', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' }),
