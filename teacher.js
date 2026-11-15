@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 let OPTS = null;
-const SITE_VERSION = '24';   /* website version: matches the published version number */
+const SITE_VERSION = '25';   /* website version: matches the published version number */
 const SHEET_W = 794, SHEET_H = 1123, PAD_X = 36, COL_GAP = 22;
 const MAX_FS = 15, MAN_MIN = 13.5, AUTO_MIN = 13.5;
 const CDN = {
@@ -884,16 +884,16 @@ function exportLib(kind) {
   doExport(kind, { pages, file: pages[0].file });
 }
 /* ---------- "PYQ ChapterWise PDF" and "Shift Wise PDF" tabs ---------- */
-const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], blocks: [], lv: [], types: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], cls: [], key: false } };
+const PDFT = { cw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], sess: [], cls: [], blocks: [], lv: [], types: [], key: false }, sw: { bucket: 'School', sel: null, page: 0, v: 0, years: [], sess: [], cls: [], key: false } };
 const BUCKET_NAME = { School: 'School Level' };
 const clsName = qs => [...new Set(qs.map(q => q.cl).filter(Boolean))].join(' & ') || 'Physics';
 const chOrder = cc => { const c = CHMAP.get(cc); return c.cl * 100 + c.o; };
 function pyqOf(bucket) { return BANK.qs.filter(q => q.s === 'P'); }
-const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
-const swOk = q => { const P = PDFT.sw; return (!P.years.length || P.years.includes(String(q.y))) && (!P.cls.length || P.cls.includes(String(q.cl))); };
-const swKey = () => ['years', 'cls'].map(k => PDFT.sw[k].length ? PDFT.sw[k].slice().sort().join(',') : 'all').join('/');
-const cwYrKey = () => ['years', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
-const cwYrSfx = () => ['cls', 'years', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
+const cwYearOk = q => { const P = PDFT.cw, c = CHMAP.get(q.cc); return (!P.years.length || P.years.includes(String(q.y))) && (!P.sess.length || P.sess.includes(q.ss)) && (!P.cls.length || P.cls.includes(String(q.cl))) && (!P.lv.length || P.lv.includes(q.d)) && (!P.types.length || P.types.includes(q.t)); };
+const swOk = q => { const P = PDFT.sw; return (!P.years.length || P.years.includes(String(q.y))) && (!P.sess.length || P.sess.includes(q.ss)) && (!P.cls.length || P.cls.includes(String(q.cl))); };
+const swKey = () => ['years', 'sess', 'cls'].map(k => PDFT.sw[k].length ? PDFT.sw[k].slice().sort().join(',') : 'all').join('/');
+const cwYrKey = () => ['years', 'sess', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
+const cwYrSfx = () => ['cls', 'years', 'sess', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
 function pdfRows(T) {
   const P = PDFT[T], key = 'rows|' + T + '|' + P.bucket + '|' + (T === 'cw' ? cwYrKey() : swKey());
@@ -967,7 +967,7 @@ function qbCompact(r, withKcet) {
   const e = QB_EXAM[r.exam] || 'School';
   const P = true;
   let o = r.options || []; if (typeof o === 'string') { try { o = JSON.parse(o); } catch (x) { o = []; } }
-  const q = { i: String(r.id), s: P ? 'P' : 'N', e, cl: String(r.class || ''), y: P && r.year != null && r.year !== '' ? Number(r.year) : null, p: r.paper, t: r.type, cc: r.chapter_code, tc: String(r.topic_code || '').replace(/^JM-/, ''), tp: r.topic || '', d: r.difficulty, q: r.question || '', o, a: r.answer == null ? '' : String(r.answer) };
+  const q = { i: String(r.id), s: P ? 'P' : 'N', e, ss: r.session || '', cl: String(r.class || ''), y: P && r.year != null && r.year !== '' ? Number(r.year) : null, p: r.paper, t: r.type, cc: r.chapter_code, tc: String(r.topic_code || '').replace(/^JM-/, ''), tp: r.topic || '', d: r.difficulty, q: r.question || '', o, a: r.answer == null ? '' : String(r.answer) };
   if (!P) { q.pb = r.publisher || 'Practice'; q.sec = r.section || ''; if (r.pyq) q.pq = r.pyq_ref || ''; }
   if (r.oos) q.oo = 1;
   if (r.figure && r.figure.svg) q.f = r.figure;
@@ -1028,6 +1028,7 @@ function renderPdfTab(T) {
           h('button', { type: 'button', class: 'pyqk', 'aria-pressed': String(T === k), onclick: () => { if (PYQSUB !== k) { PYQSUB = k; pyqShow(); } } }, h('strong', { text: t }), h('span', { text: d })))),
         T === 'cw' ? h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Chapter' }), ssel(T + 'Pick', 'a chapter'))) : null,
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Year' }), T === 'cw' ? msel(T + 'Yr', 'years') : ssel(T + 'Yr', 'a year')),
+        h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Session' }), T === 'cw' ? msel(T + 'Se', 'sessions') : ssel(T + 'Se', 'a session')),
         h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Class' }), T === 'cw' ? msel(T + 'Cl', 'classes') : ssel(T + 'Cl', 'a class')),
         T === 'sw' ? h('div', { class: 'pdflist', id: T + 'List' }, h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Question paper (code)' }), ssel(T + 'Pick', 'a paper'))) : null,
         T === 'cw' ? h('div', { class: 'fld' }, h('span', { class: 'lbl', text: 'Level (L1 easy, L2 medium, L3 hard)' }), msel('cwLv', 'levels')) : null,
@@ -1043,11 +1044,14 @@ function renderPdfTab(T) {
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
     P.years = P.years.filter(y => ys.includes(+y));
     const yItems = ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), cItems = ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']);
+    const sItems = ['March', 'May/June', 'October/November'].map(x => [x, x + ' (' + all.filter(q => q.ss === x).length + ')']);
     if (T === 'cw') {
+      mfill('cwSe', sItems, P.sess, v => { P.sess = v; refresh(); }, 'sessions', { none: 'All sessions' });
       mfill('cwYr', yItems, P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
       mfill('cwCl', cItems, P.cls, v => { P.cls = v; refresh(); }, 'classes', { none: 'All classes' });
     } else {
-      P.years = P.years.slice(0, 1); P.cls = P.cls.slice(0, 1);
+      P.years = P.years.slice(0, 1); P.cls = P.cls.slice(0, 1); P.sess = P.sess.slice(0, 1);
+      sfill('swSe', [['all', 'All sessions (' + all.length + ')']].concat(sItems), P.sess[0] || 'all', v => { P.sess = v === 'all' ? [] : [v]; refresh(); }, 'a session');
       sfill('swYr', [['all', 'All years (' + all.length + ')']].concat(yItems), P.years[0] || 'all', v => { P.years = v === 'all' ? [] : [v]; refresh(); }, 'a year', { empty: 'No years yet' });
       sfill('swCl', [['all', 'All classes (' + all.length + ')']].concat(cItems), P.cls[0] || 'all', v => { P.cls = v === 'all' ? [] : [v]; refresh(); }, 'a class');
     }

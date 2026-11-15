@@ -797,7 +797,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     return SOLP;
   }
   var PER_PAGE = 20, page = 0, lastKey = null;
-  var S = { exam: new Set(), year: new Set(), cls: new Set(), blk: new Set(), diff: new Set(), type: new Set(), ch: new Set(), tp: new Set(), src: new Set(), q: '', onlySel: false, flag: false, attn: false, oos: false, oosx: false, sel: new Set() };
+  var S = { exam: new Set(), year: new Set(), sess: new Set(), cls: new Set(), blk: new Set(), diff: new Set(), type: new Set(), ch: new Set(), tp: new Set(), src: new Set(), q: '', onlySel: false, flag: false, attn: false, oos: false, oosx: false, sel: new Set() };
   S.oosx = false; /* out of syllabus questions are included by default */
   /* Question Bank opens first from qb/data/first.json (first cards + counts) while the full data downloads: PARTIAL holds the stub rows used for the header numbers and filter lists */
   var PARTIAL = null;
@@ -1179,6 +1179,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   /* ---------- filters ---------- */
   function matches(q, skip) {
     if (skip !== 'year' && S.year.size && !S.year.has(String(q.year))) return false;
+    if (skip !== 'sess' && S.sess.size && !S.sess.has(q.session)) return false;
     if (skip !== 'cls' && S.cls.size && !S.cls.has(String(q.class))) return false;
     if (skip !== 'diff' && S.diff.size && !S.diff.has(q.difficulty)) return false;
     if (skip !== 'type' && S.type.size && !S.type.has(q.type)) return false;
@@ -1212,11 +1213,12 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     buildYearTiles();
     var defs = {
       year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(function (a, b) { return Number(b) - Number(a); }), label: function (v) { return v; } },
+      sess: { vals: ['March', 'May/June', 'October/November'], label: function (v) { return v; } },
       cls: { vals: ['IGCSE', 'AS & A Level'], label: function (v) { return v; } },
       diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } },
       type: { vals: ['MCQ', 'Subjective'], label: function (v) { return v; } }
     };
-    var DD = { year: 'All years', cls: 'All classes', blk: 'All blocks', diff: 'All levels', type: 'All question types' };
+    var DD = { year: 'All years', sess: 'All sessions', cls: 'All classes', blk: 'All blocks', diff: 'All levels', type: 'All question types' };
     DDS = [];
     $$('.qb-dd[data-f]').forEach(function (box) {
       var f = box.dataset.f, d = defs[f];
@@ -1254,7 +1256,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     });
     DDS.push(function () {
       var counts = {};
-      ROWS.forEach(function (q) { if (matches(q, f)) { var k = f === 'year' ? String(q.year) : f === 'cls' ? String(q.class) : f === 'blk' ? q.block : f === 'type' ? q.type : q.difficulty; counts[k] = (counts[k] || 0) + 1; } });
+      ROWS.forEach(function (q) { if (matches(q, f)) { var k = f === 'year' ? String(q.year) : f === 'sess' ? q.session : f === 'cls' ? String(q.class) : f === 'blk' ? q.block : f === 'type' ? q.type : q.difficulty; counts[k] = (counts[k] || 0) + 1; } });
       d.vals.forEach(function (v) { var b = boxes[v]; b.cb.checked = S[f].has(v); b.n.textContent = String(counts[v] || 0); b.lab.classList.toggle('zero', !counts[v]); });
       var sel = d.vals.filter(function (v) { return S[f].has(v); });
       btn.textContent = sel.length === 0 ? allLabel : sel.length <= 2 ? sel.map(d.label).join(', ') : sel.length + ' selected';
@@ -1381,7 +1383,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   $('.qb-hideopts').addEventListener('click', function () { var b = $('.qb-hideopts'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Show options' : 'Hide options'; $('#questions').classList.toggle('hide-opts', on); });
   $('.qb-revall').addEventListener('click', function () { var b = $('.qb-revall'), on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); $('#questions').classList.toggle('rev-all', on); });
   $('.qb-reset').addEventListener('click', function () {
-    ['year', 'cls', 'blk', 'diff', 'type', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
+    ['year', 'sess', 'cls', 'blk', 'diff', 'type', 'ch', 'tp'].forEach(function (k) { S[k].clear(); });
     S.q = ''; S.onlySel = false; S.flag = false; S.attn = false; S.oos = false; $('.qb-search').value = ''; apply();
   });
 
@@ -1498,7 +1500,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     updateSelUI();
   }
   function filterKey() {
-    return ['year', 'cls', 'blk', 'diff', 'type', 'ch'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
+    return ['year', 'sess', 'cls', 'blk', 'diff', 'type', 'ch'].map(function (k) { return Array.from(S[k]).sort().join(','); }).join('|') + '|' + S.q + '|' + S.onlySel + '|' + S.flag + '|' + S.attn + '|' + S.oos + '|' + S.oosx;
   }
   function pager(pages, start, n, total) {
     var nav = el('nav', 'qb-pager'); nav.setAttribute('aria-label', 'Pages');
