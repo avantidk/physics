@@ -747,6 +747,12 @@ const swKey = () => ['years', 'sess', 'cls'].map(k => PDFT.sw[k].length ? PDFT.s
 const cwYrKey = () => ['years', 'sess', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
 const cwYrSfx = () => ['cls', 'years', 'sess', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
+/* newest paper first: year, then exam month (Oct/Nov, then May/June, then Feb/March), then paper number (23, 22, 21); e.g. 0625/23/O/N/25 is the latest of 2025 */
+function paperRank(code, year) {
+  const m = /^\w+\/(\d+)\/([A-Z])\/([A-Z])\/(\d\d)$/.exec(code), MON = { 'F/M': 2, 'M/J': 5, 'O/N': 10 };
+  if (!m) return (year || 0) * 1e6;
+  return (year || 2000 + +m[4]) * 1e6 + (MON[m[2] + '/' + m[3]] || 0) * 1e3 + (+m[1] || 0);
+}
 function pdfRows(T) {
   const P = PDFT[T], key = 'rows|' + T + '|' + P.bucket + '|' + (T === 'cw' ? cwYrKey() : swKey());
   if (BK[key]) return BK[key];
@@ -756,7 +762,7 @@ function pdfRows(T) {
     rows = Object.keys(by).sort((a, b) => chOrder(a) - chOrder(b)).map(cc => ({ k: cc, name: CHMAP.get(cc).n, qs: by[cc], file: CHMAP.get(cc).n + ' ' + clsName(by[cc]) + ' Questions' + (T === 'cw' ? cwYrSfx() : '') }));
   } else {
     const by = {}; qs.filter(swOk).forEach(q => { const k = q.p || q.i; (by[k] = by[k] || []).push(q); });
-    rows = Object.keys(by).sort((a, b) => (by[b][0].y || 0) - (by[a][0].y || 0) || a.localeCompare(b)).map(k => ({ k, name: k, qs: by[k], file: k.replace(/\//g, '-') + ' Question Paper' }));
+    rows = Object.keys(by).sort((a, b) => paperRank(b, by[b][0].y) - paperRank(a, by[a][0].y) || b.localeCompare(a)).map(k => ({ k, name: k, qs: by[k], file: k.replace(/\//g, '-') + ' Question Paper' }));
   }
   return (BK[key] = rows);
 }
