@@ -747,7 +747,7 @@ const swKey = () => ['years', 'sess', 'cls'].map(k => PDFT.sw[k].length ? PDFT.s
 const cwYrKey = () => ['years', 'sess', 'cls', 'blocks', 'lv', 'types'].map(k => PDFT.cw[k].length ? PDFT.cw[k].slice().sort().join(',') : 'all').join('/');
 const cwYrSfx = () => ['cls', 'years', 'sess', 'lv'].map(k => PDFT.cw[k].length ? ' ' + (k === 'cls' ? 'Class ' : '') + PDFT.cw[k].slice().sort().join('+') : '').join('');
 const cwYrText = () => { const ys = PDFT.cw.years.map(Number).sort((a, b) => a - b); if (!ys.length) return 'all'; return ys.length <= 4 ? ys.join(' \u00b7 ') : ys.length + ' years (' + ys[0] + '\u2013' + ys[ys.length - 1] + ')'; };
-/* newest paper first: year, then exam month (Oct/Nov, then May/June, then Feb/March), then paper number (23, 22, 21); e.g. 0625/23/O/N/25 is the latest of 2025 */
+/* newest paper first: year, then exam month (Oct/Nov, then May/June, then Feb/Mar), then paper number (23, 22, 21); e.g. 0625/23/O/N/25 is the latest of 2025 */
 function paperRank(code, year) {
   const m = /^\w+\/(\d+)\/([A-Z])\/([A-Z])\/(\d\d)$/.exec(code), MON = { 'F/M': 2, 'M/J': 5, 'O/N': 10 };
   if (!m) return (year || 0) * 1e6;
@@ -903,7 +903,7 @@ function renderPdfTab(T) {
     const ys = Object.keys(cnt).map(Number).sort((a, b) => b - a);
     P.years = P.years.filter(y => ys.includes(+y));
     const yItems = ys.map(y => [String(y), y + ' (' + cnt[y] + ')']), cItems = ['IGCSE', 'AS & A Level'].map(c => [c, c + ' (' + all.filter(q => String(q.cl) === c).length + ')']);
-    const sItems = ['March', 'May/June', 'Oct/Nov'].map(x => [x, x + ' (' + all.filter(q => q.ss === x).length + ')']);
+    const sItems = ['Feb/Mar', 'May/June', 'Oct/Nov'].map(x => [x, x + ' (' + all.filter(q => q.ss === x).length + ')']);
     if (T === 'cw') {
       mfill('cwSe', sItems, P.sess, v => { P.sess = v; refresh(); }, 'sessions', { none: 'All sessions' });
       mfill('cwYr', yItems, P.years, v => { P.years = v; refresh(); }, 'years', { none: 'All years', empty: 'No years yet' });
@@ -1177,7 +1177,7 @@ const GUIDE_HTML = () => `
 <p>All questions in one list, grouped by chapter. Use <b>Find questions</b> to narrow the list. The filters work in this order:</p>
 <ul>
 <li><b>Chapters</b> first (pick one or more), then <b>Question type</b> (MCQ or Subjective).</li>
-<li>Then <b>Year</b>, <b>Session</b> (March, May/June, Oct/Nov), <b>Class</b> (IGCSE or AS &amp; A Level) and <b>Question Level</b> (L1 easy, L2 medium, L3 hard).</li>
+<li>Then <b>Year</b>, <b>Session</b> (Feb/Mar, May/June, Oct/Nov), <b>Class</b> (IGCSE or AS &amp; A Level) and <b>Question Level</b> (L1 easy, L2 medium, L3 hard).</li>
 <li>You can also search by words or by question ID, for example <b>0625/21/M/J/25-3</b>. <b>Reset filters</b> clears everything.</li>
 <li><b>Show all answers</b> and <b>Hide options</b> change how the whole page looks. <b>Attention</b> shows only the questions that carry an attention note.</li>
 </ul>
@@ -1186,7 +1186,7 @@ const GUIDE_HTML = () => `
 <li>The top row shows the <b>question ID</b> (blue for the extended MCQ papers 21, 22 and 23, red for the extended theory papers 41, 42 and 43) and the <b>level</b> (L1 green, L2 orange, L3 red).</li>
 <li>The eye icon shows the answer. The book icon opens the solution when there is one. The menu icon shows the chapter, the question type and the ID. Tap the ID to copy it.</li>
 <li>A red <b>Attention</b> tag means the question needs checking. The note under the tag says what to check.</li>
-<li>The ID is the paper code plus the question number: <b>0625/21/M/J/25-3</b> is question 3 of paper 0625/21, May/June 2025. M/J is May/June, O/N is Oct/Nov and F/M is March. Papers 11 to 13 are core MCQ, 21 to 23 extended MCQ, 31 to 33 core theory and 41 to 43 extended theory. The last two digits are the year.</li>
+<li>The ID is the paper code plus the question number: <b>0625/21/M/J/25-3</b> is question 3 of paper 0625/21, May/June 2025. M/J is May/June, O/N is Oct/Nov and F/M is Feb/Mar. Papers 11 to 13 are core MCQ, 21 to 23 extended MCQ, 31 to 33 core theory and 41 to 43 extended theory. The last two digits are the year.</li>
 </ul>
 <h3 id="gd-exp">3. Download and share</h3>
 <ul>

@@ -1263,7 +1263,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
     buildYearTiles();
     var defs = {
       year: { vals: uniq(VR().filter(function (q) { return q.year; }).map(function (q) { return String(q.year); })).sort(function (a, b) { return Number(b) - Number(a); }), label: function (v) { return v; } },
-      sess: { vals: ['March', 'May/June', 'Oct/Nov'], label: function (v) { return v; } },
+      sess: { vals: ['Feb/Mar', 'May/June', 'Oct/Nov'], label: function (v) { return v; } },
       cls: { vals: ['IGCSE', 'AS & A Level'], label: function (v) { return v; } },
       diff: { vals: DIFF_ORDER.slice(), label: function (v) { return v; } },
       type: { vals: ['MCQ', 'Subjective'], label: function (v) { return v; } }
