@@ -123,6 +123,7 @@ function css() {
   const st = h('style'); st.id = 'qz-css';
   st.textContent = `
 .qz{max-width:1040px;margin:0 auto;padding:22px clamp(12px,3vw,24px) 40px;color:var(--body)}
+.qz h2,.qz h3,.qz-res h2,.qz-res h3,.qz-pal h3,.qz-md h3{font-family:var(--font-head)}
 .qz h2{font-size:clamp(1.5rem,3.4vw,2rem);margin:0 0 4px;color:var(--head)}.qz h3{margin:0 0 6px;color:var(--head)}
 .qz-sub{margin:0 0 20px;color:var(--muted)}
 .qz-blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
@@ -285,7 +286,7 @@ function paperList() {
 
 /* ---------- Create Your Own ---------- */
 function customForm() {
-  const F = { src: new Set(), cls: new Set(), year: new Set(), sess: new Set(), type: new Set(), lvl: new Set(), ch: new Set(), n: 20, min: null, minAuto: true, shuffle: true };
+  const F = S.form || (S.form = { src: new Set(), cls: new Set(), year: new Set(), sess: new Set(), type: new Set(), lvl: new Set(), ch: new Set(), n: 20, min: null, minAuto: true, shuffle: true });
   const val = { src: q => q.source || 'PYQ', cls: q => String(q.class), year: q => String(q.year), sess: q => q.session, type: q => q.type, lvl: q => q.difficulty, ch: q => q.chapter_code };
   const match = (q, skip) => Object.keys(val).every(g => g === skip || !F[g].size || F[g].has(val[g](q)));
   const uniq = (g, sort) => [...new Set(D.qs.map(val[g]))].sort(sort);
@@ -363,7 +364,7 @@ function customForm() {
 function instructions(test) {
   const n = test.qs.length, agree = h('input', { type: 'checkbox', onchange: sync });
   const status = h('p', { class: 'qz-hint', role: 'status', text: 'Getting the questions ready…' });
-  const start = h('button', { type: 'button', class: 'qz-btn pri', disabled: true, text: 'Start test', onclick: () => begin(test) });
+  const start = h('button', { type: 'button', class: 'qz-btn pri', disabled: true, text: 'Start test', onclick: e => { if (S.starting) return; e.currentTarget.disabled = true; begin(test).then(() => { if (!S.run) sync(); }); } });
   const retry = h('button', { type: 'button', class: 'qz-btn', hidden: true, text: 'Try again', onclick: ready });
   let ok = false;
   function sync() { start.disabled = !(ok && agree.checked); }
@@ -392,6 +393,10 @@ function instructions(test) {
 
 /* ---------- the running test ---------- */
 async function begin(test) {
+  if (S.starting || S.run) return; S.starting = true;     /* a double click must not start two tests */
+  try { await begin2(test); } finally { S.starting = false; }
+}
+async function begin2(test) {
   const fs = await enterFs();    /* first thing, while the click still counts as a user action */
   const now = Date.now();
   const A = { v: 1, id: 'a' + now.toString(36), mode: test.mode, title: test.title, subtitle: test.subtitle, ids: test.qs.map(q => q.id), minutes: test.minutes,
@@ -399,14 +404,25 @@ async function begin(test) {
   lsSet(ACTIVE_KEY, A);
   run(A, false);
 }
+function closeGate() { if (S.gate) { S.gate.remove(); S.gate = null; } }
+/* a test that is still open (the page was refreshed or closed) covers the whole site: the other tabs and their answers cannot be used until it is resumed or submitted */
 function resumeScreen(A) {
   const left = A.endsAt - Date.now();
   if (left <= 0) { finishExpired(A); return; }
-  show(h('h2', { text: 'You have a test in progress' }), h('p', { class: 'qz-sub', text: A.title + ' · ' + A.subtitle }),
-    h('div', { class: 'qz-sum' }, [[clock(left), 'Time left'], [Object.keys(A.answers).length + ' / ' + A.ids.length, 'Answered'], [A.violations.length + ' / ' + MAX_VIOL, 'Violations so far']].map(([b, s]) => h('div', null, h('b', { text: b }), h('span', { text: s })))),
-    h('p', { class: 'qz-note bad', text: 'The timer has been running since you left. Resuming counts as a violation. The test is submitted automatically if you reach ' + MAX_VIOL + '.' }),
-    h('div', { class: 'qz-row' }, h('button', { type: 'button', class: 'qz-btn pri', text: 'Resume test', onclick: async () => { const b = A; try { await prep(D.qs.filter(q => b.ids.includes(q.id))); } catch (e) { /* shown as raw text */ } b.fs = await enterFs(); run(b, true); } }),
-      h('button', { type: 'button', class: 'qz-btn', text: 'Submit now', onclick: () => finishExpired(A, 'manual') })));
+  if (S.gate) return;
+  const have = new Set(A.ids.filter(id => D.byId[id])), ans = Object.keys(A.answers).filter(id => have.has(id)).length;
+  let busy = false;
+  const resume = h('button', { type: 'button', class: 'qz-btn pri', text: 'Resume test', onclick: async () => {
+    if (busy) return; busy = true; resume.disabled = true;
+    try { await prep(D.qs.filter(q => have.has(q.id))); } catch (e) { /* shown as raw text */ }
+    A.fs = await enterFs(); closeGate(); run(A, true); } });
+  const gate = S.gate = h('div', { class: 'qz-res qz-gate', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Test in progress' }, h('div', { class: 'qz-in' },
+    h('h2', { text: 'You have a test in progress' }), h('p', { class: 'qz-sub', text: A.title + ' \u00b7 ' + A.subtitle }),
+    h('div', { class: 'qz-sum' }, [[clock(left), 'Time left'], [ans + ' / ' + have.size, 'Answered'], [A.violations.length + ' / ' + MAX_VIOL, 'Violations so far']].map(([b, t]) => h('div', null, h('b', { text: b }), h('span', { text: t })))),
+    h('p', { class: 'qz-note bad', text: 'The timer has been running since you left. Resuming counts as a violation. The test is submitted automatically if you reach ' + MAX_VIOL + '. The rest of the site stays locked until you resume or submit.' }),
+    h('div', { class: 'qz-row' }, resume, h('button', { type: 'button', class: 'qz-btn', text: 'Submit now', onclick: () => { if (busy) return; busy = true; closeGate(); finishExpired(A, 'manual'); } }))));
+  document.body.append(gate); document.documentElement.classList.add('qz-lock'); const app = $('#app'); if (app) app.inert = true;
+  resume.focus();
 }
 function finishExpired(A, reason) {
   A.reason = reason || 'time'; A.endedAt = reason === 'manual' ? Date.now() : A.endsAt; lsDel(ACTIVE_KEY); saveHistory(A);
@@ -490,7 +506,7 @@ function run(A, resumed) {
   }
   function violation(kind, text) {
     if (R.done || R.leaving) return;
-    const now = Date.now(); if (now - R.lastV < 2000) { if (needFs() && !R.modal) fsPrompt(); return; }
+    const now = Date.now(); if (now - R.lastV < 1000) { if (needFs() && !R.modal) fsPrompt(); return; }
     R.lastV = now; flushTime();
     A.violations.push({ at: now, kind, text }); persist(); paint();
     if (A.violations.length >= MAX_VIOL) { submit('violations'); return; }
@@ -515,7 +531,7 @@ function run(A, resumed) {
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); R.off.push(() => t.removeEventListener(ev, fn, o)); };
   const stop = e => { e.preventDefault(); };
   on(document, 'visibilitychange', () => { if (document.hidden) { flushTime(); R.qStart = 0; violation('hidden', 'You switched to another tab or app, or minimised the browser'); } else { R.qStart = Date.now(); if (needFs() && !R.modal) fsPrompt(); } });
-  on(window, 'blur', () => { setTimeout(() => { if (!R.done && !document.hasFocus() && !document.hidden) violation('focus', 'The test window lost focus (you switched to another window or program)'); }, 200); });
+  on(window, 'blur', () => { setTimeout(() => { if (!R.done && !document.hasFocus() && !document.hidden) violation('focus', 'The test window lost focus (you switched to another window or program)'); }, 80); });
   const fsc = () => { if (R.done) return; if (needFs()) violation('fullscreen', 'You exited full screen'); };
   on(document, 'fullscreenchange', fsc); on(document, 'webkitfullscreenchange', fsc);
   ['contextmenu', 'copy', 'cut', 'paste', 'dragstart', 'selectstart', 'drop'].forEach(ev => on(document, ev, stop, true));
@@ -529,8 +545,10 @@ function run(A, resumed) {
   }, true);
   on(document, 'keyup', e => { if (e.key === 'PrintScreen') { try { navigator.clipboard.writeText(' '); } catch (x) { /* ignore */ } violation('screenshot', 'The screenshot key was pressed'); } }, true);
   /* leaving the page (refresh or close) makes the browser report the page as hidden: that must not count as a second violation on top of the one recorded when the test is resumed */
-  on(window, 'beforeunload', e => { R.leaving = true; setTimeout(() => { R.leaving = false; }, 2500); e.preventDefault(); e.returnValue = ''; return ''; });
+  on(window, 'beforeunload', e => { R.leaving = true; clearTimeout(R.lt); R.lt = setTimeout(() => { R.leaving = false; }, 1200); e.preventDefault(); e.returnValue = ''; return ''; });
   on(window, 'pagehide', () => { R.leaving = true; });
+  /* choosing "Stay" on the leave-page prompt gives the window its focus back: from then on everything counts again */
+  on(window, 'focus', () => { R.leaving = false; }); on(document, 'pointerdown', () => { R.leaving = false; }, true);
   try { history.pushState({ qz: 1 }, '', location.href); } catch (e) { /* ignore */ }
   on(window, 'popstate', () => { try { history.pushState({ qz: 1 }, '', location.href); } catch (e) { /* ignore */ } toast('The Back button is switched off during the test.'); });
 
@@ -543,7 +561,8 @@ function run(A, resumed) {
     if (Date.now() - R.lastSave > 5000) { R.lastSave = Date.now(); flushTime(); persist(); }
   }
   R.timer = setInterval(tick, 250);
-  Object.keys(A.answers).forEach(id => { if (!qs.some(q => q.id === id)) delete A.answers[id]; });
+  const known = new Set(qs.map(q => q.id));
+  ['answers', 'marked', 'visited', 'times'].forEach(k => { A[k] = A[k] || {}; Object.keys(A[k]).forEach(id => { if (!known.has(id)) delete A[k][id]; }); });
   go(Math.min(A.cur || 0, qs.length - 1)); tick();
   R.qStart = document.hidden ? 0 : Date.now();
   if (resumed) violation('reload', 'The page was reloaded or closed during the test');
