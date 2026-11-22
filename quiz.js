@@ -602,6 +602,11 @@ async function showResult(A, o) {
   const stat = (b, s, c) => h('div', { class: c || '' }, h('b', { text: String(b) }), h('span', { text: s }));
   const band = g.pct >= 80 ? 'Excellent' : g.pct >= 60 ? 'Good' : g.pct >= 40 ? 'Keep practising' : 'Needs more practice';
   const close = () => { clearInterval(iv); el.remove(); document.documentElement.classList.remove('qz-lock'); const app = $('#app'); if (app) app.inert = false; if (S.root && S.root.isConnected) home(); };
+  const pdfBtn = h('button', { type: 'button', class: 'qz-btn', text: 'Download PDF report', onclick: async () => {
+    pdfBtn.disabled = true; pdfBtn.textContent = 'Preparing the PDF...';
+    try { const blob = await buildPdf(A, qs); await saveFile('PhyNik-Test-Report-' + String(A.title).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + new Date(A.startedAt).toISOString().slice(0, 10) + '.pdf', blob); pdfBtn.textContent = 'PDF saved'; }
+    catch (e) { pdfBtn.textContent = e && e.code === 'declined' ? 'Download cancelled' : 'Could not make the PDF. Try again.'; }
+    setTimeout(() => { pdfBtn.disabled = false; pdfBtn.textContent = 'Download PDF report'; }, 2500); } });
   const tbl = (rows, first) => h('div', { class: 'qz-tabwrap' }, h('table', { class: 'qz-tab' }, h('thead', null, h('tr', null, [first, 'Questions', 'Correct', 'Wrong', 'Skipped', 'Score', 'Avg time'].map(t => h('th', { text: t })))),
     h('tbody', null, rows.map(r => { const p = r.total ? r.ok / r.total * 100 : 0; return h('tr', null, h('td', { text: r.name }), h('td', { text: r.total }), h('td', { text: r.ok }), h('td', { text: r.bad }), h('td', { text: r.skip }), h('td', null, Math.round(p) + '% ', h('span', { class: 'qz-bars' }, h('i', { style: 'width:' + p + '%' }))), h('td', { text: r.total ? dur(r.ms / r.total) : '-' })); }))));
   const maxMs = Math.max(1, ...g.rows.map(r => r.ms)), avgAll = g.rows.length ? g.rows.reduce((s, r) => s + r.ms, 0) / g.rows.length : 0;
@@ -624,7 +629,7 @@ async function showResult(A, o) {
     review.forEach(s => { s.hidden = !(k === 'all' || (k === 'mk' ? s.dataset.mk : k === 'an' ? s.dataset.st !== 'skip' : s.dataset.st === k)); }); } }, t)));
   el.append(h('div', { class: 'qz-in' },
     h('div', { class: 'qz-rh' }, h('div', { class: 't' }, h('h2', { text: 'Test result' }), h('p', { class: 'qz-sub', style: 'margin:2px 0 0', text: A.title + ' · ' + A.subtitle + ' · ' + new Date(A.startedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) })),
-      h('div', { class: 'qz-row qz-noprint' }, h('button', { type: 'button', class: 'qz-btn', onclick: () => window.print(), text: 'Print / Save as PDF' }),
+      h('div', { class: 'qz-row qz-noprint' }, pdfBtn,
         h('button', { type: 'button', class: 'qz-btn', onclick: () => { close(); instructions({ mode: A.mode, title: A.title, subtitle: A.subtitle, qs: qs, minutes: A.minutes, back: home }); }, text: 'Retake' }),
         h('button', { type: 'button', class: 'qz-btn pri', onclick: close, text: 'Back to Quiz' }))),
     reasonNote ? h('p', { class: 'qz-note bad', text: reasonNote }) : null,
@@ -645,6 +650,174 @@ async function showResult(A, o) {
   document.body.append(el); document.documentElement.classList.add('qz-lock'); const app = $('#app'); if (app) app.inert = true;
   if (lockTick) { lockTick(); iv = setInterval(lockTick, 1000); }
   el.scrollTop = 0; $('h2', el).setAttribute('tabindex', '-1'); $('h2', el).focus();
+}
+
+
+/* ---------- PDF report: A4, exactly two pages, colourful, with no questions and no answers ---------- */
+const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const PAL = { navy: [12, 61, 59], teal: [31, 149, 144], gold: [242, 177, 52], green: [23, 121, 74], red: [196, 72, 28], amber: [217, 150, 26], blue: [43, 108, 176], purple: [111, 66, 193], grey: [132, 155, 153], body: [38, 75, 73], muted: [102, 139, 137], rule: [214, 232, 231], white: [255, 255, 255] };
+const tint = (c, k) => c.map(v => Math.round(255 - (255 - v) * k));
+async function jspdfLib() {
+  if (!(window.jspdf && window.jspdf.jsPDF)) await window.AvantiBoot.loadScript(JSPDF);
+  return window.jspdf.jsPDF;
+}
+async function logoData() {
+  try {
+    const r = await fetch('img/ankit-logo.png'); if (!r.ok) return null;
+    const bl = await r.blob(), bm = await createImageBitmap(bl), url = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(bl); });
+    return { url, w: bm.width, h: bm.height };
+  } catch (e) { return null; }
+}
+async function buildPdf(A, qs) {
+  const JsPDF = await jspdfLib(), logo = await logoData();
+  const g = grade(A, qs), locked = Date.now() < A.endsAt;
+  const usedMs = Math.max(0, Math.min(A.endedAt || A.endsAt, A.endsAt) - A.startedAt);
+  const doc = new JsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+  const W = 210, H = 297, M = 12, CW = W - 2 * M;
+  const fill = c => doc.setFillColor(c[0], c[1], c[2]), ink = c => doc.setTextColor(c[0], c[1], c[2]), line = c => doc.setDrawColor(c[0], c[1], c[2]);
+  const font = (st, size) => { doc.setFont('helvetica', st); doc.setFontSize(size); };
+  const T = (str, x, y, o) => doc.text(String(str), x, y, o);
+  const fit = (str, w) => { str = String(str); if (doc.getTextWidth(str) <= w) return str; while (str.length > 1 && doc.getTextWidth(str + '...') > w) str = str.slice(0, -1); return str + '...'; };
+  const rr = (x, y, w, hh, r, c) => { fill(c); doc.roundedRect(x, y, w, hh, r, r, 'F'); };
+  const poly = pts => { const rel = []; for (let i = 1; i < pts.length; i++) rel.push([pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]]); doc.lines(rel, pts[0][0], pts[0][1], [1, 1], 'F', true); };
+  const heading = (str, y, c) => { rr(M, y - 4.4, 1.9, 5.8, 0.9, c || PAL.teal); font('bold', 12.5); ink(PAL.navy); T(str, M + 4.8, y); };
+  const pc = v => v >= 60 ? PAL.green : v >= 40 ? PAL.amber : PAL.red;
+  const clean = str => String(str).replace(/\s+/g, ' ').trim();
+  const stripe = hh => { fill(PAL.navy); doc.rect(0, 0, W, hh, 'F'); fill(PAL.gold); doc.rect(0, hh, W, 1.5, 'F'); };
+  const footer = n => { line(PAL.rule); doc.setLineWidth(0.3); doc.line(M, H - 12, W - M, H - 12); font('normal', 7.5); ink(PAL.muted); T('PhyNik  |  ' + clean(A.title), M, H - 7.5); T('Page ' + n + ' of 2', W - M, H - 7.5, { align: 'right' }); };
+  const when = new Date(A.startedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  const lockText = 'The correct answers and the right/wrong marks per question open at ' + clockTime(A.endsAt) + ', when the full ' + A.minutes + ' minutes of the test are over. Your score and analysis are below.';
+
+  /* ============ page 1 ============ */
+  stripe(46);
+  fill([20, 86, 83]); doc.circle(W - 14, 6, 30, 'F'); fill([26, 108, 104]); doc.circle(W - 4, 30, 20, 'F');
+  fill(PAL.navy); doc.rect(0, 46, W, 0.01, 'F'); fill(PAL.gold); doc.rect(0, 46, W, 1.5, 'F');
+  if (logo) { const lh = 12, lw = lh * logo.w / logo.h; doc.addImage(logo.url, 'PNG', M, 8, lw, lh); }
+  font('bold', 25); ink(PAL.white); T('Test Report', M, 33);
+  font('normal', 10.5); ink([190, 232, 230]); T(fit(clean(A.title) + '   |   ' + clean(A.subtitle), CW - 6), M, 40.5);
+  font('normal', 8.5); ink(PAL.white); T(when, W - M, 14, { align: 'right' }); T(plural(g.total, 'question') + '  |  ' + A.minutes + ' min', W - M, 19.5, { align: 'right' });
+  if (A.reason === 'time' || A.reason === 'violations') { font('bold', 7.5); ink(PAL.gold); T(A.reason === 'time' ? 'Auto-submitted: time was up' : 'Auto-submitted: ' + MAX_VIOL + ' violations', W - M, 25, { align: 'right' }); }
+  let y = 54;
+  if (locked) { rr(M, y - 2, CW, 13, 2.5, tint(PAL.gold, 0.28)); font('bold', 8); ink([122, 78, 6]); doc.splitTextToSize(lockText, CW - 8).slice(0, 2).forEach((t, i) => T(t, M + 4, y + 3.6 + i * 4.3)); y += 17; }
+  /* score ring */
+  const col = pc(g.pct), cx = M + 27, cy = y + 29, R = 27, ri = 18.6, frac = g.total ? g.correct / g.total : 0;
+  fill(PAL.rule); doc.circle(cx, cy, R, 'F');
+  if (frac >= 0.9999) { fill(col); doc.circle(cx, cy, R, 'F'); }
+  else if (frac > 0) { const pts = [[cx, cy]], a0 = -Math.PI / 2, a1 = a0 + 2 * Math.PI * frac, n = Math.max(8, Math.ceil(frac * 140)); for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; pts.push([cx + R * Math.cos(a), cy + R * Math.sin(a)]); } fill(col); poly(pts); }
+  fill(PAL.white); doc.circle(cx, cy, ri, 'F');
+  font('bold', 21); ink(PAL.navy); T(g.correct + '/' + g.total, cx, cy + 2, { align: 'center' });
+  font('normal', 9.5); ink(PAL.muted); T(g.pct.toFixed(1) + '%', cx, cy + 8.6, { align: 'center' }); font('bold', 6.5); T('SCORE', cx, cy - 7, { align: 'center' });
+  const band = g.pct >= 80 ? 'Excellent' : g.pct >= 60 ? 'Good' : g.pct >= 40 ? 'Keep practising' : 'Needs more practice';
+  rr(cx - 24, cy + R + 4, 48, 8, 4, tint(col, 0.2)); font('bold', 8.5); ink(col); T(band, cx, cy + R + 9.3, { align: 'center' });
+  /* stat tiles */
+  const tile = (x, ty, w, hh, label, value, c) => {
+    rr(x, ty, w, hh, 3, tint(c, 0.14)); rr(x, ty, 2.2, hh, 1.1, c);
+    let fs = 16; font('bold', fs); while (fs > 8 && doc.getTextWidth(String(value)) > w - 9) { fs -= 0.5; font('bold', fs); }
+    ink(c); T(value, x + 6, ty + 10.5); font('normal', 7.8); ink(PAL.body); T(fit(label, w - 8), x + 6, ty + 16.8);
+  };
+  const tx = M + 62, tw = (CW - 62 - 8) / 3, th = 21, ty0 = y + 1;
+  const markedN = Object.keys(A.marked || {}).filter(id => qs.some(q => q.id === id)).length;
+  [['Correct', g.correct, PAL.green], ['Wrong', g.wrong, PAL.red], ['Not answered', g.skipped, PAL.grey],
+   ['Attempted', g.attempted + ' / ' + g.total, PAL.blue], ['Accuracy of attempted', g.accuracy.toFixed(0) + '%', PAL.purple], ['Marked for review', markedN, PAL.amber],
+   ['Time used of ' + A.minutes + ' min', dur(usedMs), PAL.teal], ['Per answered question', g.attempted ? dur(usedMs / g.attempted) : '-', PAL.blue], ['Violations', A.violations.length + ' / ' + MAX_VIOL, A.violations.length ? PAL.red : PAL.green]]
+    .forEach((t, i) => tile(tx + (i % 3) * (tw + 4), ty0 + Math.floor(i / 3) * (th + 4), tw, th, t[0], t[1], t[2]));
+  y = Math.max(cy + R + 14, ty0 + 3 * th + 8) + 8;
+  /* answer sheet */
+  heading('Answer sheet', y); y += 4;
+  const legend = locked ? [['Answered', PAL.teal], ['Not answered', PAL.grey]] : [['Correct', PAL.green], ['Wrong', PAL.red], ['Not answered', PAL.grey]];
+  let lx = W - M; font('normal', 7.5);
+  legend.slice().reverse().forEach(([t, c]) => { const w = doc.getTextWidth(t); ink(PAL.body); T(t, lx, y - 4.4, { align: 'right' }); rr(lx - w - 4.2, y - 6.6, 3, 3, 0.8, c); lx -= w + 9; });
+  const N = g.rows.length, cols = N <= 40 ? 20 : N <= 100 ? 25 : 40, gap = 1.3, sz = (CW - (cols - 1) * gap) / cols;
+  g.rows.forEach((r, i) => {
+    const x = M + (i % cols) * (sz + gap), yy = y + Math.floor(i / cols) * (sz + gap);
+    const c = locked ? (r.ch ? PAL.teal : PAL.grey) : r.st === 'ok' ? PAL.green : r.st === 'bad' ? PAL.red : PAL.grey;
+    rr(x, yy, sz, sz, Math.min(1.6, sz / 4), c);
+    if (sz >= 5.2) { const fs = Math.min(9, sz * 1.05); font('bold', fs); ink(PAL.white); T(i + 1, x + sz / 2, yy + sz / 2 + fs * 0.1235, { align: 'center' }); if (r.marked) { fill(PAL.gold); doc.circle(x + sz - 1.1, yy + 1.1, 0.85, 'F'); } }
+  });
+  y += Math.ceil(N / cols) * (sz + gap) + 8;
+  /* level-wise */
+  heading('Level-wise performance', y); y += 3.5;
+  const lw3 = (CW - 10) / 3, LC = { L1: PAL.green, L2: PAL.amber, L3: PAL.red }, LN = { L1: 'L1  Easy', L2: 'L2  Medium', L3: 'L3  Hard' };
+  ['L1', 'L2', 'L3'].forEach((k, i) => {
+    const r = g.byLv.find(x => x.k === k), x = M + i * (lw3 + 5), c = LC[k];
+    rr(x, y, lw3, 31, 3, tint(c, 0.13)); rr(x, y, lw3, 2.2, 1.1, c);
+    font('bold', 9); ink(c); T(LN[k], x + 4, y + 8.5);
+    if (!r) { font('normal', 8.5); ink(PAL.muted); T('No questions', x + 4, y + 18); return; }
+    const p = r.total ? r.ok / r.total * 100 : 0;
+    font('bold', 15); ink(PAL.navy); T(r.ok + ' / ' + r.total, x + 4, y + 18.5); font('bold', 15); ink(c); T(Math.round(p) + '%', x + lw3 - 4, y + 18.5, { align: 'right' });
+    rr(x + 4, y + 21.4, lw3 - 8, 2.6, 1.3, PAL.rule); if (p > 0) rr(x + 4, y + 21.4, Math.max(2.6, (lw3 - 8) * p / 100), 2.6, 1.3, c);
+    font('normal', 7.5); ink(PAL.body); T(r.bad + ' wrong  |  ' + r.skip + ' not answered', x + 4, y + 28);
+  });
+  y += 31 + 9;
+  /* highlights */
+  const withQ = g.byCh.filter(r => r.total), best = withQ.slice().sort((a, b) => (b.ok / b.total) - (a.ok / a.total) || b.total - a.total)[0];
+  const weak = withQ.filter(r => r.ok / r.total < 0.5).sort((a, b) => (a.ok / a.total) - (b.ok / b.total));
+  const maxRow = g.rows.slice().sort((a, b) => b.ms - a.ms)[0], avgMs = g.rows.length ? g.rows.reduce((t, r) => t + r.ms, 0) / g.rows.length : 0;
+  const notes = [
+    [PAL.blue, 'You attempted ' + g.attempted + ' of ' + g.total + ' questions and got ' + g.correct + ' right (accuracy ' + g.accuracy.toFixed(0) + '%).'],
+    best ? [PAL.green, 'Strongest chapter: ' + clean(best.name) + ' (' + Math.round(best.ok / best.total * 100) + '%).'] : null,
+    weak.length ? [PAL.red, 'Revise first: ' + weak.slice(0, 3).map(w => clean(w.name)).join('; ') + (weak.length > 3 ? '; +' + (weak.length - 3) + ' more' : '') + '.'] : [PAL.green, 'No chapter is below 50%. Good all-round attempt.'],
+    maxRow && maxRow.ms > 0 ? [PAL.amber, 'Longest on Q' + (maxRow.i + 1) + ' (' + dur(maxRow.ms) + '); average ' + dur(avgMs) + ' per question.'] : null,
+    A.violations.length ? [PAL.red, plural(A.violations.length, 'violation') + ' recorded (see page 2).'] : [PAL.green, 'No violations: you stayed on the test screen from start to finish.']].filter(Boolean);
+  const room = H - 16 - (y + 3), cnt = Math.max(0, Math.min(notes.length, Math.floor((room - 6) / 5.2)));
+  if (cnt) {
+    const lh = Math.min(7, (room - 6) / cnt);
+    heading('Highlights', y, PAL.gold); rr(M, y + 3, CW, cnt * lh + 5, 3, tint(PAL.teal, 0.1));
+    notes.slice(0, cnt).forEach(([c, t], i) => { const yy = y + 3 + 5.2 + i * lh; fill(c); doc.circle(M + 5, yy - 1.1, 1.4, 'F'); font('normal', 9); ink(PAL.body); T(fit(t, CW - 14), M + 9.5, yy); });
+  }
+  footer(1);
+
+  /* ============ page 2 ============ */
+  doc.addPage();
+  stripe(18);
+  font('bold', 14); ink(PAL.white); T('Test Report', M, 12); font('normal', 8.5); ink([190, 232, 230]); T(fit(clean(A.title) + '  |  ' + clean(A.subtitle), 120), W - M, 12, { align: 'right' });
+  y = 32; heading('Chapter-wise performance', y);
+  const lg = [['Correct', PAL.green], ['Wrong', PAL.red], ['Not answered', PAL.grey]]; lx = W - M; font('normal', 7.5);
+  lg.slice().reverse().forEach(([t, c]) => { const w = doc.getTextWidth(t); ink(PAL.body); T(t, lx, y - 0.6, { align: 'right' }); rr(lx - w - 4.2, y - 3, 3, 3, 0.8, c); lx -= w + 9; });
+  const CH = g.byCh, two = CH.length > 24, per = two ? Math.ceil(CH.length / 2) : CH.length, area = 124, rh = Math.min(8.2, area / Math.max(1, per)), colW = two ? (CW - 6) / 2 : CW;
+  CH.forEach((r, i) => {
+    const colN = two ? Math.floor(i / per) : 0, x = M + colN * (colW + 6), yy = y + 5 + (i - colN * per) * rh;
+    rr(x, yy, colW, rh - 0.7, 1.2, (i - colN * per) % 2 ? PAL.white : tint(PAL.teal, 0.07));
+    const fs = Math.max(6.2, Math.min(9, rh * 1.05)), cy2 = yy + (rh - 0.7) / 2 + fs * 0.1235, labW = two ? 40 : 70, barX = x + labW + 3, barW = colW - labW - 3 - (two ? 17 : 30), p = r.total ? r.ok / r.total * 100 : 0;
+    const code = r.name.split(/\s+/)[0], nm = clean(r.name.slice(code.length));
+    font('bold', fs); ink(PAL.teal); T(code, x + 2, cy2); const cw = doc.getTextWidth(code + '  '); font('normal', fs); ink(PAL.body); T(fit(nm, labW - cw - 1), x + 2 + cw, cy2);
+    const bh = Math.min(3.6, rh * 0.5), by = yy + ((rh - 0.7) - bh) / 2; rr(barX, by, barW, bh, bh / 2, PAL.rule);
+    let bx = barX; [[r.ok, PAL.green], [r.bad, PAL.red], [r.skip, PAL.grey]].forEach(([n, c]) => { if (n > 0 && r.total) { const w = barW * n / r.total; fill(c); doc.rect(bx, by, w, bh, 'F'); bx += w; } });
+    font('bold', fs); ink(pc(p)); T(r.ok + '/' + r.total + '  ' + Math.round(p) + '%', x + colW - 2, cy2, { align: 'right' });
+  });
+  y += 5 + per * rh + 7;
+  /* time chart */
+  const vioH = A.violations.length ? 12 + A.violations.length * 7.4 : 17;
+  heading('Time spent on each question', y, PAL.blue); y += 3;
+  const chH = Math.max(40, Math.min(66, H - 16 - y - 12 - vioH)), plotH = chH - 21, plotW = CW - 10;
+  rr(M, y, CW, chH, 3, tint(PAL.blue, 0.07));
+  const maxMs = Math.max(1, ...g.rows.map(r => r.ms)), bwN = plotW / Math.max(1, N), base = y + chH - 13;
+  g.rows.forEach((r, i) => {
+    const hh = Math.max(0.8, r.ms / maxMs * plotH), c = locked ? (r.ch ? PAL.teal : PAL.grey) : r.st === 'ok' ? PAL.green : r.st === 'bad' ? PAL.red : PAL.grey;
+    fill(c); doc.rect(M + 5 + i * bwN + bwN * 0.12, base - hh, Math.max(0.35, bwN * 0.76), hh, 'F');
+  });
+  line(PAL.muted); doc.setLineWidth(0.25); doc.line(M + 4, base, M + CW - 4, base);
+  if (avgMs > 0) { const ay = base - Math.max(0.8, avgMs / maxMs * plotH); line(PAL.purple); doc.setLineWidth(0.3); doc.setLineDashPattern([1.2, 1], 0); doc.line(M + 4, ay, M + CW - 4, ay); doc.setLineDashPattern([], 0); font('bold', 6.8); const al = 'avg ' + dur(avgMs), aw = doc.getTextWidth(al); rr(M + 5, ay - 4.6, aw + 3, 4, 1.2, PAL.white); ink(PAL.purple); T(al, M + 6.5, ay - 1.7); }
+  const stepL = N > 120 ? 20 : N > 40 ? 10 : 5; font('normal', 6.8); ink(PAL.muted);
+  g.rows.forEach((r, i) => { if ((i + 1) % stepL === 0 || i === 0) T(i + 1, M + 5 + i * bwN + bwN / 2, base + 4, { align: 'center' }); });
+  font('normal', 7.5); ink(PAL.body); T(maxRow && maxRow.ms > 0 ? 'Longest: Q' + (maxRow.i + 1) + ' (' + dur(maxRow.ms) + ')   |   Average ' + dur(avgMs) + ' per question   |   ' + (locked ? 'Teal = answered, grey = not answered' : 'Green = correct, red = wrong, grey = not answered') : 'No time was recorded.', M + 4, y + chH - 2.6);
+  y += chH + 9;
+  /* violations */
+  heading('Violations', y, A.violations.length ? PAL.red : PAL.green); y += 3;
+  const VN = { hidden: 'Left the page', focus: 'Window lost focus', fullscreen: 'Exited full screen', screenshot: 'Screenshot key', reload: 'Page reloaded or closed' };
+  if (!A.violations.length) { rr(M, y, CW, 10, 3, tint(PAL.green, 0.14)); font('bold', 9); ink(PAL.green); T('None. You stayed on the test screen from start to finish.', M + 5, y + 6.4); }
+  else A.violations.forEach((v, i) => { rr(M, y + i * 7.4, CW, 6.6, 2, tint(PAL.red, 0.12)); font('bold', 8.5); ink(PAL.red); T(String(i + 1), M + 4, y + i * 7.4 + 4.4); font('normal', 8.5); ink(PAL.body); T(fit('After ' + clock(v.at - A.startedAt) + '   |   ' + (VN[v.kind] || v.kind) + ': ' + v.text, CW - 16), M + 11, y + i * 7.4 + 4.4); });
+  footer(2);
+  if (doc.getNumberOfPages() !== 2) throw new Error('The report must be two pages.');
+  return doc.output('blob');
+}
+async function saveFile(name, blob) {
+  let d = null; try { d = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { d = null; }
+  if (d && d.save) {
+    try { return await d.save({ filename: name, data: blob }); }
+    catch (e) { if (e && e.code === 'declined') throw e; return d.save({ filename: name, data: new Uint8Array(await blob.arrayBuffer()) }); }
+  }
+  const a = h('a', { href: URL.createObjectURL(blob), download: name }); document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
 }
 
 window.AvantiQuiz = { mount, hasActive: () => !!(lsGet(ACTIVE_KEY) || {}).ids };
