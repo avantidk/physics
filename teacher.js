@@ -962,6 +962,8 @@ function syncQbChecks() {
   document.querySelectorAll('#qbPop .tb-item[data-qbpanel]').forEach(b => { const pn = document.getElementById(b.getAttribute('data-qbpanel')), on = !!(pn && !pn.hidden); b.setAttribute('aria-checked', String(on)); b.setAttribute('aria-selected', String(on)); });
 }
 function setTab(t) {
+  /* remember the tab for this visit, so a refresh stays where you are */
+  if (t === 'qb' || t === 'pyq' || t === 'quiz') { try { sessionStorage.setItem('phynik-tab', t); } catch (e) { /* optional */ } }
   if (t === 'pyq') { pyqShow(); return; }
   const pv = $('#viewPyq'); if (pv) pv.hidden = true;
   setTabInner(t);
@@ -1364,6 +1366,7 @@ function boot() {
     }
   } };
   qbInit();
+  try { const t = sessionStorage.getItem('phynik-tab'); if (t === 'pyq' || t === 'quiz') setTab(t); } catch (e) { /* no saved tab: Question Bank */ }     /* a refresh stays on the same tab */
   if (location.hash === '#quiz') setTab('quiz');     /* links shared from a quiz report open the Quiz tab */
   window.addEventListener('hashchange', () => { if (location.hash === '#quiz') setTab('quiz'); });
   try { const a = JSON.parse(localStorage.getItem('phynik-quiz-active') || 'null'); if (a && a.ids) setTab('quiz'); } catch (e) { /* no saved test */ }
