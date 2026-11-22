@@ -1225,7 +1225,8 @@ const GUIDE_HTML = () => `
 <li>Answer, clear, mark for review and jump with the question palette. The timer cannot be paused, and the test is submitted when it ends.</li>
 <li>After you submit you see your score and the full analysis at once: accuracy, time used, chapter-wise and level-wise results, time on every question and your violations. Your last 5 reports stay on the Quiz page.</li>
 <li>The <b>correct answers</b> (and which questions you got right or wrong) stay hidden until the <b>full time of the test is over</b> (45 minutes for a paper), so nobody who finishes early can show them to students still taking it. A countdown shows when they open, and they appear by themselves.</li>
-<li><b>Download PDF report</b> saves a colourful 2-page A4 summary of your result (score, charts, chapter and level analysis, violations). It has no questions and no answers.</li>
+<li><b>View PDF</b> shows a colourful 2-page A4 summary of your result (score, charts, chapter and level analysis, violations) and <b>Download PDF</b> saves it. It has no questions and no answers.</li>
+<li><b>Share report</b> offers Print, Copy link, WhatsApp, Telegram and Viber (and, on phones that allow it, sending the PDF file itself). The message has your score and a link to the Quiz.</li>
 </ul>
 <h3 id="gd-tips">Tips</h3>
 <ul>
@@ -1363,6 +1364,8 @@ function boot() {
     }
   } };
   qbInit();
+  if (location.hash === '#quiz') setTab('quiz');     /* links shared from a quiz report open the Quiz tab */
+  window.addEventListener('hashchange', () => { if (location.hash === '#quiz') setTab('quiz'); });
   try { const a = JSON.parse(localStorage.getItem('phynik-quiz-active') || 'null'); if (a && a.ids) setTab('quiz'); } catch (e) { /* no saved test */ }
 }
 /* ---------- Question bank tab: the question bank's own page and code, loaded on first use ---------- */

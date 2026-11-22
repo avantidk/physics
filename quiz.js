@@ -227,11 +227,30 @@ html.qz-lock,html.qz-lock body{overflow:hidden!important}
 .qz-ans{margin:10px 0 0;font-size:.95rem}
 .qz-ro.mine{border-color:var(--accent);background:var(--accent-soft)}.qz-rv.lk{border-left-color:var(--accent)}
 .qz-agrid a.an{background:var(--accent);color:var(--accent-ink)}.qz-tc div.an{background:var(--accent)}
+.qz-pv{position:fixed;inset:0;z-index:2147483200;display:flex;flex-direction:column;background:#26403e;color:#fff}
+.qz-pvt{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 14px;background:var(--navy,#0c3d3b)}.qz-pvt b{flex:1 1 150px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qz-pvt .qz-btn{padding:8px 14px}.qz-pvt .qz-btn.pri{background:var(--gold,#f2b134);border-color:var(--gold,#f2b134);color:#0c3d3b}
+.qz-pvb{flex:1;min-height:0;overflow:auto;padding:16px 10px 30px}.qz-pvb iframe{width:100%;height:100%;min-height:70vh;border:0;background:#fff}
+.qz-pvp{display:block;width:min(100%,820px);height:auto;margin:0 auto 14px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.45);border-radius:3px}
+.qz-pvl{text-align:center;color:#d6efed;margin-top:40px}
+.qz-sh{position:fixed;inset:0;z-index:2147483300;display:grid;place-items:center;padding:16px;background:rgba(5,20,19,.72)}
+.qz-shc{width:min(440px,100%);padding:20px;border-radius:16px;background:var(--panel);color:var(--body);box-shadow:0 20px 60px rgba(0,0,0,.5)}.qz-shc h3{margin:0 0 6px;font-family:var(--font-head);color:var(--head)}
+.qz-shg{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin:14px 0}
+.qz-shb{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;border:1px solid var(--rule);border-radius:12px;background:var(--field);color:inherit;font:inherit;font-weight:600;cursor:pointer}
+.qz-shb:hover,.qz-shb:focus-visible{border-color:var(--accent);outline:none}.qz-shb i{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:700;font-size:1.05rem}
+.qz-flash{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483400;max-width:90%;padding:10px 16px;border-radius:10px;background:#0c3d3b;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.qz-printpages{display:none}
 @media print{
   #app,.qz-run,.qz-noprint,.qz-toast{display:none!important}
   html.qz-lock,html.qz-lock body{overflow:visible!important}
   .qz-res{position:static!important;inset:auto!important;overflow:visible!important;background:#fff!important;color:#000!important;display:block!important}
   .qz-rv{break-inside:avoid}
+}
+@media print{
+  body.qz-printing>*:not(.qz-printpages){display:none!important}
+  body.qz-printing .qz-printpages{display:block}
+  .qz-printpages img{display:block;width:210mm;height:297mm;break-after:page;page-break-after:always}
+  .qz-printpages img:last-child{break-after:auto;page-break-after:auto}
 }`;
   document.head.append(st);
 }
@@ -602,11 +621,20 @@ async function showResult(A, o) {
   const stat = (b, s, c) => h('div', { class: c || '' }, h('b', { text: String(b) }), h('span', { text: s }));
   const band = g.pct >= 80 ? 'Excellent' : g.pct >= 60 ? 'Good' : g.pct >= 40 ? 'Keep practising' : 'Needs more practice';
   const close = () => { clearInterval(iv); el.remove(); document.documentElement.classList.remove('qz-lock'); const app = $('#app'); if (app) app.inert = false; if (S.root && S.root.isConnected) home(); };
-  const pdfBtn = h('button', { type: 'button', class: 'qz-btn', text: 'Download PDF report', onclick: async () => {
-    pdfBtn.disabled = true; pdfBtn.textContent = 'Preparing the PDF...';
-    try { const blob = await buildPdf(A, qs); await saveFile('PhyNik-Test-Report-' + String(A.title).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + new Date(A.startedAt).toISOString().slice(0, 10) + '.pdf', blob); pdfBtn.textContent = 'PDF saved'; }
-    catch (e) { pdfBtn.textContent = e && e.code === 'declined' ? 'Download cancelled' : 'Could not make the PDF. Try again.'; }
-    setTimeout(() => { pdfBtn.disabled = false; pdfBtn.textContent = 'Download PDF report'; }, 2500); } });
+  let repP = null, pagesP = null;
+  const getRep = () => repP || (repP = buildPdf(A, qs).then(blob => ({ blob, name: 'PhyNik-Test-Report-' + String(A.title).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + new Date(A.startedAt).toISOString().slice(0, 10) + '.pdf' })).catch(e => { repP = null; throw e; }));
+  const getPages = () => pagesP || (pagesP = getRep().then(r => renderPages(r.blob, 2.4)).catch(e => { pagesP = null; throw e; }));
+  const act = (btn, label, busy, fn) => async () => {
+    btn.disabled = true; btn.textContent = busy;
+    try { const done = await fn(); btn.textContent = done || label; }
+    catch (e) { btn.textContent = e && e.code === 'declined' ? 'Download cancelled' : 'Could not do that. Try again.'; }
+    setTimeout(() => { btn.disabled = false; btn.textContent = label; }, 1800);
+  };
+  const viewBtn = h('button', { type: 'button', class: 'qz-btn', text: 'View PDF' });
+  viewBtn.onclick = act(viewBtn, 'View PDF', 'Opening...', async () => { await getRep(); pdfViewer(A, g, getRep, getPages); });
+  const pdfBtn = h('button', { type: 'button', class: 'qz-btn', text: 'Download PDF' });
+  pdfBtn.onclick = act(pdfBtn, 'Download PDF', 'Preparing the PDF...', async () => { const r = await getRep(); await saveFile(r.name, r.blob); return 'PDF saved'; });
+  const shareBtn = h('button', { type: 'button', class: 'qz-btn', text: 'Share report', onclick: () => shareSheet(A, g, getRep, getPages) });
   const tbl = (rows, first) => h('div', { class: 'qz-tabwrap' }, h('table', { class: 'qz-tab' }, h('thead', null, h('tr', null, [first, 'Questions', 'Correct', 'Wrong', 'Skipped', 'Score', 'Avg time'].map(t => h('th', { text: t })))),
     h('tbody', null, rows.map(r => { const p = r.total ? r.ok / r.total * 100 : 0; return h('tr', null, h('td', { text: r.name }), h('td', { text: r.total }), h('td', { text: r.ok }), h('td', { text: r.bad }), h('td', { text: r.skip }), h('td', null, Math.round(p) + '% ', h('span', { class: 'qz-bars' }, h('i', { style: 'width:' + p + '%' }))), h('td', { text: r.total ? dur(r.ms / r.total) : '-' })); }))));
   const maxMs = Math.max(1, ...g.rows.map(r => r.ms)), avgAll = g.rows.length ? g.rows.reduce((s, r) => s + r.ms, 0) / g.rows.length : 0;
@@ -629,7 +657,7 @@ async function showResult(A, o) {
     review.forEach(s => { s.hidden = !(k === 'all' || (k === 'mk' ? s.dataset.mk : k === 'an' ? s.dataset.st !== 'skip' : s.dataset.st === k)); }); } }, t)));
   el.append(h('div', { class: 'qz-in' },
     h('div', { class: 'qz-rh' }, h('div', { class: 't' }, h('h2', { text: 'Test result' }), h('p', { class: 'qz-sub', style: 'margin:2px 0 0', text: A.title + ' · ' + A.subtitle + ' · ' + new Date(A.startedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) })),
-      h('div', { class: 'qz-row qz-noprint' }, pdfBtn,
+      h('div', { class: 'qz-row qz-noprint' }, viewBtn, pdfBtn, shareBtn,
         h('button', { type: 'button', class: 'qz-btn', onclick: () => { close(); instructions({ mode: A.mode, title: A.title, subtitle: A.subtitle, qs: qs, minutes: A.minutes, back: home }); }, text: 'Retake' }),
         h('button', { type: 'button', class: 'qz-btn pri', onclick: close, text: 'Back to Quiz' }))),
     reasonNote ? h('p', { class: 'qz-note bad', text: reasonNote }) : null,
@@ -818,6 +846,80 @@ async function saveFile(name, blob) {
     catch (e) { if (e && e.code === 'declined') throw e; return d.save({ filename: name, data: new Uint8Array(await blob.arrayBuffer()) }); }
   }
   const a = h('a', { href: URL.createObjectURL(blob), download: name }); document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+/* ---------- view, print and share the PDF report ---------- */
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+async function renderPages(blob, scale) {         /* the PDF as page pictures, so it looks the same on every phone, tablet and computer */
+  if (!window.pdfjsLib) await window.AvantiBoot.loadScript(PDFJS);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+  const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()) }).promise, out = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const pg = await pdf.getPage(i), vp = pg.getViewport({ scale }), c = h('canvas', { class: 'qz-pvp', 'aria-label': 'Report page ' + i + ' of ' + pdf.numPages });
+    c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+    const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);
+    await pg.render({ canvasContext: cx, viewport: vp }).promise; out.push(c);
+  }
+  return out;
+}
+function flash(msg) {
+  const old = $('.qz-flash'); if (old) old.remove();
+  const t = h('div', { class: 'qz-flash', role: 'status', text: msg }); document.body.append(t); setTimeout(() => t.remove(), 3200);
+}
+async function printPages(pages) {                /* prints exactly the two A4 pages */
+  const imgs = pages.map(c => h('img', { alt: '', src: c.toDataURL('image/jpeg', 0.93) })), wrap = h('div', { class: 'qz-printpages' }, imgs);
+  const st = h('style'); st.id = 'qz-printstyle'; st.textContent = '@page{size:A4;margin:0}'; document.head.append(st); document.body.append(wrap); document.body.classList.add('qz-printing');
+  await Promise.all(imgs.map(i => (i.decode ? i.decode() : Promise.resolve()).catch(() => {})));
+  let done = false; const clean = () => { if (done) return; done = true; window.removeEventListener('afterprint', clean); document.body.classList.remove('qz-printing'); wrap.remove(); st.remove(); };
+  window.addEventListener('afterprint', clean);
+  try { window.print(); } finally { setTimeout(clean, 60000); }     /* normally removed by the browser's afterprint signal; this is only a safety net */
+}
+const shareLink = () => location.origin + location.pathname + '#quiz';
+function shareSheet(A, g, getRep, getPages) {
+  const link = shareLink(), text = 'I scored ' + g.correct + '/' + g.total + ' (' + Math.round(g.pct) + '%) in ' + A.title + ' on PhyNik.';
+  const go = url => { const a = h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }); document.body.append(a); a.click(); a.remove(); };
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); }
+    catch (e) { const t = h('textarea', { style: 'position:fixed;opacity:0' }); t.value = link; document.body.append(t); t.select(); try { document.execCommand('copy'); } catch (x) { /* ignore */ } t.remove(); }
+    flash('Link copied');
+  };
+  const canFile = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File([new Blob(['x'])], 'a.pdf', { type: 'application/pdf' })] })); } catch (e) { return false; } })();
+  const ic = d => '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+  const items = [
+    canFile ? ['Share the PDF file', '#1f9590', ic('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 14v5h14v-5"/>'), async () => { const r = await getRep(); try { await navigator.share({ files: [new File([r.blob], r.name, { type: 'application/pdf' })], title: 'PhyNik test report', text }); } catch (e) { if (!e || e.name !== 'AbortError') flash('Could not share the file'); } }] : null,
+    ['WhatsApp', '#25D366', 'W', () => go('https://wa.me/?text=' + encodeURIComponent(text + '\n' + link))],
+    ['Telegram', '#229ED9', 'T', () => go('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text))],
+    ['Viber', '#7360F2', 'V', () => go('viber://forward?text=' + encodeURIComponent(text + ' ' + link))],
+    ['Copy link', '#0e6b84', ic('<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>'), copy],
+    ['Print', '#5b6f6d', ic('<path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><path d="M6 14h12v7H6z"/>'), async () => { flash('Getting the pages ready...'); await printPages(await getPages()); }]].filter(Boolean);
+  const close = () => { sh.remove(); document.removeEventListener('keydown', key, true); };
+  const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  const sh = h('div', { class: 'qz-sh', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Share report', onclick: e => { if (e.target === sh) close(); } },
+    h('div', { class: 'qz-shc' }, h('h3', { text: 'Share report' }), h('p', { class: 'qz-hint', style: 'margin:0', text: 'The message has your score and a link to the quiz. Your answers and the PDF stay private unless you share the PDF file.' }),
+      h('div', { class: 'qz-shg' }, items.map(([label, color, icon, fn]) => h('button', { type: 'button', class: 'qz-shb', onclick: async () => { try { await fn(); if (label !== 'Copy link') close(); } catch (e) { flash('Could not do that. Try again.'); } } },
+        h('i', { style: 'background:' + color, html: icon.length > 1 ? icon : null, text: icon.length > 1 ? null : icon }), h('span', { text: label })))),
+      h('div', { class: 'qz-row', style: 'justify-content:flex-end;margin:0' }, h('button', { type: 'button', class: 'qz-btn', text: 'Close', onclick: close }))));
+  document.addEventListener('keydown', key, true); document.body.append(sh); $('.qz-shb', sh).focus();
+}
+function pdfViewer(A, g, getRep, getPages) {
+  const body = h('div', { class: 'qz-pvb' }, h('p', { class: 'qz-pvl', text: 'Preparing the report...' }));
+  const close = () => { ov.remove(); document.removeEventListener('keydown', key, true); };
+  const key = e => { if (e.key === 'Escape' && !$('.qz-sh')) { e.stopPropagation(); close(); } };
+  const dl = h('button', { type: 'button', class: 'qz-btn', text: 'Download', onclick: async () => { try { const r = await getRep(); await saveFile(r.name, r.blob); flash('PDF saved'); } catch (e) { flash(e && e.code === 'declined' ? 'Download cancelled' : 'Could not save the PDF'); } } });
+  const ov = h('div', { class: 'qz-pv', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'PDF report' },
+    h('div', { class: 'qz-pvt' }, h('b', { text: 'Test report (PDF) - ' + A.title }), dl,
+      h('button', { type: 'button', class: 'qz-btn', text: 'Share', onclick: () => shareSheet(A, g, getRep, getPages) }),
+      h('button', { type: 'button', class: 'qz-btn', text: 'Print', onclick: async () => { try { await printPages(await getPages()); } catch (e) { flash('Could not print'); } } }),
+      h('button', { type: 'button', class: 'qz-btn pri', text: 'Close', onclick: close })), body);
+  document.addEventListener('keydown', key, true); document.body.append(ov);
+  getPages().then(pages => { body.replaceChildren(...pages.map(c => c.cloneNode ? (() => { const k = h('canvas', { class: 'qz-pvp', 'aria-label': c.getAttribute('aria-label') }); k.width = c.width; k.height = c.height; k.getContext('2d').drawImage(c, 0, 0); return k; })() : c)); },
+    async () => {
+      try { const r = await getRep(), url = URL.createObjectURL(r.blob); body.replaceChildren(navigator.pdfViewerEnabled === false
+        ? h('div', { class: 'qz-pvl' }, h('p', { text: 'This browser cannot show the PDF here.' }), h('a', { class: 'qz-btn pri', href: url, target: '_blank', rel: 'noopener', text: 'Open the PDF' }))
+        : h('iframe', { src: url, title: 'PDF report' })); }
+      catch (e) { body.replaceChildren(h('p', { class: 'qz-pvl', text: 'The report could not be made. Close this and try again.' })); }
+    });
+  $('.qz-btn.pri', ov).focus();
 }
 
 window.AvantiQuiz = { mount, hasActive: () => !!(lsGet(ACTIVE_KEY) || {}).ids };
