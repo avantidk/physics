@@ -205,6 +205,7 @@ html.qz-lock,html.qz-lock body{overflow:hidden!important}
 .qz-toast{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);z-index:11;max-width:90%;padding:10px 16px;border-radius:10px;background:#0c3d3b;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .qz-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ---- result report ---- */
+.qz-wait .qz-big{display:block;font:700 clamp(2.4rem,9vw,3.6rem)/1.1 var(--font-body);font-variant-numeric:tabular-nums;color:var(--head)}
 .qz-res{overflow:auto;display:block}.qz-res .qz-in{max-width:1040px;margin:0 auto;padding:22px clamp(12px,3vw,24px) 60px}
 .qz-rh{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;margin:0 0 16px}.qz-rh .t{flex:1 1 280px}.qz-rh h2{margin:0}
 .qz-hero{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:20px;border:1px solid var(--rule);border-radius:var(--r,14px);background:var(--panel);margin:0 0 14px}
@@ -265,7 +266,7 @@ function home() {
       block(svgIc('<path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/><path d="M20.5 18.5L22 20"/>'), 'Create Your Own', 'Pick the time, the number of questions, the chapters, the level and more.', customForm, plural(D.qs.length, 'question') + ' in the bank')),
     hist.length ? h('div', null, h('h3', { text: 'Your recent tests', style: 'margin-top:26px' }), hist.map(a => h('div', { class: 'qz-hist' },
       h('b', { text: a.title }), h('span', { class: 'qz-hint', text: new Date(a.startedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) }),
-      h('span', { class: 'qz-pill ' + (a.summary && a.summary.pct >= 50 ? 'ok' : 'bad'), text: a.summary ? a.summary.score + '/' + a.summary.total + ' · ' + Math.round(a.summary.pct) + '%' : '' }),
+      Date.now() < a.endsAt ? h('span', { class: 'qz-pill', text: 'Result at ' + clockTime(a.endsAt) }) : h('span', { class: 'qz-pill ' + (a.summary && a.summary.pct >= 50 ? 'ok' : 'bad'), text: a.summary ? a.summary.score + '/' + a.summary.total + ' · ' + Math.round(a.summary.pct) + '%' : '' }),
       h('span', { class: 'sp' }), h('button', { type: 'button', class: 'qz-btn', onclick: () => showResult(a, { fresh: false }), text: 'View report' })))) : null);
 }
 
@@ -383,7 +384,7 @@ function instructions(test) {
       h('li', null, h('b', { text: 'Refreshing. ' }), 'If you refresh or close the page, you can resume from the Quiz tab, but it is recorded as a violation and the timer keeps running.'),
       h('li', null, h('b', { text: 'Answering. ' }), 'Pick one option per question. You can change an answer, clear it, mark a question for review, and move freely between questions with the question palette.'),
       h('li', null, h('b', { text: 'Marking. ' }), 'Each correct answer gets 1 mark. Wrong or unanswered questions get 0. There is no negative marking.'),
-      h('li', null, h('b', { text: 'Result. ' }), 'Press Submit when you are done. You will see your score, a chapter-wise and level-wise breakdown, time spent on each question, your violations, and every question with the correct answer.')),
+      h('li', null, h('b', { text: 'Result. ' }), 'Press Submit when you are done. To keep the answers from being shared with students who are still taking the test, your score, report and the correct answers stay hidden until the full ' + test.minutes + ' minutes of the test are over (if you finish early you wait for the rest of the time). Then you see your score, a chapter-wise and level-wise breakdown, time spent on each question, your violations, and every question with the correct answer.')),
       fsOk ? null : h('p', { class: 'qz-note', text: 'Full screen is not available in this browser or view. The test still runs, with every other protection switched on.' })),
     status, h('div', { class: 'qz-row' }, retry),
     h('label', { class: 'qz-agree' }, agree, h('span', { text: 'I have read and understood the instructions.' })),
@@ -570,6 +571,33 @@ function run(A, resumed) {
   qEl.focus();
 }
 
+/* ---------- before the report: the answers are held back until the full time of the test is over ---------- */
+const clockTime = ms => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+function showWait(A, qs) {
+  const old = $('.qz-res'); if (old) old.remove();
+  const ids = new Set(qs.map(q => q.id)), answered = Object.keys(A.answers).filter(id => ids.has(id)).length, marked = Object.keys(A.marked || {}).filter(id => ids.has(id)).length;
+  const used = Math.max(0, Math.min(A.endedAt || A.endsAt, A.endsAt) - A.startedAt);
+  const el = h('div', { class: 'qz-res qz-wait', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Test submitted' });
+  const cd = h('b', { class: 'qz-big', 'aria-hidden': 'true' });
+  let iv = 0;
+  const close = () => { clearInterval(iv); el.remove(); document.documentElement.classList.remove('qz-lock'); const app = $('#app'); if (app) app.inert = false; if (S.root && S.root.isConnected) home(); };
+  const tick = () => { const left = A.endsAt - Date.now(); if (left <= 0) { clearInterval(iv); showResult(A, { fresh: false }); return; } cd.textContent = clock(left); };
+  const stat = (b, t) => h('div', null, h('b', { text: String(b) }), h('span', { text: t }));
+  const why = A.reason === 'violations' ? 'The test was submitted automatically after ' + MAX_VIOL + ' violations.' : A.reason === 'time' ? 'Time was up, so the test was submitted automatically.' : '';
+  el.append(h('div', { class: 'qz-in' },
+    h('div', { class: 'qz-rh' }, h('div', { class: 't' }, h('h2', { text: 'Test submitted' }), h('p', { class: 'qz-sub', style: 'margin:2px 0 0', text: A.title + ' \u00b7 ' + A.subtitle }))),
+    why ? h('p', { class: 'qz-note bad', text: why }) : null,
+    h('div', { class: 'qz-hero', style: 'justify-content:center;text-align:center;flex-direction:column;gap:6px' },
+      h('p', { class: 'qz-hint', style: 'margin:0', text: 'Your answers are saved. Your score, report and the correct answers open in' }), cd,
+      h('p', { class: 'qz-hint', style: 'margin:0', text: 'at ' + clockTime(A.endsAt) + ', when the full ' + A.minutes + ' minutes of this test are over.' })),
+    h('p', { class: 'qz-note', text: 'The answers are held back so that nobody who finishes early can show them to students who are still taking the test.' }),
+    h('div', { class: 'qz-stats' }, stat(answered + ' / ' + qs.length, 'Answered'), stat(qs.length - answered, 'Not answered'), stat(marked, 'Marked for review'), stat(dur(used), 'Time used of ' + A.minutes + ' min'), stat(A.violations.length + ' / ' + MAX_VIOL, 'Violations')),
+    h('div', { class: 'qz-row', style: 'margin-top:18px' }, h('button', { type: 'button', class: 'qz-btn pri', onclick: close, text: 'Back to Quiz' }), h('span', { class: 'qz-hint', text: 'You can open the report from \u201cYour recent tests\u201d once it unlocks.' }))));
+  document.body.append(el); document.documentElement.classList.add('qz-lock'); const app = $('#app'); if (app) app.inert = true;
+  tick(); iv = setInterval(tick, 1000);
+  const hd = $('h2', el); hd.setAttribute('tabindex', '-1'); hd.focus();
+}
+
 /* ---------- the result report ---------- */
 function saveHistory(A) {
   const qs = A.ids.map(i => D.byId[i]).filter(Boolean), g = grade(A, qs);
@@ -589,6 +617,7 @@ const VNAME = { hidden: 'Left the page', focus: 'Window lost focus', fullscreen:
 async function showResult(A, o) {
   css();
   const qs = A.ids.map(i => D.byId[i]).filter(Boolean);
+  if (Date.now() < A.endsAt) { showWait(A, qs); return; }     /* answers stay hidden until the whole test time is over */
   let fg = {}; try { fg = await prep(qs); } catch (e) { /* diagrams missing */ }
   const g = grade(A, qs), usedMs = Math.max(0, Math.min((A.endedAt || A.endsAt), A.endsAt) - A.startedAt);
   const old = $('.qz-res'); if (old) old.remove();

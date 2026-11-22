@@ -1223,7 +1223,8 @@ const GUIDE_HTML = () => `
 <li><b>Create Your Own</b>: choose the source, class, year, session, chapters, level, question type, number of questions and the time.</li>
 <li>Read the instructions, tick the box and press <b>Start test</b>. The test opens in full screen. Leaving it (another tab, window or app, minimising, or leaving full screen) is a <b>violation</b>: two warnings, and the third submits the test.</li>
 <li>Answer, clear, mark for review and jump with the question palette. The timer cannot be paused, and the test is submitted when it ends.</li>
-<li>After you submit you get a full report: score, accuracy, time used, chapter-wise and level-wise results, time on every question, your violations, and every question with the correct answer. Your last 5 reports stay on the Quiz page.</li>
+<li>After you submit, the score, the report and the correct answers stay hidden until the <b>full time of the test is over</b> (45 minutes for a paper), so nobody who finishes early can show the answers to students still taking it. A countdown shows when they open.</li>
+<li>The report then shows score, accuracy, time used, chapter-wise and level-wise results, time on every question, your violations, and every question with the correct answer. Your last 5 reports stay on the Quiz page.</li>
 </ul>
 <h3 id="gd-tips">Tips</h3>
 <ul>
