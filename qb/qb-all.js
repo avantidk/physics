@@ -1740,7 +1740,7 @@ window.QB_LOGO_B64="iVBORw0KGgoAAAANSUhEUgAAAtAAAADMCAYAAABa3JRVAADCT0lEQVR42ux9
   function save(filename, data, note) {
     var ext = String(filename).split('.').pop().toLowerCase();
     if (!QBP(ext === 'pdf' ? 'pdf' : ext === 'pptx' ? 'pptx' : 'docx')) { msg(QBP('pdf') ? 'Your plan includes PDF downloads only.' : 'Downloads need a Premium membership.', true); return Promise.resolve(false); }
-    if (!dl) { msg('Downloads are not available in this view. Open the dashboard on claude.ai to export.', true); return Promise.resolve(false); }
+    if (!dl) { msg('Downloads are not available in this view. Open the site on claude.ai to export.', true); return Promise.resolve(false); }
     return dl.save({ filename: filename, data: data }).then(function () { msg('Saved ' + filename + (note ? '. ' + note : '')); return true; }, function (e) {
       var code = e && e.code;
       if (code === 'declined') msg('Download cancelled.');

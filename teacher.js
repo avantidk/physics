@@ -1,4 +1,4 @@
-/* Physics Dashboard: Question Bank (Dashboard tab) and PYQs. One file, no build step. */
+/* Physics site: Question Bank, PYQs and Quiz. One file, no build step (the quiz lives in quiz.js, loaded on first use). */
 (function () {
 'use strict';
 let OPTS = null;
@@ -966,13 +966,23 @@ function setTab(t) {
   const pv = $('#viewPyq'); if (pv) pv.hidden = true;
   setTabInner(t);
 }
-function hideViews() { ['Qb', 'Lib', 'Cw', 'Sw', 'Syl', 'Pyq', 'Portal'].forEach(n => { const e = $('#view' + n); if (e) e.hidden = true; }); const cp = document.getElementById('qbClassPop'); if (cp) { const x = cp.querySelector('.qb-pclose'); if (x) x.click(); else cp.remove(); } /* a Dashboard pop-up never stays open behind another tab */ }
+function hideViews() { ['Qb', 'Lib', 'Cw', 'Sw', 'Syl', 'Pyq', 'Quiz', 'Portal'].forEach(n => { const e = $('#view' + n); if (e) e.hidden = true; }); const cp = document.getElementById('qbClassPop'); if (cp) { const x = cp.querySelector('.qb-pclose'); if (x) x.click(); else cp.remove(); } /* a Dashboard pop-up never stays open behind another tab */ }
+/* ---------- Quiz tab: its own code (quiz.js), loaded on first use ---------- */
+function quizInit() {
+  const v = $('#viewQuiz'); if (!v) return;
+  if (window.AvantiQuiz) { window.AvantiQuiz.mount(v); return; }
+  v.textContent = ''; v.append(h('p', { class: 'hint', text: 'Loading\u2026' }));
+  loadScript('quiz.js').then(() => window.AvantiQuiz.mount(v), () => {
+    v.textContent = ''; v.append(h('div', { class: 'hint', role: 'alert', style: 'padding:32px 16px;text-align:center' }, h('p', { text: 'The quiz could not load. Check your connection and try again.' }),
+      h('button', { type: 'button', class: 'btn', onclick: () => quizInit() }, 'Try again')));
+  });
+}
 function setTabInner(t) {
-  hideViews(); const v = $('#view' + ({ qb: 'Qb', lib: 'Lib', cw: 'Cw', sw: 'Sw', syl: 'Syl' })[t]); if (v) v.hidden = false;
+  hideViews(); const v = $('#view' + ({ qb: 'Qb', lib: 'Lib', cw: 'Cw', sw: 'Sw', syl: 'Syl', quiz: 'Quiz' })[t]); if (v) v.hidden = false;
   if (window.AvantiPortal) window.AvantiPortal.leave();
   document.querySelectorAll('[data-act="tab"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === t)));
   syncQbPop(t);
-  if (t === 'qb') qbInit(); else if (t === 'syl') renderSyl(); else if (t === 'cw' || t === 'sw') ensureDpp().then(() => { renderPdfTab(t); setTimeout(rescale, 0); }, () => dppFail(t)); else ensureDpp().then(() => { renderLib(); setTimeout(rescale, 0); }, () => dppFail(t));
+  if (t === 'qb') qbInit(); else if (t === 'quiz') quizInit(); else if (t === 'syl') renderSyl(); else if (t === 'cw' || t === 'sw') ensureDpp().then(() => { renderPdfTab(t); setTimeout(rescale, 0); }, () => dppFail(t)); else ensureDpp().then(() => { renderLib(); setTimeout(rescale, 0); }, () => dppFail(t));
   setTimeout(rescale, 0);
 }
 
@@ -1056,7 +1066,7 @@ function shareMenu(btn, o) {
     item(ICO.link, 'Copy link', { onclick: async () => { closeShare(); try { await navigator.clipboard.writeText(full); toast('Link copied'); } catch (e) { toast('Could not copy. Select and copy: ' + link); } } }),
     o.print ? item(ICO.print, 'Print', { onclick: () => { closeShare(); o.print(); } }) : null,
     o.download ? item(FIMG.pdf.replace('width="36" height="36"', 'width="20" height="20"'), 'Download PDF', { onclick: () => { closeShare(); o.download(); } }) : null,
-    h('div', { class: 'smn', text: 'The link opens the dashboard. To print or send the file itself, download it first.' }));
+    h('div', { class: 'smn', text: 'The link opens the website. To print or send the file itself, download it first.' }));
   document.body.append(m);
   const r = btn.getBoundingClientRect(), mw = m.offsetWidth;
   m.style.top = Math.min(window.innerHeight - m.offsetHeight - 8, r.bottom + 6) + 'px';
@@ -1172,8 +1182,8 @@ function themeInit() { let m = null; try { m = localStorage.getItem(THEME_KEY); 
 function themeToggle() { const m = themeNow() === 'dark' ? 'light' : 'dark'; themeApply(m); try { localStorage.setItem(THEME_KEY, m); } catch (e) { /* optional */ } }
 const GUIDE_HTML = () => `
 <p class="gd-lead">PhyNik holds Cambridge Physics questions (IGCSE and AS &amp; A Level) with answers, one paper at a time. There is no sign-in and nothing to install.</p>
-<nav class="gd-toc" aria-label="Guide sections"><a href="#gd-qb">Dashboard</a><a href="#gd-card">Question cards</a><a href="#gd-exp">Download and share</a><a href="#gd-cnt">Counts</a><a href="#gd-pyq">PYQs</a><a href="#gd-tips">Tips</a></nav>
-<h3 id="gd-qb">1. Dashboard</h3>
+<nav class="gd-toc" aria-label="Guide sections"><a href="#gd-qb">Question Bank</a><a href="#gd-card">Question cards</a><a href="#gd-exp">Download and share</a><a href="#gd-cnt">Counts</a><a href="#gd-pyq">PYQs</a><a href="#gd-quiz">Quiz</a><a href="#gd-tips">Tips</a></nav>
+<h3 id="gd-qb">1. Question Bank</h3>
 <p>All questions in one list, grouped by chapter. Use <b>Find questions</b> to narrow the list. The filters work in this order:</p>
 <ul>
 <li><b>Chapters</b> first (pick one or more), then <b>Question type</b> (MCQ or Subjective).</li>
@@ -1206,6 +1216,15 @@ const GUIDE_HTML = () => `
 <li><b>Chapterwise</b>: pick a chapter first, then narrow by year, session, class, level and question type.</li>
 <li>The page preview is live. Turn on <b>Answer Key</b> or <b>Explanation</b> and use the PDF, Word, PowerPoint, print and share buttons above the preview.</li>
 </ul>
+<h3 id="gd-quiz">6. Quiz</h3>
+<p>Timed tests in exam conditions. Pick one of two ways:</p>
+<ul>
+<li><b>Paper Wise</b>: choose a past paper (newest first) and sit exactly its questions.</li>
+<li><b>Create Your Own</b>: choose the source, class, year, session, chapters, level, question type, number of questions and the time.</li>
+<li>Read the instructions, tick the box and press <b>Start test</b>. The test opens in full screen. Leaving it (another tab, window or app, minimising, or leaving full screen) is a <b>violation</b>: two warnings, and the third submits the test.</li>
+<li>Answer, clear, mark for review and jump with the question palette. The timer cannot be paused, and the test is submitted when it ends.</li>
+<li>After you submit you get a full report: score, accuracy, time used, chapter-wise and level-wise results, time on every question, your violations, and every question with the correct answer. Your last 5 reports stay on the Quiz page.</li>
+</ul>
 <h3 id="gd-tips">Tips</h3>
 <ul>
 <li>The <b>moon/sun icon</b> (top right) switches between light and dark mode.</li>
@@ -1220,7 +1239,7 @@ function guideOpen() {
   if (m) m.remove();
   m = h('div', { class: 'gd-back', id: 'guideModal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Site guide', 'data-act': 'guideback' },
     h('div', { class: 'gd-card' },
-      h('div', { class: 'gd-top' }, h('h2', { text: 'How to use this dashboard' }), h('button', { type: 'button', class: 'gd-x', 'data-act': 'guideclose', 'aria-label': 'Close guide', html: '&times;' })),
+      h('div', { class: 'gd-top' }, h('h2', { text: 'How to use this site' }), h('button', { type: 'button', class: 'gd-x', 'data-act': 'guideclose', 'aria-label': 'Close guide', html: '&times;' })),
       h('div', { class: 'gd-body', html: GUIDE_HTML() })));
   document.body.append(m);
   m.querySelectorAll('.gd-toc a').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); const t = m.querySelector(a.getAttribute('href')); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
@@ -1248,13 +1267,14 @@ function buildShell() {
         h('button', { type: 'button', class: 'tb-theme tb-guide', id: 'guideBtn', 'data-act': 'guide', title: 'Guide: what is in this site', 'aria-label': 'Guide: what is in this site', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>' }),
         h('button', { type: 'button', class: 'tb-theme tb-info', id: 'qbInfoBtn', 'data-act': 'qbinfo', 'aria-haspopup': 'true', 'aria-expanded': 'false', title: 'Question Bank overview', 'aria-label': 'Question Bank overview', html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' }),
         h('div', { class: 'tb-pop', id: 'qbPop', hidden: true, role: 'menu' }, [['heroov', 'Physics Bank: Question Counts'], ['overview', 'Chapter-wise Count']].map(([k, t]) => k === 'syl' ? h('button', { type: 'button', class: 'tb-item', role: 'menuitemradio', 'aria-selected': 'false', 'aria-checked': 'false', 'data-act': 'tab', 'data-k': 'syl', text: t }) : h('button', { type: 'button', class: 'tb-item', role: 'menuitemradio', 'aria-selected': 'false', 'aria-checked': 'false', 'data-qbpanel': k, text: t }))),
-        h('nav', { class: 'tb-menu' }, tb('qb', 'Dashboard', true), tb('pyq', 'PYQs'))),
+        h('nav', { class: 'tb-menu' }, tb('qb', 'Question Bank', true), tb('pyq', 'PYQs'), tb('quiz', 'Quiz'))),
       h('main', { class: 'main' },
         h('div', { id: 'viewQb', class: 'qbhost' }),
         h('div', { id: 'viewLib', class: 'make', hidden: true }, h('p', { class: 'hint', text: 'Loading\u2026' })),
         h('div', { id: 'viewPyq', class: 'pyqpick', hidden: true }),
         h('div', { id: 'viewCw', class: 'make', hidden: true }, h('p', { class: 'hint', text: 'Loading\u2026' })),
         h('div', { id: 'viewSw', class: 'make', hidden: true }, h('p', { class: 'hint', text: 'Loading\u2026' })),
+        h('div', { id: 'viewQuiz', class: 'qzhost', hidden: true }),
         h('div', { id: 'viewSyl', class: 'sy-wrap', hidden: true }),
         h('div', { id: 'viewPortal', class: 'pt-wrap', hidden: true })),
       h('footer', { class: 'app-foot', id: 'appFoot' },
@@ -1341,6 +1361,7 @@ function boot() {
     }
   } };
   qbInit();
+  try { const a = JSON.parse(localStorage.getItem('phynik-quiz-active') || 'null'); if (a && a.ids) setTab('quiz'); } catch (e) { /* no saved test */ }
 }
 /* ---------- Question bank tab: the question bank's own page and code, loaded on first use ---------- */
 let qbLoaded = false;
