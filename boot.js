@@ -1,4 +1,4 @@
-/* Physics Dashboard (lite): Dashboard + PYQs only. No sign-in and no plans: every export (PDF, Word, PowerPoint, print, share, copy) is on. */
+/* Physics site (lite): Question Bank, PYQs and Quiz. No sign-in and no plans: every export (PDF, Word, PowerPoint, print, share, copy) is on. */
 (function () {
 'use strict';
 /* no account: exports, print, share and copy are on; saved worksheets and tests are off */
@@ -29,7 +29,7 @@ async function start() {
     const code = await fetch('teacher.js').then(r => { if (!r.ok) throw new Error('teacher'); return r.text(); });
     const s = document.createElement('script'); s.textContent = code; document.head.append(s);
     if (!window.AvantiTeacher) throw new Error('teacher');
-  } catch (e) { a.innerHTML = '<div style="padding:48px 16px;text-align:center;font-family:system-ui,sans-serif;color:#fff"><p>The dashboard could not load. Please refresh the page.</p></div>'; return; }
+  } catch (e) { a.innerHTML = '<div style="padding:48px 16px;text-align:center;font-family:system-ui,sans-serif;color:#fff"><p>The site could not load. Please refresh the page.</p></div>'; return; }
   window.AvantiTeacher.start({});
 }
 window.AvantiBoot = { start, loadScript };

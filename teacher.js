@@ -1057,7 +1057,7 @@ function closeShareKey(e) { if (e.key === 'Escape') closeShare(); }
 function shareMenu(btn, o) {
   if (!need('share')) return;
   closeShare();
-  const text = o.title + ' (PhyNik Physics Dashboard)', link = o.url || DASH_URL, full = text + '\n' + link;
+  const text = o.title + ' (PhyNik Physics Question Bank)', link = o.url || DASH_URL, full = text + '\n' + link;
   const item = (ico, label, attrs) => h(attrs.href ? 'a' : 'button', Object.assign({ class: 'smi', type: attrs.href ? undefined : 'button' }, attrs), h('span', { class: 'smic', html: ico }), h('span', { text: label }));
   const m = h('div', { id: 'shareMenu', class: 'smenu', role: 'menu' },
     h('div', { class: 'smh', text: 'Share ' + o.title }),
