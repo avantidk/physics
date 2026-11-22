@@ -205,7 +205,6 @@ html.qz-lock,html.qz-lock body{overflow:hidden!important}
 .qz-toast{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);z-index:11;max-width:90%;padding:10px 16px;border-radius:10px;background:#0c3d3b;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .qz-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ---- result report ---- */
-.qz-wait .qz-big{display:block;font:700 clamp(2.4rem,9vw,3.6rem)/1.1 var(--font-body);font-variant-numeric:tabular-nums;color:var(--head)}
 .qz-res{overflow:auto;display:block}.qz-res .qz-in{max-width:1040px;margin:0 auto;padding:22px clamp(12px,3vw,24px) 60px}
 .qz-rh{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;margin:0 0 16px}.qz-rh .t{flex:1 1 280px}.qz-rh h2{margin:0}
 .qz-hero{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:20px;border:1px solid var(--rule);border-radius:var(--r,14px);background:var(--panel);margin:0 0 14px}
@@ -226,6 +225,8 @@ html.qz-lock,html.qz-lock body{overflow:hidden!important}
 .qz-ro.right{border-color:var(--ok);background:#e1f6ea;color:#0e4a2c}.qz-ro.wrong{border-color:var(--bad);background:#fde6dd;color:#6c2a0f}
 .qz-ro .qz-let{width:26px;height:26px;flex-basis:26px}.qz-ro .tag{margin-left:auto;font-size:.8rem;font-weight:700;white-space:nowrap}
 .qz-ans{margin:10px 0 0;font-size:.95rem}
+.qz-ro.mine{border-color:var(--accent);background:var(--accent-soft)}.qz-rv.lk{border-left-color:var(--accent)}
+.qz-agrid a.an{background:var(--accent);color:var(--accent-ink)}.qz-tc div.an{background:var(--accent)}
 @media print{
   #app,.qz-run,.qz-noprint,.qz-toast{display:none!important}
   html.qz-lock,html.qz-lock body{overflow:visible!important}
@@ -266,7 +267,7 @@ function home() {
       block(svgIc('<path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/><path d="M20.5 18.5L22 20"/>'), 'Create Your Own', 'Pick the time, the number of questions, the chapters, the level and more.', customForm, plural(D.qs.length, 'question') + ' in the bank')),
     hist.length ? h('div', null, h('h3', { text: 'Your recent tests', style: 'margin-top:26px' }), hist.map(a => h('div', { class: 'qz-hist' },
       h('b', { text: a.title }), h('span', { class: 'qz-hint', text: new Date(a.startedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) }),
-      Date.now() < a.endsAt ? h('span', { class: 'qz-pill', text: 'Result at ' + clockTime(a.endsAt) }) : h('span', { class: 'qz-pill ' + (a.summary && a.summary.pct >= 50 ? 'ok' : 'bad'), text: a.summary ? a.summary.score + '/' + a.summary.total + ' · ' + Math.round(a.summary.pct) + '%' : '' }),
+      h('span', { class: 'qz-pill ' + (a.summary && a.summary.pct >= 50 ? 'ok' : 'bad'), text: a.summary ? a.summary.score + '/' + a.summary.total + ' · ' + Math.round(a.summary.pct) + '%' : '' }),
       h('span', { class: 'sp' }), h('button', { type: 'button', class: 'qz-btn', onclick: () => showResult(a, { fresh: false }), text: 'View report' })))) : null);
 }
 
@@ -384,7 +385,7 @@ function instructions(test) {
       h('li', null, h('b', { text: 'Refreshing. ' }), 'If you refresh or close the page, you can resume from the Quiz tab, but it is recorded as a violation and the timer keeps running.'),
       h('li', null, h('b', { text: 'Answering. ' }), 'Pick one option per question. You can change an answer, clear it, mark a question for review, and move freely between questions with the question palette.'),
       h('li', null, h('b', { text: 'Marking. ' }), 'Each correct answer gets 1 mark. Wrong or unanswered questions get 0. There is no negative marking.'),
-      h('li', null, h('b', { text: 'Result. ' }), 'Press Submit when you are done. To keep the answers from being shared with students who are still taking the test, your score, report and the correct answers stay hidden until the full ' + test.minutes + ' minutes of the test are over (if you finish early you wait for the rest of the time). Then you see your score, a chapter-wise and level-wise breakdown, time spent on each question, your violations, and every question with the correct answer.')),
+      h('li', null, h('b', { text: 'Result. ' }), 'Press Submit when you are done. You see your score and the full analysis at once: a chapter-wise and level-wise breakdown, time spent on each question and your violations. The correct answers (and which questions you got right or wrong) stay hidden until the full ' + test.minutes + ' minutes of the test are over, so students who finish early cannot show them to others who are still taking it. If you finish early, you wait for the rest of the time.')),
       fsOk ? null : h('p', { class: 'qz-note', text: 'Full screen is not available in this browser or view. The test still runs, with every other protection switched on.' })),
     status, h('div', { class: 'qz-row' }, retry),
     h('label', { class: 'qz-agree' }, agree, h('span', { text: 'I have read and understood the instructions.' })),
@@ -571,32 +572,7 @@ function run(A, resumed) {
   qEl.focus();
 }
 
-/* ---------- before the report: the answers are held back until the full time of the test is over ---------- */
 const clockTime = ms => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-function showWait(A, qs) {
-  const old = $('.qz-res'); if (old) old.remove();
-  const ids = new Set(qs.map(q => q.id)), answered = Object.keys(A.answers).filter(id => ids.has(id)).length, marked = Object.keys(A.marked || {}).filter(id => ids.has(id)).length;
-  const used = Math.max(0, Math.min(A.endedAt || A.endsAt, A.endsAt) - A.startedAt);
-  const el = h('div', { class: 'qz-res qz-wait', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Test submitted' });
-  const cd = h('b', { class: 'qz-big', 'aria-hidden': 'true' });
-  let iv = 0;
-  const close = () => { clearInterval(iv); el.remove(); document.documentElement.classList.remove('qz-lock'); const app = $('#app'); if (app) app.inert = false; if (S.root && S.root.isConnected) home(); };
-  const tick = () => { const left = A.endsAt - Date.now(); if (left <= 0) { clearInterval(iv); showResult(A, { fresh: false }); return; } cd.textContent = clock(left); };
-  const stat = (b, t) => h('div', null, h('b', { text: String(b) }), h('span', { text: t }));
-  const why = A.reason === 'violations' ? 'The test was submitted automatically after ' + MAX_VIOL + ' violations.' : A.reason === 'time' ? 'Time was up, so the test was submitted automatically.' : '';
-  el.append(h('div', { class: 'qz-in' },
-    h('div', { class: 'qz-rh' }, h('div', { class: 't' }, h('h2', { text: 'Test submitted' }), h('p', { class: 'qz-sub', style: 'margin:2px 0 0', text: A.title + ' \u00b7 ' + A.subtitle }))),
-    why ? h('p', { class: 'qz-note bad', text: why }) : null,
-    h('div', { class: 'qz-hero', style: 'justify-content:center;text-align:center;flex-direction:column;gap:6px' },
-      h('p', { class: 'qz-hint', style: 'margin:0', text: 'Your answers are saved. Your score, report and the correct answers open in' }), cd,
-      h('p', { class: 'qz-hint', style: 'margin:0', text: 'at ' + clockTime(A.endsAt) + ', when the full ' + A.minutes + ' minutes of this test are over.' })),
-    h('p', { class: 'qz-note', text: 'The answers are held back so that nobody who finishes early can show them to students who are still taking the test.' }),
-    h('div', { class: 'qz-stats' }, stat(answered + ' / ' + qs.length, 'Answered'), stat(qs.length - answered, 'Not answered'), stat(marked, 'Marked for review'), stat(dur(used), 'Time used of ' + A.minutes + ' min'), stat(A.violations.length + ' / ' + MAX_VIOL, 'Violations')),
-    h('div', { class: 'qz-row', style: 'margin-top:18px' }, h('button', { type: 'button', class: 'qz-btn pri', onclick: close, text: 'Back to Quiz' }), h('span', { class: 'qz-hint', text: 'You can open the report from \u201cYour recent tests\u201d once it unlocks.' }))));
-  document.body.append(el); document.documentElement.classList.add('qz-lock'); const app = $('#app'); if (app) app.inert = true;
-  tick(); iv = setInterval(tick, 1000);
-  const hd = $('h2', el); hd.setAttribute('tabindex', '-1'); hd.focus();
-}
 
 /* ---------- the result report ---------- */
 function saveHistory(A) {
@@ -617,49 +593,57 @@ const VNAME = { hidden: 'Left the page', focus: 'Window lost focus', fullscreen:
 async function showResult(A, o) {
   css();
   const qs = A.ids.map(i => D.byId[i]).filter(Boolean);
-  if (Date.now() < A.endsAt) { showWait(A, qs); return; }     /* answers stay hidden until the whole test time is over */
   let fg = {}; try { fg = await prep(qs); } catch (e) { /* diagrams missing */ }
   const g = grade(A, qs), usedMs = Math.max(0, Math.min((A.endedAt || A.endsAt), A.endsAt) - A.startedAt);
+  const locked = Date.now() < A.endsAt;     /* the correct answers (and which questions were right or wrong) wait until the full test time is over */
   const old = $('.qz-res'); if (old) old.remove();
   const el = h('div', { class: 'qz-res', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Test result' });
+  let iv = 0, lockTick = null, lockNote = null;
   const stat = (b, s, c) => h('div', { class: c || '' }, h('b', { text: String(b) }), h('span', { text: s }));
   const band = g.pct >= 80 ? 'Excellent' : g.pct >= 60 ? 'Good' : g.pct >= 40 ? 'Keep practising' : 'Needs more practice';
-  const close = () => { el.remove(); document.documentElement.classList.remove('qz-lock'); const app = $('#app'); if (app) app.inert = false; if (S.root && S.root.isConnected) home(); };
+  const close = () => { clearInterval(iv); el.remove(); document.documentElement.classList.remove('qz-lock'); const app = $('#app'); if (app) app.inert = false; if (S.root && S.root.isConnected) home(); };
   const tbl = (rows, first) => h('div', { class: 'qz-tabwrap' }, h('table', { class: 'qz-tab' }, h('thead', null, h('tr', null, [first, 'Questions', 'Correct', 'Wrong', 'Skipped', 'Score', 'Avg time'].map(t => h('th', { text: t })))),
     h('tbody', null, rows.map(r => { const p = r.total ? r.ok / r.total * 100 : 0; return h('tr', null, h('td', { text: r.name }), h('td', { text: r.total }), h('td', { text: r.ok }), h('td', { text: r.bad }), h('td', { text: r.skip }), h('td', null, Math.round(p) + '% ', h('span', { class: 'qz-bars' }, h('i', { style: 'width:' + p + '%' }))), h('td', { text: r.total ? dur(r.ms / r.total) : '-' })); }))));
   const maxMs = Math.max(1, ...g.rows.map(r => r.ms)), avgAll = g.rows.length ? g.rows.reduce((s, r) => s + r.ms, 0) / g.rows.length : 0;
   const weak = g.byCh.filter(r => r.total && r.ok / r.total < 0.5);
   const reasonNote = A.reason === 'time' ? 'Time was up, so the test was submitted automatically.' : A.reason === 'violations' ? 'The test was submitted automatically after ' + MAX_VIOL + ' violations.' : '';
-  const review = g.rows.map(r => h('section', { class: 'qz-rv ' + r.st, id: 'rv' + r.i, 'data-st': r.st, 'data-mk': r.marked ? '1' : '' },
+  if (locked) {
+    const cd = h('b');
+    lockNote = h('p', { class: 'qz-note', role: 'status' }, 'Your score and analysis are below. The correct answers, and which questions you got right or wrong, open at ' + clockTime(A.endsAt) + ' (in ', cd, '), when the full ' + A.minutes + ' minutes of this test are over. They are held back so nobody who finishes early can show them to students who are still taking the test.');
+    lockTick = () => { const left = A.endsAt - Date.now(); if (left <= 0) { clearInterval(iv); if (el.isConnected) showResult(A, { fresh: false }); return; } cd.textContent = clock(left); };
+  }
+  const review = g.rows.map(r => h('section', { class: 'qz-rv ' + (locked ? 'lk' : r.st), id: 'rv' + r.i, 'data-st': locked ? (r.ch ? 'an' : 'skip') : r.st, 'data-mk': r.marked ? '1' : '' },
     h('div', { class: 'qz-rvh' }, h('b', { text: 'Q' + (r.i + 1) }), h('small', { text: r.q.id }), h('span', { class: 'qz-pill ' + r.q.difficulty, text: r.q.difficulty }), h('span', { class: 'qz-pill', text: r.q.chapter_code + ' ' + r.q.chapter }),
-      r.marked ? h('span', { class: 'qz-pill', text: 'Marked' }) : null, h('span', { class: 'sp' }), h('span', { class: 'qz-pill ' + r.st, text: r.st === 'ok' ? 'Correct' : r.st === 'bad' ? 'Wrong' : 'Not answered' }), h('small', { text: dur(r.ms) })),
+      r.marked ? h('span', { class: 'qz-pill', text: 'Marked' }) : null, h('span', { class: 'sp' }), h('span', { class: 'qz-pill ' + (locked ? 'skip' : r.st), text: locked ? (r.ch ? 'Answered' : 'Not answered') : r.st === 'ok' ? 'Correct' : r.st === 'bad' ? 'Wrong' : 'Not answered' }), h('small', { text: dur(r.ms) })),
     stemNode(r.q, fg),
-    r.q.options.map((o, k) => { const L = 'ABCD'[k], right = L === r.q.answer, mine = L === r.ch; return h('div', { class: 'qz-ro' + (right ? ' right' : mine ? ' wrong' : '') }, h('span', { class: 'qz-let', text: L }), optText(o), right || mine ? h('span', { class: 'tag', text: right && mine ? '✓ Your answer · correct' : right ? '✓ Correct answer' : '✗ Your answer' }) : null); }),
-    h('p', { class: 'qz-ans', text: r.ch ? 'Your answer: ' + r.ch + '   ·   Correct answer: ' + r.q.answer : 'You did not answer this question.   Correct answer: ' + r.q.answer })));
+    r.q.options.map((o, k) => { const L = 'ABCD'[k], right = L === r.q.answer, mine = L === r.ch; if (locked) return h('div', { class: 'qz-ro' + (mine ? ' mine' : '') }, h('span', { class: 'qz-let', text: L }), optText(o), mine ? h('span', { class: 'tag', text: 'Your answer' }) : null); return h('div', { class: 'qz-ro' + (right ? ' right' : mine ? ' wrong' : '') }, h('span', { class: 'qz-let', text: L }), optText(o), right || mine ? h('span', { class: 'tag', text: right && mine ? '✓ Your answer · correct' : right ? '✓ Correct answer' : '✗ Your answer' }) : null); }),
+    h('p', { class: 'qz-ans', text: locked ? (r.ch ? 'Your answer: ' + r.ch : 'You did not answer this question.') + '   \u00b7   The correct answer opens at ' + clockTime(A.endsAt) + '.' : r.ch ? 'Your answer: ' + r.ch + '   ·   Correct answer: ' + r.q.answer : 'You did not answer this question.   Correct answer: ' + r.q.answer })));
   const filt = h('div', { class: 'qz-chips qz-noprint', style: 'margin:0 0 12px' });
-  [['all', 'All'], ['ok', 'Correct'], ['bad', 'Wrong'], ['skip', 'Not answered'], ['mk', 'Marked']].forEach(([k, t], i) => filt.append(h('button', { type: 'button', class: 'qz-chip', 'aria-pressed': String(i === 0), onclick: e => {
+  (locked ? [['all', 'All'], ['an', 'Answered'], ['skip', 'Not answered'], ['mk', 'Marked']] : [['all', 'All'], ['ok', 'Correct'], ['bad', 'Wrong'], ['skip', 'Not answered'], ['mk', 'Marked']]).forEach(([k, t], i) => filt.append(h('button', { type: 'button', class: 'qz-chip', 'aria-pressed': String(i === 0), onclick: e => {
     filt.querySelectorAll('.qz-chip').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget)));
-    review.forEach(s => { s.hidden = !(k === 'all' || (k === 'mk' ? s.dataset.mk : s.dataset.st === k)); }); } }, t)));
+    review.forEach(s => { s.hidden = !(k === 'all' || (k === 'mk' ? s.dataset.mk : k === 'an' ? s.dataset.st !== 'skip' : s.dataset.st === k)); }); } }, t)));
   el.append(h('div', { class: 'qz-in' },
     h('div', { class: 'qz-rh' }, h('div', { class: 't' }, h('h2', { text: 'Test result' }), h('p', { class: 'qz-sub', style: 'margin:2px 0 0', text: A.title + ' · ' + A.subtitle + ' · ' + new Date(A.startedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) })),
       h('div', { class: 'qz-row qz-noprint' }, h('button', { type: 'button', class: 'qz-btn', onclick: () => window.print(), text: 'Print / Save as PDF' }),
         h('button', { type: 'button', class: 'qz-btn', onclick: () => { close(); instructions({ mode: A.mode, title: A.title, subtitle: A.subtitle, qs: qs, minutes: A.minutes, back: home }); }, text: 'Retake' }),
         h('button', { type: 'button', class: 'qz-btn pri', onclick: close, text: 'Back to Quiz' }))),
     reasonNote ? h('p', { class: 'qz-note bad', text: reasonNote }) : null,
+    lockNote,
     h('div', { class: 'qz-hero' }, h('div', { class: 'qz-ring', style: '--p:' + g.pct.toFixed(1) + ';--c:' + (g.pct >= 60 ? 'var(--ok)' : g.pct >= 40 ? '#d9961a' : 'var(--bad)') }, h('div', null, h('b', { text: g.correct + ' / ' + g.total }), h('span', { text: g.pct.toFixed(1) + '%' }))),
       h('div', { class: 'qz-stats' }, stat(band, 'Overall'), stat(g.correct, 'Correct', 'ok'), stat(g.wrong, 'Wrong', 'bad'), stat(g.skipped, 'Not answered'), stat(g.attempted + ' / ' + g.total, 'Attempted'), stat(g.accuracy.toFixed(0) + '%', 'Accuracy (of attempted)'),
         stat(dur(usedMs), 'Time used of ' + A.minutes + ' min'), stat(g.attempted ? dur(usedMs / g.attempted) : '-', 'Per answered question'), stat(Object.keys(A.marked || {}).length, 'Marked for review'), stat(A.violations.length + ' / ' + MAX_VIOL, 'Violations', A.violations.length ? 'bad' : ''))),
-    h('h3', { text: 'Answer sheet' }), h('div', { class: 'qz-agrid' }, g.rows.map(r => h('a', { href: '#rv' + r.i, class: r.st, title: 'Question ' + (r.i + 1), onclick: ev => { ev.preventDefault(); const t = $('#rv' + r.i, el); if (t) { t.hidden = false; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, text: r.i + 1 }))),
+    h('h3', { text: 'Answer sheet' }), h('div', { class: 'qz-agrid' }, g.rows.map(r => h('a', { href: '#rv' + r.i, class: locked ? (r.ch ? 'an' : 'skip') : r.st, title: 'Question ' + (r.i + 1), onclick: ev => { ev.preventDefault(); const t = $('#rv' + r.i, el); if (t) { t.hidden = false; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, text: r.i + 1 }))),
     h('h3', { text: 'Chapter-wise' }), tbl(g.byCh, 'Chapter'),
     weak.length ? h('p', { class: 'qz-note', style: 'margin-top:10px', text: 'Revise these first: ' + weak.map(w => w.name.replace(/\s+/, ' ')).join('; ') + '.' }) : null,
     h('h3', { text: 'Level-wise' }), tbl(g.byLv, 'Level'),
-    h('h3', { text: 'Time spent on each question' }), h('div', { class: 'qz-tc', role: 'img', 'aria-label': 'Bar chart of the time spent on each question' }, g.rows.map(r => h('div', { class: r.st, style: 'height:' + Math.max(3, r.ms / maxMs * 100) + '%', title: 'Q' + (r.i + 1) + ': ' + dur(r.ms) + ' · ' + (r.st === 'ok' ? 'correct' : r.st === 'bad' ? 'wrong' : 'not answered') }))),
+    h('h3', { text: 'Time spent on each question' }), h('div', { class: 'qz-tc', role: 'img', 'aria-label': 'Bar chart of the time spent on each question' }, g.rows.map(r => h('div', { class: locked ? (r.ch ? 'an' : 'skip') : r.st, style: 'height:' + Math.max(3, r.ms / maxMs * 100) + '%', title: 'Q' + (r.i + 1) + ': ' + dur(r.ms) + ' · ' + (r.st === 'ok' ? 'correct' : r.st === 'bad' ? 'wrong' : 'not answered') }))),
     h('div', { class: 'qz-tcl' }, g.rows.map(r => h('span', { text: (r.i + 1) % 5 === 0 || r.i === 0 ? r.i + 1 : '' }))),
-    h('p', { class: 'qz-hint', text: 'Green = correct, red = wrong, grey = not answered. Average ' + dur(avgAll) + ' per question; longest ' + dur(maxMs) + '.' }),
+    h('p', { class: 'qz-hint', text: (locked ? 'Blue = answered, grey = not answered. Average ' : 'Green = correct, red = wrong, grey = not answered. Average ') + dur(avgAll) + ' per question; longest ' + dur(maxMs) + '.' }),
     h('h3', { text: 'Violations' }),
     A.violations.length ? h('div', { class: 'qz-tabwrap' }, h('table', { class: 'qz-tab' }, h('thead', null, h('tr', null, ['#', 'After', 'What happened'].map(t => h('th', { text: t })))), h('tbody', null, A.violations.map((v, i) => h('tr', null, h('td', { text: i + 1 }), h('td', { text: clock(v.at - A.startedAt) }), h('td', { text: (VNAME[v.kind] || v.kind) + ': ' + v.text })))))) : h('p', { class: 'qz-note', text: 'None. You stayed on the test screen from start to finish.' }),
-    h('h3', { text: 'Every question, with the correct answer' }), filt, review));
+    h('h3', { text: locked ? 'Every question, with your answer' : 'Every question, with the correct answer' }), filt, review));
   document.body.append(el); document.documentElement.classList.add('qz-lock'); const app = $('#app'); if (app) app.inert = true;
+  if (lockTick) { lockTick(); iv = setInterval(lockTick, 1000); }
   el.scrollTop = 0; $('h2', el).setAttribute('tabindex', '-1'); $('h2', el).focus();
 }
 
